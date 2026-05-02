@@ -25,7 +25,7 @@ Mini-jeu orienté connaissances de la table des types Pokémon.
 <img width="1849" height="825" alt="Capture d&#39;écran 2026-05-02 154940" src="https://github.com/user-attachments/assets/19d1ddc1-777a-4f1c-a35a-22d7f43e7461" />
 
 ### 3) Dézoom
-Le joueur identifie un Pokémon à partir d'une image progressivement dézoomée. Rencontrez même des Pokémon chromatiques lors de vos parties !
+Le joueur identifie un Pokémon à partir d'une image progressivement dézoomée. Aurez-vous la chance de rencontrez des Pokémon chromatiques lors de vos parties ?
 <img width="1853" height="816" alt="Capture d&#39;écran 2026-05-02 155324" src="https://github.com/user-attachments/assets/9a4baf51-cd3a-49c1-bb4f-b25227b69801" />
 
 ## Stack technique
