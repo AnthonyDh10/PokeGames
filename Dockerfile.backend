@@ -1,0 +1,24 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copy project files first to maximize Docker cache use.
+COPY ["PokéDesc.API/PokéDesc.API.csproj", "PokéDesc.API/"]
+COPY ["PokéDesc.Business/PokéDesc.Business.csproj", "PokéDesc.Business/"]
+COPY ["PokéDesc.Data/PokéDesc.Data.csproj", "PokéDesc.Data/"]
+COPY ["PokéDesc.Domain/PokéDesc.Domain.csproj", "PokéDesc.Domain/"]
+
+RUN dotnet restore "PokéDesc.API/PokéDesc.API.csproj"
+
+# Copy the full source and publish the API.
+COPY . .
+WORKDIR /src/PokéDesc.API
+RUN dotnet publish "PokéDesc.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "PokéDesc.API.dll"]

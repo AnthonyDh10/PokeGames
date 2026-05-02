@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>20db1b20-c80a-4940-8955-932818c362ca</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.21" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PokéDesc.Business\PokéDesc.Business.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Data\all_pokemon.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Update="Data\all_types.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

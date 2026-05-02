@@ -1,0 +1,79 @@
+# ============================================
+# IDE et Éditeurs
+# ============================================
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.swp
+*.swo
+*~
+
+# ============================================
+# .NET / C# Backend
+# ============================================
+bin/
+obj/
+/packages
+project.lock.json
+project.assets.json
+*.nuget.props
+*.nuget.targets
+*.nupkg
+*.snupkg
+/publish/
+*.dll
+*.pdb
+*.exe
+
+# Secret Manager
+secrets.json
+
+# ============================================
+# Node.js / Frontend (Vite + React)
+# ============================================
+FrontEnd/node_modules/
+FrontEnd/dist/
+FrontEnd/build/
+.pnpm-store/
+*.tsbuildinfo
+
+# ============================================
+# Variables d'environnement et secrets
+# ============================================
+.env
+.env.local
+.env.*.local
+FrontEnd/.env
+FrontEnd/.env.local
+
+# ============================================
+# Fichiers système
+# ============================================
+[Tt]humbs.db
+*.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# ============================================
+# Fichiers de log et diagnostiques
+# ============================================
+*.log
+*.logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================
+# Fichiers temporaires
+# ============================================
+*.tmp
+*.temp
+.cache/
