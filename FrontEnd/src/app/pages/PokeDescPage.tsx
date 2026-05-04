@@ -102,7 +102,8 @@ export default function PokeDescPage() {
   const [errorMessage, setErrorMessage] = useState('')
 
   // Pokemon data
-  const [censoredDescription, setCensoredDescription] = useState('')
+  const [descriptions, setDescriptions] = useState<string[]>([])
+  const [descriptionIndex, setDescriptionIndex] = useState(0)
   const [currentPokemonId, setCurrentPokemonId] = useState('')
   const [currentPokemonSprite, setCurrentPokemonSprite] = useState('')
   const [currentScore, setCurrentScore] = useState(0)
@@ -227,7 +228,7 @@ export default function PokeDescPage() {
       ])
 
       // Skip Pokémon without description
-      if (!desc.description || desc.description.trim() === '') {
+      if (!desc.descriptions?.length) {
         setIsLoading(false)
         setErrorMessage('Pokémon sans description — passage au suivant...')
         setTimeout(() => {
@@ -236,7 +237,8 @@ export default function PokeDescPage() {
         return
       }
 
-      setCensoredDescription(desc.description)
+      setDescriptions(desc.descriptions)
+      setDescriptionIndex(0)
       processRevealedHints(hintData, hints)
 
       if (hintData.sprites?.frontDefault) {
@@ -447,6 +449,7 @@ export default function PokeDescPage() {
     setSearchTerm('')
     setSelectedPokemonName('')
     setGuessResultMessage('')
+    setDescriptionIndex(0)
   }
 
   // --- States d'affichage ---
@@ -541,8 +544,27 @@ export default function PokeDescPage() {
           >
             <div className="p-4 md:p-6">
               <div className="font-body bg-blue-50 border-l-4 rounded-xl p-4 text-base leading-relaxed" style={{ borderColor: colors.brand.blue }}>
-                {censoredDescription || <span className="text-gray-400 italic">Chargement de la description...</span>}
+                {descriptions[descriptionIndex] || <span className="text-gray-400 italic">Chargement de la description...</span>}
               </div>
+              {descriptions.length > 1 && (
+                <div className="flex items-center justify-center gap-4 mt-3">
+                  <button
+                    onClick={() => setDescriptionIndex(i => (i - 1 + descriptions.length) % descriptions.length)}
+                    className="w-9 h-9 flex items-center justify-center rounded-full border-2 font-bold text-lg hover:-translate-y-0.5 hover:shadow-sm transition"
+                    style={{ borderColor: colors.brand.blue, color: colors.brand.blue }}
+                  >
+                    ‹
+                  </button>
+                  <span className="font-body text-sm text-gray-500 tabular-nums">{descriptionIndex + 1} / {descriptions.length}</span>
+                  <button
+                    onClick={() => setDescriptionIndex(i => (i + 1) % descriptions.length)}
+                    className="w-9 h-9 flex items-center justify-center rounded-full border-2 font-bold text-lg hover:-translate-y-0.5 hover:shadow-sm transition"
+                    style={{ borderColor: colors.brand.blue, color: colors.brand.blue }}
+                  >
+                    ›
+                  </button>
+                </div>
+              )}
             </div>
           </Card>
 

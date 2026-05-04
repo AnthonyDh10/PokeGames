@@ -7,7 +7,7 @@ export interface PokemonDto {
 }
 
 export interface CensoredDescriptionDto {
-  description: string
+  descriptions: string[]
 }
 
 export interface GenerationDto {
