@@ -20,6 +20,7 @@ export interface PartieDto {
   modeSolo: boolean
   nbPokemons: number
   selectedGenerations: number[]
+  timerDurationSeconds: number
   pokemonsToGuess?: PokemonSimpleDto[]
   currentIndexJ1: number
   currentIndexJ2: number

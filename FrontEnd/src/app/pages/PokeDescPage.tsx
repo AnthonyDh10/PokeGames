@@ -142,6 +142,7 @@ export default function PokeDescPage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const isTimeoutRef = useRef(false)
   const currentPokemonIdRef = useRef<string>('')
+  const timerDurationRef = useRef<number>(60)
 
   // Pre-filter by lobby generations and revealed hints (Type 1, Type 2, Generation — AND logic)
   const hintFilteredPokemons = allPokemons.filter((p) => {
@@ -183,6 +184,7 @@ export default function PokeDescPage() {
 
   function isHintLocked(hintKey: string): boolean {
     if (usedHints.includes(hintKey)) return false
+    if (partie?.timerDurationSeconds === -1) return false // mode infini : jamais bloqué
     const penalty = HINT_PENALTIES[hintKey] ?? 0
     return penalty > timeRemaining
   }
@@ -200,6 +202,7 @@ export default function PokeDescPage() {
     try {
       const p = await getPartie(partieId)
       setPartie(p)
+      timerDurationRef.current = p.timerDurationSeconds
       setSessionCode(p.codeSession ?? 'N/A')
 
       const player1 = p.dresseur1Id === sessionId
@@ -297,7 +300,7 @@ export default function PokeDescPage() {
       try {
         const result = await getTimer(partieId, sessionId)
         setTimeRemaining(result.timeRemaining)
-        if (result.timeRemaining <= 0 && !isTimeoutRef.current) {
+        if (result.timeRemaining <= 0 && !isTimeoutRef.current && timerDurationRef.current !== -1) {
           isTimeoutRef.current = true
           clearInterval(timerRef.current!)
           handleTimeout()
@@ -370,7 +373,7 @@ export default function PokeDescPage() {
       setUsedHints(newUsed)
 
       const penalty = HINT_PENALTIES[hintKey]
-      if (penalty) {
+      if (penalty && timerDurationRef.current !== -1) {
         triggerHintAnimation(hintKey, penalty)
         triggerTimerAnimation(penalty)
       }
@@ -520,9 +523,10 @@ export default function PokeDescPage() {
               <span className="font-body font-semibold text-orange-500"><span className="grayscale opacity-60">🎲</span> Tentatives : {attemptsUsed} / 3</span>
               <Timer
                 value={timeRemaining}
+                mode={partie?.timerDurationSeconds === -1 ? 'stopwatch' : 'countdown'}
                 shake={timerShake}
                 flash={timerFlash}
-                showPenalty={showTimePenalty}
+                showPenalty={showTimePenalty && (partie?.timerDurationSeconds !== -1)}
                 penaltyValue={currentTimePenalty}
               />
             </div>
@@ -627,7 +631,7 @@ export default function PokeDescPage() {
           header={
             <>
               <h3 className="font-display text-2xl tracking-wide text-white">Indices disponibles</h3>
-              <p className="font-body text-sm mt-1" style={{ color: colors.ui.textOnColorSoft }}>Chaque indice coûte du temps !</p>
+              <p className="font-body text-sm mt-1" style={{ color: colors.ui.textOnColorSoft }}>{partie?.timerDurationSeconds === -1 ? 'Les indices coûtent des points !' : 'Chaque indice coûte du temps !'}</p>
             </>
           
           }
@@ -654,7 +658,7 @@ export default function PokeDescPage() {
                     ${locked || used ? 'cursor-not-allowed' : ''}`}
                   style={used ? { backgroundColor: colors.brand.blue + '18', borderColor: colors.brand.blue } : {}}
                 >
-                  {animation !== undefined && (
+                  {animation !== undefined && partie?.timerDurationSeconds !== -1 && (
                     <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-red-500 font-bold text-lg pointer-events-none z-20 bg-white/95 px-2 py-0.5 rounded-md border-2 border-red-500 animate-[hintFloatUp_1.5s_ease-out_forwards]">
                       -{animation}s
                     </span>

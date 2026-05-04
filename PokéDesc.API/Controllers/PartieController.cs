@@ -92,7 +92,8 @@ public class PartieController : ControllerBase
                 request.Mode,
                 request.IsSolo,
                 request.NbPokemons,
-                request.Generations
+                request.Generations,
+                request.TimerDuration
             );
             return Ok(partie);
         }

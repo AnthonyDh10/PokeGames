@@ -71,7 +71,7 @@ public class PartieService : IPartieService
     }
 
     public async Task<Partie> StartGameAsync(string partieId, string mode, bool isSolo = false,
-        int nbPokemons = 1, List<int>? generations = null)
+        int nbPokemons = 3, List<int>? generations = null, int timerDuration = 60)
     {
         var partie = await GetGameAsync(partieId);
 
@@ -83,6 +83,7 @@ public class PartieService : IPartieService
             // Stocker les paramètres sur la partie
             partie.NbPokemons = nbPokemons;
             partie.SelectedGenerations = generations ?? Enumerable.Range(1, 8).ToList();
+            partie.TimerDurationSeconds = timerDuration;
 
             // Récupérer les listes de Pokémons
             var basePokemons = await _pokemonService.GetAllPokemonsAsync();
@@ -130,9 +131,9 @@ public class PartieService : IPartieService
 
             // Initialiser les timers pour chaque joueur
             partie.TimerStartJ1 = DateTime.UtcNow;
-            partie.TimeRemainingJ1 = 60.0;
+            partie.TimeRemainingJ1 = timerDuration >= 0 ? timerDuration : -1; // -1 = infini
             partie.TimerStartJ2 = DateTime.UtcNow;
-            partie.TimeRemainingJ2 = 60.0;
+            partie.TimeRemainingJ2 = timerDuration >= 0 ? timerDuration : -1; // -1 = infini
         }
         else if (mode == "Types")
         {
@@ -223,16 +224,24 @@ public class PartieService : IPartieService
         {
             usedHints.Add(hintType);
             
-            // Appliquer la pénalité de temps
+            // Appliquer la pénalité de temps (sauf si timer infini)
             if (HintTimePenalties.TryGetValue(hintType, out double timePenalty))
             {
                 if (isJ1)
                 {
-                    partie.TimeRemainingJ1 = Math.Max(0, partie.TimeRemainingJ1 - timePenalty);
+                    // Ne pas appliquer de pénalité si le timer est infini (-1)
+                    if (partie.TimeRemainingJ1 >= 0)
+                    {
+                        partie.TimeRemainingJ1 = Math.Max(0, partie.TimeRemainingJ1 - timePenalty);
+                    }
                 }
                 else
                 {
-                    partie.TimeRemainingJ2 = Math.Max(0, partie.TimeRemainingJ2 - timePenalty);
+                    // Ne pas appliquer de pénalité si le timer est infini (-1)
+                    if (partie.TimeRemainingJ2 >= 0)
+                    {
+                        partie.TimeRemainingJ2 = Math.Max(0, partie.TimeRemainingJ2 - timePenalty);
+                    }
                 }
             }
         }
@@ -358,16 +367,17 @@ public class PartieService : IPartieService
             return;
             
         bool isJ1 = dresseurId == partie.Dresseur1Id;
+        double timerDuration = partie.TimerDurationSeconds >= 0 ? partie.TimerDurationSeconds : -1;
         
         if (isJ1)
         {
             partie.TimerStartJ1 = DateTime.UtcNow;
-            partie.TimeRemainingJ1 = 60.0;
+            partie.TimeRemainingJ1 = timerDuration;
         }
         else
         {
             partie.TimerStartJ2 = DateTime.UtcNow;
-            partie.TimeRemainingJ2 = 60.0;
+            partie.TimeRemainingJ2 = timerDuration;
         }
     }
 
@@ -423,6 +433,10 @@ public class PartieService : IPartieService
         if (timerStart == null)
             return false;
 
+        // Si le timer est infini (-1), pas de timeout
+        if (timeRemaining < 0)
+            return false;
+
         var elapsed = (DateTime.UtcNow - timerStart.Value).TotalSeconds;
         return elapsed >= timeRemaining;
     }
@@ -470,9 +484,14 @@ public class PartieService : IPartieService
         double timeRemaining = isJ1 ? partie.TimeRemainingJ1 : partie.TimeRemainingJ2;
 
         if (timerStart == null)
-            return timeRemaining;
+            return timeRemaining < 0 ? 0 : timeRemaining;
 
         var elapsed = (DateTime.UtcNow - timerStart.Value).TotalSeconds;
+
+        // Mode infini : retourner le temps écoulé (stopwatch ascendant)
+        if (timeRemaining < 0)
+            return elapsed;
+
         return Math.Max(0, timeRemaining - elapsed);
     }
 
@@ -509,7 +528,7 @@ public class PartieService : IPartieService
                 newPartie.Dresseur2Id = partie.Dresseur2Id;
                 newPartie.Statut = "Prêt";
             }
-            await StartGameAsync(newPartie.Id, "Standard", partie.ModeSolo, partie.NbPokemons, partie.SelectedGenerations);
+            await StartGameAsync(newPartie.Id, "Standard", partie.ModeSolo, partie.NbPokemons, partie.SelectedGenerations, partie.TimerDurationSeconds);
             partie.RematchPartieId = newPartie.Id;
         }
 

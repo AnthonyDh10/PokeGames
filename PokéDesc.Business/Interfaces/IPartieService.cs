@@ -22,7 +22,7 @@ public interface IPartieService
     /// Lance la partie avec le mode de jeu choisi.
     /// </summary>
     Task<Partie> StartGameAsync(string partieId, string mode, bool isSolo = false,
-        int nbPokemons = 1, List<int>? generations = null);
+        int nbPokemons = 1, List<int>? generations = null, int timerDuration = 60);
 
     /// <summary>
     /// Permet à un deuxième joueur de rejoindre une partie existante via son code.

@@ -1,3 +1,5 @@
+#nullable enable
+
 namespace PokéDesc.Domain.Models;
 
 public class DeZoomGameState

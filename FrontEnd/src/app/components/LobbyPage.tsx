@@ -32,7 +32,7 @@ interface LobbyPageProps {
   onSettingsChange?: (settings: GameSettings) => void
 }
 
-const DEFAULT_SETTINGS: GameSettings = { nbPokemons: 1, generations: [1, 2, 3, 4, 5, 6, 7, 8] }
+const DEFAULT_SETTINGS: GameSettings = { nbPokemons: 3, generations: [1, 2, 3, 4, 5, 6, 7, 8], timerDuration: 60 }
 
 export default function LobbyPage({
   gameRoute,
@@ -64,6 +64,15 @@ export default function LobbyPage({
   useEffect(() => {
     setBackground(theme.background)
   }, [])
+
+  const gameTitle = (() => {
+    const route = (gameRoute || '').toLowerCase()
+    if (route.includes('pokedesc')) return 'PokéDesc'
+    if (route.includes('dezoom')) return 'Dezoom'
+    if (route.includes('types')) return 'Types'
+    if (startMode) return startMode
+    return 'Explication'
+  })()
 
   useEffect(() => {
     return () => {
@@ -97,7 +106,8 @@ export default function LobbyPage({
     const settingsChanged =
       !prevSettingsRef.current ||
       prevSettingsRef.current.nbPokemons !== currentSettings.nbPokemons ||
-      JSON.stringify(prevSettingsRef.current.generations) !== JSON.stringify(currentSettings.generations)
+      JSON.stringify(prevSettingsRef.current.generations) !== JSON.stringify(currentSettings.generations) ||
+      prevSettingsRef.current.timerDuration !== currentSettings.timerDuration
 
     if (settingsChanged) {
       prevSettingsRef.current = currentSettings
@@ -274,7 +284,7 @@ export default function LobbyPage({
     const waitingRoomCard = (
       <Card
         headerColor={theme.primary}
-        pokeballColor={theme.primaryDark}
+        pokeballOpacity={0}
         header={
           <>
             <h2 className="font-display text-4xl tracking-wide mb-4" style={{ color: theme.textOnColor }}>
@@ -454,7 +464,7 @@ export default function LobbyPage({
           header={
             <div className="text-center flex flex-col flex-1">
               <h3 className="font-display text-3xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
-                Explication
+                {gameTitle}
               </h3>
             </div>
           }

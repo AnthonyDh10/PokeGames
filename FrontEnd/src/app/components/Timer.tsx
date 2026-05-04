@@ -10,8 +10,9 @@ interface TimerProps {
 }
 
 function formatElapsed(totalSeconds: number): string {
-  const m = Math.floor(totalSeconds / 60)
-  const s = totalSeconds % 60
+  const total = Math.floor(totalSeconds)
+  const m = Math.floor(total / 60)
+  const s = total % 60
   return m > 0 ? `${m}m ${s}s` : `${s}s`
 }
 
@@ -33,7 +34,11 @@ export default function Timer({
       : '#6B7280'
 
   const display =
-    mode === 'countdown' ? `${value.toFixed(1)}s` : formatElapsed(value)
+    mode === 'countdown'
+      ? (!isFinite(value) || value > 10000)
+        ? '♾️'
+        : `${value.toFixed(1)}s`
+      : formatElapsed(value)
 
   return (
     <>

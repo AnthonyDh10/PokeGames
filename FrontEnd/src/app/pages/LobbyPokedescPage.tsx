@@ -10,6 +10,7 @@ const ALL_GENERATIONS = [1, 2, 3, 4, 5, 6, 7, 8]
 export interface GameSettings {
   nbPokemons: number
   generations: number[]
+  timerDuration: number // En secondes (-1 = infini)
 }
 
 const THEME = {
@@ -29,7 +30,7 @@ export default function LobbyPokedescPage() {
   const previousSettings = (location.state as { previousSettings?: GameSettings } | null)?.previousSettings
 
   const [settings, setSettings] = useState<GameSettings>(
-    previousSettings ?? { nbPokemons: 1, generations: [...ALL_GENERATIONS] }
+    previousSettings ?? { nbPokemons: 3, generations: [...ALL_GENERATIONS], timerDuration: 60 }
   )
 
   function toggleGeneration(gen: number) {
@@ -56,6 +57,7 @@ export default function LobbyPokedescPage() {
       settingsPanel={(isPlayer1, partie: PartieDto | null) => {
         const displayNb = isPlayer1 ? settings.nbPokemons : (partie?.nbPokemons ?? settings.nbPokemons)
         const displayGens = isPlayer1 ? settings.generations : (partie?.selectedGenerations ?? settings.generations)
+        const displayTimer = isPlayer1 ? settings.timerDuration : (partie?.timerDurationSeconds ?? settings.timerDuration)
         return (
         <Card pokeballColor={colors.brand.blue}>
           <div className="p-6">
@@ -91,6 +93,33 @@ export default function LobbyPokedescPage() {
                     }
                   >
                     {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Durée du timer */}
+            <div className="mb-6">
+              <label className="font-body block text-sm font-medium mb-3" style={{ color: colors.ui.textMuted }}>
+                Durée du timer :{' '}
+                <span className="font-bold" style={{ color: colors.brand.blue }}>
+                  {displayTimer === -1 ? '∞' : `${displayTimer}s`}
+                </span>
+              </label>
+              <div className="flex gap-2">
+                {[30, 60, 120, -1].map((duration) => (
+                  <button
+                    key={duration}
+                    onClick={() => isPlayer1 && setSettings((prev) => ({ ...prev, timerDuration: duration }))}
+                    disabled={!isPlayer1}
+                    className={`flex-1 py-2 rounded-xl font-body font-semibold text-sm border-2 transition ${!isPlayer1 ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
+                    style={
+                      displayTimer === duration
+                        ? { backgroundColor: colors.brand.blue, color: '#fff', borderColor: colors.brand.blue }
+                        : { backgroundColor: '#fff', color: colors.ui.textMuted, borderColor: '#e5e7eb' }
+                    }
+                  >
+                    {duration === -1 ? '♾️' : `${duration}s`}
                   </button>
                 ))}
               </div>

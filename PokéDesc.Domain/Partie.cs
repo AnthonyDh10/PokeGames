@@ -24,8 +24,9 @@ public class Partie
     public bool ModeSolo { get; set; } = false;
 
     // Paramètres choisis par l'hôte
-    public int NbPokemons { get; set; } = 1;
+    public int NbPokemons { get; set; } = 3;
     public List<int> SelectedGenerations { get; set; } = new() { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    public int TimerDurationSeconds { get; set; } = 60; // Durée du timer en secondes (-1 = infini)
 
     // --- Logique du Jeu ---
 

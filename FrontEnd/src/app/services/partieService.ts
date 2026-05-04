@@ -19,7 +19,7 @@ export async function getPartie(partieId: string): Promise<PartieDto> {
 export async function startPartie(
   partieId: string,
   isSolo: boolean,
-  settings?: { nbPokemons: number; generations: number[] },
+  settings?: { nbPokemons: number; generations: number[]; timerDuration: number },
   mode: string = 'Standard'
 ): Promise<PartieDto> {
   const { data } = await api.post<PartieDto>(`/api/partie/${partieId}/start`, {
@@ -27,6 +27,7 @@ export async function startPartie(
     isSolo,
     nbPokemons: settings?.nbPokemons ?? 1,
     generations: settings?.generations ?? [1, 2, 3, 4, 5, 6, 7, 8],
+    timerDuration: settings?.timerDuration ?? 60,
   })
   return data
 }

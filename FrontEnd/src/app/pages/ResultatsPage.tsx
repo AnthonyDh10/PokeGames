@@ -152,6 +152,7 @@ export default function ResultatsPage() {
       await startPartie(newPartie.id, true, {
         nbPokemons: partie.nbPokemons,
         generations: partie.selectedGenerations,
+        timerDuration: partie.timerDurationSeconds,
       })
       navigate(`/pokedesc/${newPartie.id}`)
     } catch {

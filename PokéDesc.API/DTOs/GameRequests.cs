@@ -46,6 +46,9 @@ public class StartGameRequest
     public int NbPokemons { get; set; } = 1;
 
     public List<int>? Generations { get; set; } // null = toutes les générations
+
+    [Range(-1, int.MaxValue)]
+    public int TimerDuration { get; set; } = 60; // Durée du timer en secondes (-1 = infini)
 }
 
 public class UpdateGameSettingsRequest
