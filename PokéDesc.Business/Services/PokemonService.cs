@@ -95,26 +95,24 @@ public class PokemonService : IPokemonService
         }).ToList();
     }
 
-    public async Task<string> GetCensoredDescriptionAsync(string id)
+    public async Task<List<string>> GetCensoredDescriptionAsync(string id)
     {
         var pokemon = await GetPokemonByIdAsync(id);
-        if (string.IsNullOrEmpty(pokemon.Description))
-        {
-            return string.Empty;
-        }
+        if (pokemon.Description == null || !pokemon.Description.Any())
+            return new List<string>();
 
-        var description = pokemon.Description;
-        var nameFr = pokemon.NameFr;
+        var nameFr = pokemon.NameFr?.Trim() ?? string.Empty;
 
-        if (!string.IsNullOrWhiteSpace(nameFr))
+        return pokemon.Description.Select(desc =>
         {
-            description = System.Text.RegularExpressions.Regex.Replace(
-                description,
-                System.Text.RegularExpressions.Regex.Escape(nameFr.Trim()),
+            if (string.IsNullOrWhiteSpace(nameFr))
+                return desc;
+            return System.Text.RegularExpressions.Regex.Replace(
+                desc,
+                System.Text.RegularExpressions.Regex.Escape(nameFr),
                 "***",
                 System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-        }
-        return description;
+        }).ToList();
     }
 
     public async Task<PokemonHints> GetPokemonHintsAsync(string id)

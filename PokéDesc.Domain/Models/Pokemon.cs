@@ -28,6 +28,7 @@ public class Pokemon
     public Cries Cries { get; set; }
     public List<string> Moves { get; set; }
     public int MovesCount { get; set; }
-    public string Description { get; set; }
+    public List<string> Description { get; set; } = new();
+    public List<Variety> Varieties { get; set; } = new();
     public EvolutionChain EvolutionChain { get; set; }
 }

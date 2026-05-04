@@ -106,10 +106,10 @@ public class PartieService : IPartieService
 
             // Filter out Pokémon without descriptions
             basePokemons = basePokemons
-                .Where(p => !string.IsNullOrWhiteSpace(p.Description))
+                .Where(p => p.Description != null && p.Description.Any())
                 .ToList();
             legendaryMythicalPokemons = legendaryMythicalPokemons
-                .Where(p => !string.IsNullOrWhiteSpace(p.Description))
+                .Where(p => p.Description != null && p.Description.Any())
                 .ToList();
 
             if (basePokemons.Count == 0)
@@ -166,7 +166,7 @@ public class PartieService : IPartieService
             var sourceList = isRare ? legendaryMythicalPokemons : basePokemons;
             // Extra safeguard: filter out Pokémon without descriptions
             var validPokemons = sourceList
-                .Where(p => !string.IsNullOrWhiteSpace(p.Description))
+                .Where(p => p.Description != null && p.Description.Any())
                 .ToList();
 
             if (validPokemons.Count == 0)

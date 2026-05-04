@@ -140,8 +140,8 @@ public class PokemonController : ControllerBase
     {
         try
         {
-            var description = await _service.GetCensoredDescriptionAsync(id);
-            return Ok(new { description });
+            var descriptions = await _service.GetCensoredDescriptionAsync(id);
+            return Ok(new { descriptions });
         }
         catch (KeyNotFoundException ex)
         {
