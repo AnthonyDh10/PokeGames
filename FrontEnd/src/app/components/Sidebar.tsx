@@ -19,8 +19,9 @@ export default function Sidebar({
 
   const navItems = [
     { icon: pokedescLogo, label: "PokéDesc", to: "/pokedesc" },
-    { icon: typeLogo, label: "Types", to: "/types" },
+    { icon: typeLogo, label: "Quel est ce type ?", to: "/types" },
     { icon: dezoomLogo, label: "Dézoom", to: "/dezoom" },
+    { icon: "📄", label: "Règles", to: "/regles" }
   ];
 
   return (
