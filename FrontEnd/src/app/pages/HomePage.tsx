@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import GameCard from "../components/GameCard";
 import SectionTitle from "../components/SectionTitle";
 import { useBackgroundStore } from "../store/backgroundStore";
+import { useChatStore } from "../store/chatStore";
 import { colors } from "../design/colors";
 import redGif from "../components/images/red-gif.gif";
 import pokedescLogo from "../components/images/pokedesc-logo-transparant.png";
@@ -10,9 +11,12 @@ import dezoomLogo from "../components/images/dezoom-logo.png";
 
 export default function HomePage() {
   const { setBackground } = useBackgroundStore();
+  const { clearContext, setOpen } = useChatStore();
 
   useEffect(() => {
     setBackground({ colorLeft: colors.ui.bgLeft, colorStripe: colors.ui.bgStripe, colorRight: colors.ui.bgRight });
+    clearContext();
+    setOpen(false);
   }, []);
 
   return (
