@@ -73,9 +73,11 @@ PokeGames/
 - amélioration de l'expérience multijoueur temps réel
 - optimisation UX/UI et animations de jeu
 
-## Statut
+## Déploiement
 
-Projet en évolution active.
+Ce projet est configuré en **CI/CD** (Intégration et Déploiement Continus) pour automatiser les mises en production :
+- **Frontend :** Déployé sur Vercel
+- **Backend :** Déployé sur Render
 
 ## Auteur
 
