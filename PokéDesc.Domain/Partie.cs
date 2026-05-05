@@ -65,6 +65,10 @@ public class Partie
     public bool RematchReadyJ1 { get; set; }
     public bool RematchReadyJ2 { get; set; }
     public string? RematchPartieId { get; set; }
+    
+    // Flags indiquant que chaque joueur a appuyé sur "Terminer la partie"
+    public bool FinishedJ1 { get; set; } = false;
+    public bool FinishedJ2 { get; set; } = false;
 }
 
 public class CompletedPokemon

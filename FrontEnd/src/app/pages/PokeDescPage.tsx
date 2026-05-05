@@ -8,7 +8,7 @@ import Card from '../components/Card'
 import PokemonSearchInput from '../components/PokemonSearchInput'
 import Timer from '../components/Timer'
 import { getAllPokemons, getCensoredDescription, getHints } from '../services/pokemonService'
-import { getPartie, submitGuess, useHint, getTimer, resetTimer } from '../services/partieService'
+import { getPartie, submitGuess, useHint, getTimer, resetTimer, markPlayerFinished } from '../services/partieService'
 import type { PokemonDto, PokemonHintsDto } from '../types/pokemon'
 import type { PartieDto, GuessResultDto } from '../types/partie'
 
@@ -445,6 +445,12 @@ export default function PokeDescPage() {
     setIsFinalPokemon(false)
 
     if (isFinalPokemon) {
+      try {
+        // Prévenir le backend que ce joueur a cliqué sur "Terminer la partie".
+        await markPlayerFinished(partieId!, sessionId)
+      } catch {
+        // ignore errors — on naviguera quand même
+      }
       navigate(`/resultats/${partieId}`)
       return
     }

@@ -70,3 +70,8 @@ export async function markRematchReady(partieId: string, dresseurId: string): Pr
   )
   return data
 }
+
+export async function markPlayerFinished(partieId: string, dresseurId: string): Promise<PartieDto> {
+  const { data } = await api.post<PartieDto>(`/api/partie/${partieId}/finish`, {}, { params: { dresseurId } })
+  return data
+}

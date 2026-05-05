@@ -539,4 +539,22 @@ public class PartieService : IPartieService
             RematchPartieId = partie.RematchPartieId,
         };
     }
+
+    public async Task<Partie> MarkPlayerFinishedAsync(string partieId, string dresseurId)
+    {
+        var partie = await GetGameAsync(partieId);
+        bool isJ1 = dresseurId == partie.Dresseur1Id;
+
+        if (isJ1) partie.FinishedJ1 = true;
+        else partie.FinishedJ2 = true;
+
+        // Si solo ou si les deux joueurs ont marqué la fin, basculer le statut
+        bool bothFinished = partie.ModeSolo || (partie.Dresseur2Id != null && partie.FinishedJ1 && partie.FinishedJ2);
+        if (bothFinished)
+        {
+            partie.Statut = "Termine";
+        }
+
+        return partie;
+    }
 }

@@ -47,7 +47,18 @@ export default function ResultatsPage() {
   const player2Name = isPlayer1 ? opponentName : myName
 
   async function loadSprites(p: PartieDto) {
-    const all = [...(p.completedPokemonsJ1 ?? []), ...(p.completedPokemonsJ2 ?? [])]
+    // N'afficher les sprites des deux joueurs que si la partie est terminée (ou en solo).
+    let all: CompletedPokemonDto[] = []
+    if (p.modeSolo || (p.statut ?? '').toLowerCase() === 'termine') {
+      all = [...(p.completedPokemonsJ1 ?? []), ...(p.completedPokemonsJ2 ?? [])]
+    } else {
+      // Sinon, ne charger que les sprites du joueur courant
+      if (p.dresseur1Id === sessionId) {
+        all = [...(p.completedPokemonsJ1 ?? [])]
+      } else {
+        all = [...(p.completedPokemonsJ2 ?? [])]
+      }
+    }
     const newSprites: Record<string, string> = {}
     await Promise.all(
       all.map(async (cp) => {
@@ -68,7 +79,7 @@ export default function ResultatsPage() {
 
   function isComplete(p: PartieDto): boolean {
     if (p.modeSolo) return (p.completedPokemonsJ1?.length ?? 0) > 0
-    return (p.completedPokemonsJ1?.length ?? 0) > 0 && (p.completedPokemonsJ2?.length ?? 0) > 0
+    return (p.statut ?? '').toLowerCase() === 'termine'
   }
 
   async function load() {
@@ -77,7 +88,36 @@ export default function ResultatsPage() {
     setErrorMessage('')
     try {
       const p = await getPartie(partieId)
-      setPartie(p)
+      // Si la partie n'est pas marquée 'Termine' côté backend et qu'il s'agit d'un multijoueur,
+      // masquer les données de l'adversaire pour ne pas dévoiler ses résultats avant qu'il ait cliqué sur "Terminer la partie".
+      if (!p.modeSolo && (p.statut ?? '').toLowerCase() !== 'termine') {
+        const isJ1 = p.dresseur1Id === sessionId
+        const masked: PartieDto = {
+          id: p.id,
+          codeSession: p.codeSession,
+          statut: p.statut,
+          dresseur1Id: p.dresseur1Id,
+          dresseur2Id: p.dresseur2Id,
+          modeSolo: p.modeSolo,
+          nbPokemons: p.nbPokemons,
+          selectedGenerations: p.selectedGenerations,
+          timerDurationSeconds: p.timerDurationSeconds,
+          pokemonsToGuess: p.pokemonsToGuess,
+          currentIndexJ1: p.currentIndexJ1,
+          currentIndexJ2: p.currentIndexJ2,
+          scoreJ1: p.scoreJ1,
+          scoreJ2: 0,
+          attemptsUsedJ1: p.attemptsUsedJ1,
+          attemptsUsedJ2: 0,
+          usedHintsJ1: p.usedHintsJ1,
+          usedHintsJ2: [],
+          completedPokemonsJ1: p.completedPokemonsJ1,
+          completedPokemonsJ2: [],
+        }
+        setPartie(masked)
+      } else {
+        setPartie(p)
+      }
       setChatContext({
         partieId,
         sessionCode: p.codeSession ?? '',
@@ -104,23 +144,46 @@ export default function ResultatsPage() {
     autoRefreshRef.current = setInterval(async () => {
       try {
         const p = await getPartie(partieId!)
-        const prevJ2Count = partie.completedPokemonsJ2?.length ?? 0
-        const newJ2Count = p.completedPokemonsJ2?.length ?? 0
-        if (newJ2Count !== prevJ2Count) {
-          setPartie(p)
-          await loadSprites(p)
-        }
-        if (isComplete(p)) {
+        // Si la partie est terminée côté backend, afficher tout et arrêter le poll
+        if ((p.statut ?? '').toLowerCase() === 'termine') {
           setGameFullyComplete(true)
           setPartie(p)
+          await loadSprites(p)
           clearInterval(autoRefreshRef.current!)
+          return
         }
+
+        // Sinon, ne mettre à jour que les données du joueur courant (évite de dévoiler l'adversaire)
+        setPartie((prev) => {
+          if (!prev) return p
+          if (prev.dresseur1Id === sessionId) {
+            return {
+              ...prev,
+              scoreJ1: p.scoreJ1,
+              attemptsUsedJ1: p.attemptsUsedJ1,
+              usedHintsJ1: p.usedHintsJ1,
+              completedPokemonsJ1: p.completedPokemonsJ1,
+              currentIndexJ1: p.currentIndexJ1,
+            }
+          }
+          return {
+            ...prev,
+            scoreJ2: p.scoreJ2,
+            attemptsUsedJ2: p.attemptsUsedJ2,
+            usedHintsJ2: p.usedHintsJ2,
+            completedPokemonsJ2: p.completedPokemonsJ2,
+            currentIndexJ2: p.currentIndexJ2,
+          }
+        })
+        await loadSprites(p)
       } catch {
         // silent
       }
     }, 2000)
     return () => { if (autoRefreshRef.current) clearInterval(autoRefreshRef.current) }
   }, [partie, gameFullyComplete]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  
 
   useEffect(() => {
     return () => { if (rematchPollRef.current) clearInterval(rematchPollRef.current) }

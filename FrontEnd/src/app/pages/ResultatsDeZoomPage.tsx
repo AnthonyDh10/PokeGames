@@ -198,6 +198,8 @@ export default function ResultatsDeZoomPage() {
         headerColor={isWinner ? colors.brand.red : colors.brand.redDeep}
         pokeballColor={isWinner ? colors.brand.red : colors.brand.redDeep}
         headerClassName="py-3"
+        cardSize={{ width: 300, height: 200 }}
+        pokeballSize={150}
         header={
           <h2 className="font-display text-xl tracking-wide text-white">
             {name} {isWinner && <span style={{ filter: 'grayscale(1)', marginLeft: '0.5rem' }}>👑</span>}

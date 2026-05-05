@@ -129,7 +129,7 @@ export default function ResultatsTypesPage() {
     setIsRelaunching(true)
     try {
       const newPartie = await createPartie(sessionId)
-      await startPartie(newPartie.id, true, { nbPokemons: 1, generations: [1, 2, 3, 4, 5, 6, 7, 8] }, 'Types')
+      await startPartie(newPartie.id, true)
       navigate(`/types/${newPartie.id}`)
     } catch {
       setErrorMessage('Erreur lors du relancement de la partie.')
@@ -243,7 +243,10 @@ export default function ResultatsTypesPage() {
       <Card
         headerColor={isWinner ? colors.brand.yellowWarm : colors.brand.yellowLight}
         pokeballColor={isWinner ? colors.brand.yellowWarm : colors.brand.yellowLight}
+        pokeballSize={150}
         headerClassName="py-3"
+        animation={false}
+        cardSize={{ width: 300, height: 250 }}
         header={
           <h2 className="font-display text-xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
             {name} {isWinner && (

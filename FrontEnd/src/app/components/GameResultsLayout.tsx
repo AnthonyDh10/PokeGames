@@ -40,14 +40,14 @@ export default function GameResultsLayout({
         </div>
       </Card>
 
-      {scores}
-
-      {details}
-
+      <div className="flex gap-3 justify-center flex-wrap pt-4 pb-8">
+        {scores}
+      </div>
+        {details}
       <div className="flex gap-3 justify-center flex-wrap pt-4 pb-8">
         {actions}
       </div>
-
+      
     </div>
   )
 }

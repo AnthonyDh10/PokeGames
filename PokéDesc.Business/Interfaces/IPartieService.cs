@@ -63,4 +63,9 @@ public interface IPartieService
     /// Marque un joueur comme prêt pour une revanche. Si les deux sont prêts, crée et démarre une nouvelle partie.
     /// </summary>
     Task<RematchStatusDto> MarkRematchReadyAsync(string partieId, string dresseurId);
+
+    /// <summary>
+    /// Marque que le joueur a cliqué sur "Terminer la partie". Si les deux joueurs ont cliqué, la partie devient "Termine".
+    /// </summary>
+    Task<Partie> MarkPlayerFinishedAsync(string partieId, string dresseurId);
 }

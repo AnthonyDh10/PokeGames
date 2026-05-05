@@ -135,6 +135,23 @@ public class PartieController : ControllerBase
         return Ok(status);
     }
 
+    [HttpPost("{partieId}/finish")]
+    public async Task<IActionResult> MarkPlayerFinished(string partieId, [FromQuery] string dresseurId)
+    {
+        if (string.IsNullOrWhiteSpace(dresseurId))
+            return BadRequest("dresseurId est requis.");
+
+        try
+        {
+            var partie = await _partieService.MarkPlayerFinishedAsync(partieId, dresseurId);
+            return Ok(partie);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
+
     [HttpGet("{partieId}/timer/{dresseurId}")]
     public IActionResult GetRemainingTime(string partieId, string dresseurId)
     {
