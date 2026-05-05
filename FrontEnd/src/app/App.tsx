@@ -5,6 +5,7 @@ import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 import Footer from "./components/Footer";
 import DiagonalBackground from "./components/DiagonalBackground";
+import ChatPanel from "./components/ChatPanel";
 import { useBackgroundStore } from "./store/backgroundStore";
 import HomePage from "./pages/HomePage";
 import LobbyPokedescPage from "./pages/LobbyPokedescPage";
@@ -53,6 +54,7 @@ export default function App() {
       </div>
 
       <Footer />
+      <ChatPanel />
     </DiagonalBackground>
   );
 }

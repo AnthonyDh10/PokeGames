@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router'
 import { useSessionStore } from '../store/sessionStore'
+import { useChatStore } from '../store/chatStore'
 import { getDeZoomResults, markDeZoomRematchReady } from '../services/dezoomService'
 import { createPartie, startPartie } from '../services/partieService'
 import GameResultsLayout from '../components/GameResultsLayout'
@@ -24,6 +25,7 @@ export default function ResultatsDeZoomPage() {
   const location = useLocation()
   const { sessionId, playerName } = useSessionStore()
   const state = location.state as { sessionCode?: string } | null
+  const { setContext: setChatContext } = useChatStore()
 
   const [results, setResults] = useState<DeZoomGameResultsDto | null>(null)
   const [isSolo, setIsSolo] = useState(true)
@@ -42,6 +44,11 @@ export default function ResultatsDeZoomPage() {
       setResults(r)
       const solo = !r.player2
       setIsSolo(solo)
+      setChatContext({
+        partieId,
+        sessionCode: state?.sessionCode ?? '',
+        isSolo: solo,
+      })
       return { results: r, solo }
     } catch {
       setErrorMessage('Impossible de charger les résultats.')
@@ -79,7 +86,7 @@ export default function ResultatsDeZoomPage() {
     setIsRelaunching(true)
     try {
       const newPartie = await createPartie(sessionId)
-      await startPartie(newPartie.id, true, { nbPokemons: 1, generations: [1, 2, 3, 4, 5, 6, 7, 8] })
+      await startPartie(newPartie.id, true, { nbPokemons: 1, generations: [1, 2, 3, 4, 5, 6, 7, 8], timerDuration: -1 })
       navigate(`/dezoom/${newPartie.id}`)
     } catch {
       setErrorMessage('Erreur lors du relancement de la partie.')

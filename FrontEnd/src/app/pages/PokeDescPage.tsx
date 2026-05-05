@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { useSessionStore } from '../store/sessionStore'
 import { useBackgroundStore } from '../store/backgroundStore'
+import { useChatStore } from '../store/chatStore'
 import { colors } from '../design/colors'
 import Card from '../components/Card'
 import PokemonSearchInput from '../components/PokemonSearchInput'
@@ -90,6 +91,7 @@ export default function PokeDescPage() {
   const navigate = useNavigate()
   const { sessionId, playerName } = useSessionStore()
   const { setBackground } = useBackgroundStore()
+  const { setContext: setChatContext } = useChatStore()
 
   useEffect(() => {
     setBackground({ colorLeft: colors.ui.bgLeftGame, colorStripe: colors.ui.bgStripeGame, colorRight: colors.ui.bgRightGame });
@@ -204,6 +206,11 @@ export default function PokeDescPage() {
       setPartie(p)
       timerDurationRef.current = p.timerDurationSeconds
       setSessionCode(p.codeSession ?? 'N/A')
+      setChatContext({
+        partieId,
+        sessionCode: p.codeSession ?? '',
+        isSolo: !p.dresseur2Id,
+      })
 
       const player1 = p.dresseur1Id === sessionId
       setIsPlayer1(player1)

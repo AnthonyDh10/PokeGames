@@ -5,6 +5,7 @@ import { PokeballDecor } from './Pokeball'
 import Card from './Card'
 import { useSessionStore } from '../store/sessionStore'
 import { useBackgroundStore } from '../store/backgroundStore'
+import { useChatStore } from '../store/chatStore'
 import { createPartie, joinPartie, getPartie, startPartie, updateGameSettings } from '../services/partieService'
 import type { PartieDto } from '../types/partie'
 import type { GameSettings } from '../pages/LobbyPokedescPage'
@@ -48,6 +49,7 @@ export default function LobbyPage({
   const location = useLocation()
   const { sessionId, playerName, setPlayerName } = useSessionStore()
   const { setBackground } = useBackgroundStore()
+  const { setContext: setChatContext, clearContext: clearChatContext } = useChatStore()
 
   const [pseudoInput, setPseudoInput] = useState('')
   const [codeSession, setCodeSession] = useState('')
@@ -64,6 +66,19 @@ export default function LobbyPage({
   useEffect(() => {
     setBackground(theme.background)
   }, [])
+
+  // Sync partie state to chat context
+  useEffect(() => {
+    if (partie?.id) {
+      setChatContext({
+        partieId: partie.id,
+        sessionCode: partie.codeSession ?? '',
+        isSolo: !partie.dresseur2Id,
+      })
+    } else {
+      clearChatContext()
+    }
+  }, [partie?.id, partie?.dresseur2Id, partie?.codeSession]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const gameTitle = (() => {
     const route = (gameRoute || '').toLowerCase()

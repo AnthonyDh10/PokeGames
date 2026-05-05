@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router'
 import { useSessionStore } from '../store/sessionStore'
+import { useChatStore } from '../store/chatStore'
 import { getTypesGameResults, markRematchReady } from '../services/typesGameService'
 import { createPartie, startPartie } from '../services/partieService'
 import GameResultsLayout from '../components/GameResultsLayout'
@@ -65,6 +66,7 @@ export default function ResultatsTypesPage() {
   const location = useLocation()
   const { sessionId, playerName } = useSessionStore()
   const state = location.state as { sessionCode?: string } | null
+  const { setContext: setChatContext } = useChatStore()
 
   const [results, setResults] = useState<TypesGameResultsDto | null>(null)
   const [isSolo, setIsSolo] = useState(true)
@@ -84,6 +86,11 @@ export default function ResultatsTypesPage() {
       // Déduire si solo : solo si pas de player2
       const solo = !r.player2
       setIsSolo(solo)
+      setChatContext({
+        partieId,
+        sessionCode: state?.sessionCode ?? '',
+        isSolo: solo,
+      })
       return { results: r, solo }
     } catch {
       setErrorMessage('Impossible de charger les résultats.')

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { useSessionStore } from '../store/sessionStore'
 import { useBackgroundStore } from '../store/backgroundStore'
+import { useChatStore } from '../store/chatStore'
 import { colors } from '../design/colors'
 import Card from '../components/Card'
 import PokemonSearchInput from '../components/PokemonSearchInput'
@@ -59,6 +60,7 @@ export default function TypesGamePage() {
   const navigate = useNavigate()
   const { sessionId } = useSessionStore()
   const { setBackground } = useBackgroundStore()
+  const { setContext: setChatContext } = useChatStore()
 
   useEffect(() => {
     setBackground({
@@ -103,6 +105,11 @@ export default function TypesGamePage() {
         try {
           const p = await getPartie(partieId)
           setSessionCode(p.codeSession ?? 'N/A')
+          setChatContext({
+            partieId,
+            sessionCode: p.codeSession ?? '',
+            isSolo: !p.dresseur2Id,
+          })
         } catch {
           setSessionCode('N/A')
         }
