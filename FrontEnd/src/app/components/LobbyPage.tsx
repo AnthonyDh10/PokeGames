@@ -461,6 +461,8 @@ export default function LobbyPage({
           headerColor={theme.primaryDark}
           headerClassName="py-6"
           pokeballColor={theme.primaryDark}
+          cardSize={{ height: 350 }}
+
           header={
             <div className="text-center flex flex-col flex-1">
               <h3 className="font-display text-3xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
@@ -482,6 +484,7 @@ export default function LobbyPage({
           headerColor={theme.primary}
           headerClassName="py-6"
           pokeballColor={theme.primary}
+          cardSize={{ height: 350 }}
           header={
             <div className="text-center flex flex-col flex-1">
               <h3 className="font-display text-3xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
@@ -511,6 +514,7 @@ export default function LobbyPage({
           headerColor={theme.primaryLight}
           headerClassName="py-6"
           pokeballColor={theme.primaryLight}
+          cardSize={{ height: 350 }}
           header={
             <div className="text-center flex flex-col flex-1">
               <h3 className="font-display text-3xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>

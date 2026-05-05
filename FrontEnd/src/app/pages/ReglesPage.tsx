@@ -76,16 +76,9 @@ const chenVariants = {
 };
 
 const cardsVariants = {
-  initial: (dir: string) => ({
-    y: dir === "forward" ? 40 : -40,
-    opacity: 0,
-  }),
+  initial: { y: -40, opacity: 0 },
   animate: { y: 0, opacity: 1, transition: { duration: 0.45, ease: "easeOut" as const } },
-  exit: (dir: string) => ({
-    y: dir === "backward" ? 40 : -40,
-    opacity: 0,
-    transition: { duration: 0.3, ease: "easeIn" as const },
-  }),
+  exit: { y: 40, opacity: 0, transition: { duration: 0.3, ease: "easeIn" as const } },
 };
 
 export default function ReglesPage() {
@@ -144,7 +137,7 @@ export default function ReglesPage() {
         >
           <GameCard
             title="PokéDesc"
-            description="Clique pour découvrir les règles de PokéDesc !"
+            description="Découvre les règles ici !"
             color={colors.brand.blue}
             image={pokedescLogo}
             to="/pokedesc"
@@ -153,7 +146,7 @@ export default function ReglesPage() {
 
           <GameCard
             title="Quel est ce type ?"
-            description="Clique pour découvrir les règles de Quel est ce type ? !"
+            description="Découvre les règles ici !"
             color={colors.brand.yellow}
             image={typeLogo}
             to="/types"
@@ -162,7 +155,7 @@ export default function ReglesPage() {
 
           <GameCard
             title="Dézoom"
-            description="Clique pour découvrir les règles de Dézoom !"
+            description="Découvre les règles ici !"
             color={colors.brand.red}
             image={dezoomLogo}
             to="/dezoom"

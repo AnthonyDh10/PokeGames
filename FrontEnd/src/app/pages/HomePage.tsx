@@ -29,20 +29,12 @@ const chenVariants = {
   }),
 };
 
-// GameCards : slide vertical
-// forward : cards sortent vers le haut, entrent depuis le bas
-// backward : cards sortent vers le bas, entrent depuis le haut
+// GameCards : slide vertical de haut en bas (toujours la même direction)
+// Entrent depuis le haut, sortent vers le bas
 const cardsVariants = {
-  initial: (dir: string) => ({
-    y: dir === "backward" ? -40 : 40,
-    opacity: 0,
-  }),
+  initial: { y: -40, opacity: 0 },
   animate: { y: 0, opacity: 1, transition: { duration: 0.45, ease: "easeOut" as const } },
-  exit: (dir: string) => ({
-    y: dir === "forward" ? -40 : 40,
-    opacity: 0,
-    transition: { duration: 0.3, ease: "easeIn" as const },
-  }),
+  exit: { y: 40, opacity: 0, transition: { duration: 0.3, ease: "easeIn" as const } },
 };
 
 export default function HomePage() {
