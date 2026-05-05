@@ -546,30 +546,32 @@ export default function PokeDescPage() {
             pokeballOpacity={0}
             header={<h2 className="font-display text-2xl tracking-wide text-white">Description du Pokédex</h2>}
           >
-            <div className="p-4 md:p-6">
-              <div className="font-body bg-blue-50 border-l-4 rounded-xl p-4 text-base leading-relaxed" style={{ borderColor: colors.brand.blue }}>
-                {descriptions[descriptionIndex] || <span className="text-gray-400 italic">Chargement de la description...</span>}
-              </div>
-              {descriptions.length > 1 && (
-                <div className="flex items-center justify-center gap-4 mt-3">
-                  <button
-                    onClick={() => setDescriptionIndex(i => (i - 1 + descriptions.length) % descriptions.length)}
-                    className="w-9 h-9 flex items-center justify-center rounded-full border-2 font-bold text-lg hover:-translate-y-0.5 hover:shadow-sm transition"
-                    style={{ borderColor: colors.brand.blue, color: colors.brand.blue }}
-                  >
-                    ‹
-                  </button>
-                  <span className="font-body text-sm text-gray-500 tabular-nums">{descriptionIndex + 1} / {descriptions.length}</span>
-                  <button
-                    onClick={() => setDescriptionIndex(i => (i + 1) % descriptions.length)}
-                    className="w-9 h-9 flex items-center justify-center rounded-full border-2 font-bold text-lg hover:-translate-y-0.5 hover:shadow-sm transition"
-                    style={{ borderColor: colors.brand.blue, color: colors.brand.blue }}
-                  >
-                    ›
-                  </button>
+            <div className="p-4 md:p-6 flex flex-col pb-6 min-h-[160px] md:min-h-[220px]">
+                <div className="flex-1">
+                  <div className="font-body bg-blue-50 border-l-4 rounded-xl p-4 text-base leading-relaxed h-full" style={{ borderColor: colors.brand.blue }}>
+                    {descriptions[descriptionIndex] || <span className="text-gray-400 italic">Chargement de la description...</span>}
+                  </div>
                 </div>
-              )}
-            </div>
+                {descriptions.length > 1 && (
+                  <div className="flex items-center justify-center gap-4 mt-auto">
+                    <button
+                      onClick={() => setDescriptionIndex(i => (i - 1 + descriptions.length) % descriptions.length)}
+                      className="w-9 h-9 flex items-center justify-center rounded-full border-2 font-bold text-lg hover:-translate-y-0.5 hover:shadow-sm transition"
+                      style={{ borderColor: colors.brand.blue, color: colors.brand.blue }}
+                    >
+                      ‹
+                    </button>
+                    <span className="font-body text-sm text-gray-500 tabular-nums">{descriptionIndex + 1} / {descriptions.length}</span>
+                    <button
+                      onClick={() => setDescriptionIndex(i => (i + 1) % descriptions.length)}
+                      className="w-9 h-9 flex items-center justify-center rounded-full border-2 font-bold text-lg hover:-translate-y-0.5 hover:shadow-sm transition"
+                      style={{ borderColor: colors.brand.blue, color: colors.brand.blue }}
+                    >
+                      ›
+                    </button>
+                  </div>
+                )}
+              </div>
           </Card>
 
           {/* Réponse */}

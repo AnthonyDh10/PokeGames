@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { PokeballDecor } from './Pokeball'
 
 interface CardProps {
@@ -11,7 +12,14 @@ interface CardProps {
   pokeballOpacity?: number
   pokeballSize?: number
   overflowVisible?: boolean
+  animation?: boolean
+  cardSize?: { width?: number; height?: number }
   style?: React.CSSProperties
+}
+
+const cardAnimationVariants = {
+  initial: { y: -40, opacity: 0 },
+  animate: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" as const } },
 }
 
 export default function Card({
@@ -24,23 +32,29 @@ export default function Card({
   pokeballColor = 'black',
   pokeballOpacity = 0.15,
   pokeballSize = 200,
-  overflowVisible = false, // 1. On récupère la prop avec false par défaut
+  overflowVisible = false,
+  animation = true,
+  cardSize,
   style,
 }: CardProps) {
-  return (
+  const cardStyle = cardSize ? { 
+    ...style, 
+    width: cardSize.width ? `${cardSize.width}px` : undefined,
+    height: cardSize.height ? `${cardSize.height}px` : undefined,
+  } : style
+  const cardContent = (
     <div
       className={`bg-white rounded-3xl shadow-[0_8px_24px_rgba(0,0,0,0.25)] border border-gray-100 flex flex-col ${
-        overflowVisible ? 'overflow-visible' : 'overflow-hidden' // 2. Remplacement ici
+        overflowVisible ? 'overflow-visible' : 'overflow-hidden'
       } ${
         hoverable
           ? 'hover:shadow-[0_12px_32px_rgba(0,0,0,0.35)] hover:-translate-y-1 transition-all duration-300'
           : ''
       } ${className}`}
-      style={style}
+      style={cardStyle}
     >
       {headerColor && (
         <div
-          // 3. Ajout de `rounded-t-3xl` pour arrondir le header lui-même
           className={`relative flex flex-col items-center justify-center px-8 rounded-t-3xl overflow-hidden ${headerClassName}`}
           style={{ backgroundColor: headerColor }}
         >
@@ -59,5 +73,19 @@ export default function Card({
         </div>
       </div>
     </div>
+  )
+
+  if (!animation) {
+    return cardContent
+  }
+
+  return (
+    <motion.div
+      initial="initial"
+      animate="animate"
+      variants={cardAnimationVariants}
+    >
+      {cardContent}
+    </motion.div>
   )
 }
