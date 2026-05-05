@@ -91,7 +91,7 @@ export default function ChatPanel() {
 
       {/* Drawer panel */}
       <div
-        className="fixed top-0 right-0 h-full z-40 flex flex-col shadow-2xl transition-transform duration-300"
+        className="fixed top-0 right-0 h-full z-[9999] flex flex-col shadow-2xl transition-transform duration-300"
         style={{
           width: '320px',
           transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
