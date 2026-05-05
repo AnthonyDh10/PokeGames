@@ -451,7 +451,7 @@ export default function PokeDescPage() {
       } catch {
         // ignore errors — on naviguera quand même
       }
-      navigate(`/resultats/${partieId}`)
+      navigate(`/resultats/${partieId}`, { state: { sessionCode } })
       return
     }
 

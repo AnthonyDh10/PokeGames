@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router'
+import { useParams, useNavigate, useLocation } from 'react-router'
 import { useSessionStore } from '../store/sessionStore'
 import { useChatStore } from '../store/chatStore'
 import { getPartie, markRematchReady, createPartie, startPartie } from '../services/partieService'
@@ -25,6 +25,8 @@ const HINT_LABELS: Record<string, string> = {
 export default function ResultatsPage() {
   const { partieId } = useParams<{ partieId: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
+  const state = location.state as { sessionCode?: string } | null
   const { sessionId, playerName } = useSessionStore()
   const { setContext: setChatContext } = useChatStore()
 
@@ -286,95 +288,92 @@ export default function ResultatsPage() {
   const j2Won = partie.scoreJ2 > partie.scoreJ1
   const isDraw = !isSolo && gameFullyComplete && partie.scoreJ1 === partie.scoreJ2
 
-  const scoresSection = (
-    <div className={`flex flex-col md:flex-row items-stretch gap-4 ${isSolo ? 'justify-center' : ''}`}>
-
-      {/* J1 */}
+  function PlayerCard({
+    name,
+    score,
+    pokemons,
+    isWinner,
+    pending = false,
+  }: {
+    name: string
+    score: number
+    pokemons: CompletedPokemonDto[]
+    isWinner: boolean
+    pending?: boolean
+  }) {
+    return (
       <Card
-        headerColor={!isSolo && j1Won ? colors.brand.yellow : colors.brand.blue}
-        pokeballColor={!isSolo && j1Won ? colors.brand.yellow : colors.brand.blue}
+        headerColor={isWinner ? colors.brand.yellow : colors.brand.blue}
+        pokeballColor={isWinner ? colors.brand.yellow : colors.brand.blue}
         headerClassName="py-3"
+        cardSize={{ width: 300, height: 250 }}
+        animation={false}
+        pokeballSize={150}
         header={
           <h2 className="font-display text-xl tracking-wide" style={{ color: colors.ui.textOnColor }}>
-            {player1Name} {!isSolo && j1Won && '👑'}
+            {name} {isWinner && <span style={{ filter: 'grayscale(1)', marginLeft: '0.5rem' }}>👑</span>}
           </h2>
         }
-        className={`flex-1 transition-all ${!isSolo && j1Won ? 'border' : ''}`}
+        className="flex-1 transition-all"
         style={{
-          borderColor: !isSolo && j1Won ? colors.brand.yellow : undefined,
-          boxShadow: !isSolo && j1Won ? `0 8px 24px ${colors.brand.yellow}40` : undefined,
+          borderColor: isWinner ? colors.brand.yellow : undefined,
+          boxShadow: isWinner ? `0 8px 24px ${colors.brand.yellow}40` : undefined,
         }}
       >
         <div className="p-6 flex flex-col h-full text-center rounded-b-xl">
+          {pending && (
+            <span
+              className="mx-auto inline-block text-xs font-medium px-2 py-1 rounded-full mb-3 animate-pulse border"
+              style={{
+                backgroundColor: `${colors.game.hint}1A`,
+                color: colors.brand.yellowWarm,
+                borderColor: colors.game.hint,
+              }}
+            >
+              ⏳ En cours...
+            </span>
+          )}
           <div className="text-5xl font-bold my-3" style={{ color: colors.brand.blue }}>
-            {partie.scoreJ1}
+            {score}
           </div>
           <p className="text-sm mb-4" style={{ color: colors.ui.textMuted }}>points</p>
           <div className="flex gap-3 justify-center text-sm flex-wrap mt-auto" style={{ color: colors.ui.textMuted }}>
             <span className="px-2 py-1 rounded-md shadow-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
-              ✅ {partie.completedPokemonsJ1?.filter(p => p.wasGuessed).length ?? 0} devinés
+              ✅ {pokemons.filter(p => p.wasGuessed).length} devinés
             </span>
             <span className="px-2 py-1 rounded-md shadow-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
-              ❌ {partie.completedPokemonsJ1?.filter(p => !p.wasGuessed).length ?? 0} ratés
+              ❌ {pokemons.filter(p => !p.wasGuessed).length} ratés
             </span>
           </div>
         </div>
       </Card>
+    )
+  }
 
-      {/* VS divider */}
+  const scoresSection = (
+    <div className={`flex flex-col md:flex-row items-stretch gap-4 ${isSolo ? 'justify-center' : ''}`}>
+      <PlayerCard
+        name={player1Name}
+        score={partie.scoreJ1}
+        pokemons={partie.completedPokemonsJ1 ?? []}
+        isWinner={!isSolo && j1Won}
+      />
       {!isSolo && (
-        <div
-          className="flex items-center justify-center text-2xl font-bold px-2 py-4 md:py-0"
-          style={{ color: colors.ui.textMuted }}
-        >
-          VS
-        </div>
-      )}
-
-      {/* J2 */}
-      {!isSolo && (
-        <Card
-          headerColor={j2Won ? colors.brand.yellow : colors.brand.blue}
-          headerClassName="py-3"
-          pokeballColor={j2Won ? colors.brand.yellow : colors.brand.blue}
-          header={
-            <h2 className="font-display text-xl tracking-wide" style={{ color: colors.ui.textOnColor }}>
-              {player2Name} {j2Won && '👑'}
-            </h2>
-          }
-          className={`flex-1 transition-all ${j2Won ? 'border' : ''}`}
-          style={{
-            borderColor: j2Won ? colors.brand.yellow : undefined,
-            boxShadow: j2Won ? `0 8px 24px ${colors.brand.yellow}40` : undefined,
-          }}
-        >
-          <div className="p-6 flex flex-col h-full text-center rounded-b-xl">
-            {!gameFullyComplete && (partie.completedPokemonsJ2?.length ?? 0) === 0 && (
-              <span
-                className="mx-auto inline-block text-xs font-medium px-2 py-1 rounded-full mb-2 animate-pulse border"
-                style={{
-                  backgroundColor: `${colors.game.hint}1A`,
-                  color: colors.brand.yellowWarm,
-                  borderColor: colors.game.hint,
-                }}
-              >
-                ⏳ En cours...
-              </span>
-            )}
-            <div className="text-5xl font-bold my-3" style={{ color: colors.brand.blue }}>
-              {partie.scoreJ2}
-            </div>
-            <p className="text-sm mb-4" style={{ color: colors.ui.textMuted }}>points</p>
-            <div className="flex gap-3 justify-center text-sm flex-wrap mt-auto" style={{ color: colors.ui.textMuted }}>
-              <span className="px-2 py-1 rounded-md shadow-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
-                ✅ {partie.completedPokemonsJ2?.filter(p => p.wasGuessed).length ?? 0} devinés
-              </span>
-              <span className="px-2 py-1 rounded-md shadow-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
-                ❌ {partie.completedPokemonsJ2?.filter(p => !p.wasGuessed).length ?? 0} ratés
-              </span>
-            </div>
+        <>
+          <div
+            className="flex items-center justify-center text-2xl font-bold px-2 py-4 md:py-0"
+            style={{ color: colors.ui.textMuted }}
+          >
+            VS
           </div>
-        </Card>
+          <PlayerCard
+            name={player2Name}
+            score={partie.scoreJ2}
+            pokemons={partie.completedPokemonsJ2 ?? []}
+            isWinner={j2Won}
+            pending={!gameFullyComplete && (partie.completedPokemonsJ2?.length ?? 0) === 0}
+          />
+        </>
       )}
     </div>
   )
@@ -420,7 +419,7 @@ export default function ResultatsPage() {
   return (
     <GameResultsLayout
       title="Résultats de la partie"
-      sessionCode={partie.codeSession}
+      sessionCode={state?.sessionCode ?? partie.codeSession}
       topAlert={
         !gameFullyComplete && !isSolo ? (
           <p className="text-orange-500 font-medium mt-2 animate-pulse">
