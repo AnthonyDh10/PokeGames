@@ -43,10 +43,10 @@ const GAME_RULES: Record<string, GameRules> = {
         content: (
           <div className="space-y-4">
             <p>
-              Lisez les descriptions issues du Pokédex et soyez le meilleur pour deviner quel Pokémon s'y cache !
+              Lis les descriptions issues du Pokédex et sois le plus rapide pour deviner quel Pokémon s'y cache !
             </p>
             <p>
-              En multijoueur, affrontez votre ami pour trouver la réponse le plus rapidement possible tout en utilisant le moins d'indices.
+              En multijoueur, affronte ton ami pour trouver la réponse le plus rapidement possible tout en utilisant le moins d'indices.
             </p>
           </div>
         ),
@@ -59,19 +59,19 @@ const GAME_RULES: Record<string, GameRules> = {
             <ul className="space-y-3 mt-2">
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
-                <span><strong className="text-gray-900">Nombre de Pokémon :</strong> Choisissez la longueur de la partie (de 1 à 6 manches).</span>
+                <span><strong className="text-gray-900">Nombre de Pokémon :</strong> Choisis la longueur de la partie (de 1 à 6 manches).</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
-                <span><strong className="text-gray-900">Chronomètre :</strong> Définissez le temps accordé par Pokémon (30s, 60s, 120s ou sans limite).</span>
+                <span><strong className="text-gray-900">Chronomètre :</strong> Définis le temps accordé par Pokémon (30s, 60s, 120s ou sans limite).</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
-                <span><strong className="text-gray-900">Générations :</strong> Sélectionnez les générations autorisées.</span>
+                <span><strong className="text-gray-900">Générations :</strong> Sélectionne les générations autorisées.</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
-                <span><strong className="text-gray-900">Mode Multijoueur :</strong> Invitez un ami en lui envoyant votre code de session.</span>
+                <span><strong className="text-gray-900">Mode Multijoueur :</strong> Invite un ami en lui envoyant ton code de session.</span>
               </li>
             </ul>
             <p className="text-sm italic text-gray-500 mt-4">Seul l'hôte peut modifier les paramètres.</p>
@@ -84,19 +84,19 @@ const GAME_RULES: Record<string, GameRules> = {
           <ul className="space-y-4">
             <li className="flex items-start gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
-              <span><strong className="text-gray-900">Naviguez :</strong> Faites défiler les différentes descriptions du Pokémon à l'aide des flèches &lt; et &gt;.</span>
+              <span><strong className="text-gray-900">Navigue :</strong> Fais défiler les différentes descriptions du Pokémon à l'aide des flèches &lt; et &gt;.</span>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
-              <span><strong className="text-gray-900">Devinez :</strong> Tapez votre réponse dans la barre de recherche. Une liste déroulante vous suggère automatiquement les noms correspondants.</span>
+              <span><strong className="text-gray-900">Devine :</strong> Tape ta réponse dans la barre de recherche. Une liste déroulante te suggère automatiquement les noms correspondants.</span>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
-              <span><strong className="text-gray-900">Tentatives :</strong> Vous disposez de 3 essais maximum par Pokémon.</span>
+              <span><strong className="text-gray-900">Tentatives :</strong> Tu disposes de 3 essais maximum par Pokémon.</span>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
-              <span><strong className="text-gray-900">Transition :</strong> La manche passe automatiquement au Pokémon suivant dès que vous trouvez la bonne réponse, que vous épuisez vos 3 essais, ou que le chronomètre tombe à zéro.</span>
+              <span><strong className="text-gray-900">Transition :</strong> La manche passe automatiquement au Pokémon suivant dès que tu trouves la bonne réponse, que tu épuises tes 3 essais, ou que le chronomètre tombe à zéro.</span>
             </li>
           </ul>
         ),
@@ -105,8 +105,8 @@ const GAME_RULES: Record<string, GameRules> = {
         title: "3. Indices et Scores",
         content: (
           <div className="space-y-4">
-            <p>Trouver un Pokémon du premier coup et sans aide vous rapporte <strong className="text-gray-900">100 points</strong>.</p>
-            <p>Chaque indice filtre automatiquement votre liste déroulante de réponses, mais pénalise votre score et votre chronomètre :</p>
+            <p>Trouver un Pokémon du premier coup et sans aide te rapporte <strong className="text-gray-900">100 points</strong>.</p>
+            <p>Chaque indice filtre automatiquement ta liste déroulante de réponses, mais pénalise ton score et ton chronomètre :</p>
             
             <div className="overflow-x-auto mt-6">
               <table className="w-full text-sm text-left">
@@ -145,7 +145,7 @@ const GAME_RULES: Record<string, GameRules> = {
         title: "4. Fin de partie",
         content: (
           <div className="space-y-4">
-            <p>Une fois tous les Pokémon passés, les scores sont comparés et le grand vainqueur est couronné ! Depuis cet écran, vous pouvez :</p>
+            <p>Une fois tous les Pokémon passés, les scores sont comparés et le grand vainqueur est couronné ! Depuis cet écran, tu peux :</p>
             <ul className="space-y-3 mt-4">
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
@@ -170,26 +170,58 @@ const GAME_RULES: Record<string, GameRules> = {
     color: colors.brand.yellow,
     pages: [
       {
-        title: "Comment jouer",
+        title: "Le but du jeu",
+        content: (
+          <div className="space-y-4">
+            <p>
+              Analyse un tableau d'interactions de types (faiblesses, résistances, immunités) et sois le meilleur pour deviner quelle paire de types s'y cache !
+            </p>
+            <p>
+              En multijoueur, affronte ton ami pour trouver la combinaison exacte le plus rapidement possible.
+            </p>
+          </div>
+        ),
+      },
+      {
+        title: "1. Déroulement d'une manche",
         content: (
           <ul className="space-y-4">
             <li className="flex items-start gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
-              <span>Un type Pokémon est tiré au sort à chaque manche.</span>
+              <span><strong className="text-gray-900">Observe :</strong> Un tableau d'interactions s'affiche (faiblesses x2 et x4, résistances x2 et x4, dégâts normaux et immunités). <br/><span className="text-sm text-gray-500 mt-1 block">⚠️ Attention, la paire générée peut être inédite et ne correspondre à aucun Pokémon existant dans le jeu officiel !</span></span>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
-              <span>Ses forces, faiblesses et immunités te sont révélées progressivement.</span>
+              <span><strong className="text-gray-900">Devine :</strong> Saisis les deux types qui composent cette paire dans le champ de réponse.</span>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
-              <span>Devine le type en te basant sur les indices affichés.</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
-              <span>Moins tu utilises d'indices, plus ton score est élevé.</span>
+              <span><strong className="text-gray-900">Transition :</strong> La manche se termine instantanément dès que tu as deviné correctement les deux types.</span>
             </li>
           </ul>
+        ),
+      },
+      {
+        title: "2. Fin de partie",
+        content: (
+          <div className="space-y-4">
+            <p>En multijoueur, le joueur qui parvient à deviner la bonne combinaison le plus rapidement remporte la manche.</p>
+            <p>Depuis l'écran de fin, tu peux :</p>
+            <ul className="space-y-3 mt-4">
+              <li className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
+                <span><strong className="text-gray-900">Relancer.</strong></span>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
+                <span><strong className="text-gray-900">Retourner au lobby.</strong></span>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
+                <span><strong className="text-gray-900">Revenir au menu principal.</strong> </span>
+              </li>
+            </ul>
+          </div>
         ),
       },
     ],
@@ -199,26 +231,81 @@ const GAME_RULES: Record<string, GameRules> = {
     color: colors.brand.red,
     pages: [
       {
-        title: "Comment jouer",
+        title: "Le but du jeu",
+        content: (
+          <div className="space-y-4">
+            <p>
+              Un Pokémon est caché à l'écran, à l'exception d'un petit carré qui dévoile une partie de son corps. Sois le meilleur pour deviner de qui il s'agit !
+            </p>
+            <p>
+              En multijoueur, affronte ton ami pour trouver la bonne réponse le plus rapidement possible et avec le moins d'erreurs.
+            </p>
+          </div>
+        ),
+      },
+      {
+        title: "1. Préparation de la partie (Lobby)",
+        content: (
+          <div className="space-y-4">
+            <p className="font-medium text-gray-900">Avant de lancer le jeu, l'hôte de la partie doit configurer la session :</p>
+            <ul className="space-y-3 mt-2">
+              <li className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                <span><strong className="text-gray-900">Générations :</strong> Sélectionne les générations autorisées (ex: jouer uniquement les Pokémon de la 1ère génération).</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                <span><strong className="text-gray-900">Mode Solo ou Multijoueur :</strong> Invite un ami en lui envoyant ton code de session.</span>
+              </li>
+            </ul>
+            <p className="text-sm italic text-gray-500 mt-4">Seul l'hôte peut modifier les paramètres.</p>
+          </div>
+        ),
+      },
+      {
+        title: "2. Déroulement d'une manche",
         content: (
           <ul className="space-y-4">
             <li className="flex items-start gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-              <span>Un Pokémon est affiché en très gros plan — tu ne vois qu'une petite partie de son sprite.</span>
+              <span><strong className="text-gray-900">Observe :</strong> Analyse la petite zone visible du Pokémon masqué.</span>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-              <span>L'image se dézoom progressivement à chaque seconde.</span>
+              <span><strong className="text-gray-900">Devine :</strong> Tape ta réponse dans la barre de recherche. Une liste déroulante te suggère des noms et des filtres sont à ta disposition pour affiner tes choix.</span>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-              <span>Identifie le Pokémon le plus tôt possible pour maximiser ton score.</span>
+              <span><strong className="text-gray-900">Tentatives et Pénalités :</strong> Tu disposes de 4 essais maximum. À chaque mauvaise tentative, le carré visible s'agrandit pour t'aider, mais <strong className="text-red-600">10 secondes de pénalité</strong> s'ajoutent à ton chronomètre !</span>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-              <span>Plus tu devines vite, plus ton score sera élevé !</span>
+              <span><strong className="text-gray-900">Transition :</strong> La manche se termine automatiquement lorsque tu trouves la bonne réponse, que tu épuises tes 4 essais, ou que le temps est écoulé.</span>
             </li>
           </ul>
+        ),
+      },
+      {
+        title: "3. Fin de partie",
+        content: (
+          <div className="space-y-4">
+            <p>En multijoueur, le joueur qui parvient à identifier le Pokémon le plus rapidement (en tenant compte des pénalités de temps liées aux mauvaises tentatives) remporte la manche.</p>
+            <p>Une fois toutes les manches terminées, le grand vainqueur est couronné ! Depuis l'écran de fin, tu peux :</p>
+            <ul className="space-y-3 mt-4">
+              <li className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                <span><strong className="text-gray-900">Relancer :</strong> Rejouer immédiatement avec les mêmes paramètres.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                <span><strong className="text-gray-900">Retourner au lobby :</strong> Modifier les règles, le temps ou les générations.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                <span><strong className="text-gray-900">Quitter :</strong> Revenir au menu principal.</span>
+              </li>
+            </ul>
+          </div>
         ),
       },
     ],
