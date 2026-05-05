@@ -12,7 +12,6 @@ import dialogueImg from "../components/images/dialogue.png";
 import pokedescLogo from "../components/images/pokedesc-logo-transparant.png";
 import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
-
 import {
   Dialog,
   DialogContent,

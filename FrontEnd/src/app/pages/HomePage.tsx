@@ -5,6 +5,7 @@ import GameCard from "../components/GameCard";
 import SectionTitle from "../components/SectionTitle";
 import { useBackgroundStore } from "../store/backgroundStore";
 import { useNavDirectionStore } from "../store/navDirectionStore";
+import { useChatStore } from "../store/chatStore";
 import { colors } from "../design/colors";
 import oakWebp from "../components/images/oak.webp";
 import dialogueImg from "../components/images/dialogue.png";
@@ -41,9 +42,12 @@ export default function HomePage() {
   const { setBackground } = useBackgroundStore();
   const { direction, setDirection } = useNavDirectionStore();
   const navigate = useNavigate();
+  const { clearContext, setOpen } = useChatStore();
 
   useEffect(() => {
     setBackground({ colorLeft: colors.ui.bgLeft, colorStripe: colors.ui.bgStripe, colorRight: colors.ui.bgRight });
+    clearContext();
+    setOpen(false);
   }, []);
 
   return (

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { useSessionStore } from '../store/sessionStore'
+import { useChatStore } from '../store/chatStore'
 import { getPartie, markRematchReady, createPartie, startPartie } from '../services/partieService'
 import { getHints } from '../services/pokemonService'
 import Card from '../components/Card'
@@ -25,6 +26,7 @@ export default function ResultatsPage() {
   const { partieId } = useParams<{ partieId: string }>()
   const navigate = useNavigate()
   const { sessionId, playerName } = useSessionStore()
+  const { setContext: setChatContext } = useChatStore()
 
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
@@ -76,6 +78,11 @@ export default function ResultatsPage() {
     try {
       const p = await getPartie(partieId)
       setPartie(p)
+      setChatContext({
+        partieId,
+        sessionCode: p.codeSession ?? '',
+        isSolo: p.modeSolo || !p.dresseur2Id,
+      })
       const complete = isComplete(p)
       setGameFullyComplete(complete)
       await loadSprites(p)

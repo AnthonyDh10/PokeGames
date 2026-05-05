@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { useSessionStore } from '../store/sessionStore'
 import { useBackgroundStore } from '../store/backgroundStore'
+import { useChatStore } from '../store/chatStore'
 import { colors } from '../design/colors'
 import Card from '../components/Card'
 import PokemonSearchInput from '../components/PokemonSearchInput'
@@ -43,6 +44,7 @@ export default function DeZoomGamePage() {
   const navigate = useNavigate()
   const { sessionId } = useSessionStore()
   const { setBackground } = useBackgroundStore()
+  const { setContext: setChatContext } = useChatStore()
 
   useEffect(() => {
     setBackground({
@@ -108,6 +110,11 @@ export default function DeZoomGamePage() {
           if (p.selectedGenerations?.length > 0) {
             setSelectedGenerations(p.selectedGenerations)
           }
+          setChatContext({
+            partieId,
+            sessionCode: p.codeSession ?? '',
+            isSolo: !p.dresseur2Id,
+          })
         } catch {
           setSessionCode('N/A')
         }

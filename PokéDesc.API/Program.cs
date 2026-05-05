@@ -2,6 +2,7 @@ using PokéDesc.Data.Repositories;
 using PokéDesc.Business.Services;
 using PokéDesc.Business.Interfaces;
 using Microsoft.AspNetCore.Hosting;
+using PokéDesc.API.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +40,7 @@ builder.Services.AddControllers()
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR();
 
 // --- CORS dynamique (dev = Vite, prod = domaine configuré via env var) ---
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
@@ -49,7 +51,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("Frontend", policy =>
         policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod()
+              .AllowCredentials());
 });
 
 // =================================================================
@@ -71,5 +74,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("Frontend");
 app.MapControllers();
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();
