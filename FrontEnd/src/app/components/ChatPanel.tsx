@@ -148,7 +148,7 @@ export default function ChatPanel() {
               <p className="font-body text-sm text-gray-400 text-center px-4">
                 {isSolo
                   ? 'Le chat sera disponible quand un adversaire rejoindra la partie.'
-                  : 'Aucun message pour l'instant. Dites bonjour ! 👋'}
+                  : "Aucun message pour l\u2019instant. Dites bonjour ! 👋"}
               </p>
             </div>
           ) : (
