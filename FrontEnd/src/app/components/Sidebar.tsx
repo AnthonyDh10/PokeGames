@@ -4,6 +4,7 @@ import Pokeball from "./Pokeball";
 import pokedescLogo from "../components/images/pokedesc-logo-transparant.png";
 import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
+import rulesLogo from "../components/images/rules-icon.png";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -21,7 +22,7 @@ export default function Sidebar({
     { icon: pokedescLogo, label: "PokéDesc", to: "/pokedesc" },
     { icon: typeLogo, label: "Quel est ce type ?", to: "/types" },
     { icon: dezoomLogo, label: "Dézoom", to: "/dezoom" },
-    { icon: "📄", label: "Règles", to: "/regles" }
+    { icon: rulesLogo, label: "Règles", to: "/regles" }
   ];
 
   return (
