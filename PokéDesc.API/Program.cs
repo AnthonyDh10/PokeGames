@@ -29,7 +29,10 @@ builder.Services.AddSingleton<ITypesGameService>(sp =>
 builder.Services.AddSingleton<IDeZoomService>(sp =>
 {
     var repo = sp.GetRequiredService<PokemonRepository>();
-    return new DeZoomService(repo);
+    var pokemons = repo.GetAllAsync().GetAwaiter().GetResult()
+        .Where(p => !string.IsNullOrEmpty(p.Sprites?.FrontDefault))
+        .ToList();
+    return new DeZoomService(pokemons);
 });
 
 // --- API ---

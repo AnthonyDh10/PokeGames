@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using PokéDesc.Business.Interfaces;
@@ -41,8 +42,7 @@ internal class TypeData
 public class TypesGameService : ITypesGameService
 {
     private readonly List<TypeData> _types;
-    private static readonly Dictionary<string, TypesGameState> _gameStore = new();
-    private static readonly object _lock = new();
+    private static readonly ConcurrentDictionary<string, TypesGameState> _gameStore = new();
 
     public TypesGameService(string dataPath)
     {
@@ -55,41 +55,30 @@ public class TypesGameService : ITypesGameService
 
     public TypesGameDto GetOrCreateGame(string partieId, string dresseurId)
     {
-        lock (_lock)
+        var state = _gameStore.GetOrAdd(partieId, _ =>
         {
-            if (!_gameStore.TryGetValue(partieId, out var state))
+            var random = Random.Shared;
+            bool isMono = random.Next(10) < 3;
+            var shuffled = _types.OrderBy(_ => random.Next()).ToList();
+            return new TypesGameState
             {
-                var random = new Random();
-                bool isMono = random.Next(10) < 3; // 30% mono
+                PartieId = partieId,
+                Type1Id = shuffled[0].Id,
+                Type2Id = isMono ? null : shuffled[1].Id,
+                DresseurId1 = dresseurId,
+            };
+        });
 
-                var shuffled = _types.OrderBy(_ => random.Next()).ToList();
-                int type1Id = shuffled[0].Id;
-                int? type2Id = isMono ? null : shuffled[1].Id;
+        if (state.DresseurId1 != dresseurId && state.DresseurId2 == null)
+            state.DresseurId2 = dresseurId;
 
-                state = new TypesGameState
-                {
-                    PartieId = partieId,
-                    Type1Id = type1Id,
-                    Type2Id = type2Id,
-                    DresseurId1 = dresseurId,
-                };
-                _gameStore[partieId] = state;
-            }
-            else if (state.DresseurId1 != dresseurId && state.DresseurId2 == null)
-            {
-                state.DresseurId2 = dresseurId;
-            }
-
-            return BuildDto(state);
-        }
+        return BuildDto(state);
     }
 
     public TypesGuessResult SubmitGuess(string partieId, string dresseurId, int type1Id, int? type2Id, int elapsedSeconds, int attemptCount)
     {
-        lock (_lock)
-        {
-            if (!_gameStore.TryGetValue(partieId, out var state))
-                return new TypesGuessResult { IsCorrect = false, Message = "Partie introuvable." };
+        if (!_gameStore.TryGetValue(partieId, out var state))
+            return new TypesGuessResult { IsCorrect = false, Message = "Partie introuvable." };
 
             bool isJ1 = dresseurId == state.DresseurId1;
             bool alreadyGuessed = isJ1 ? state.IsGuessedJ1 : state.IsGuessedJ2;
@@ -152,15 +141,12 @@ public class TypesGameService : ITypesGameService
                 IsCorrect = false,
                 Message = "Ce n'est pas ça, réessayez !",
             };
-        }
     }
 
     public TypesGameResultsDto GetResults(string partieId)
     {
-        lock (_lock)
-        {
-            if (!_gameStore.TryGetValue(partieId, out var state))
-                return new TypesGameResultsDto();
+        if (!_gameStore.TryGetValue(partieId, out var state))
+            return new TypesGameResultsDto();
 
             var t1 = _types.First(t => t.Id == state.Type1Id);
             var t2 = state.Type2Id.HasValue ? _types.First(t => t.Id == state.Type2Id.Value) : null;
@@ -191,7 +177,6 @@ public class TypesGameService : ITypesGameService
                 Player2 = player2,
                 BothFinished = state.IsGuessedJ1 && (state.DresseurId2 == null || state.IsGuessedJ2),
             };
-        }
     }
 
     private TypesGameDto BuildDto(TypesGameState state)
@@ -242,10 +227,8 @@ public class TypesGameService : ITypesGameService
 
     public TypesRematchStatusDto MarkRematchReady(string partieId, string dresseurId)
     {
-        lock (_lock)
-        {
-            if (!_gameStore.TryGetValue(partieId, out var state))
-                return new TypesRematchStatusDto();
+        if (!_gameStore.TryGetValue(partieId, out var state))
+            return new TypesRematchStatusDto();
 
             bool isJ1 = dresseurId == state.DresseurId1;
             if (isJ1)
@@ -268,7 +251,7 @@ public class TypesGameService : ITypesGameService
                     DresseurId2 = state.DresseurId2,
                 };
                 // Set up new puzzle
-                var random = new Random();
+                var random = Random.Shared;
                 bool isMono = random.Next(10) < 3;
                 var shuffled = _types.OrderBy(_ => random.Next()).ToList();
                 newState.Type1Id = shuffled[0].Id;
@@ -283,7 +266,6 @@ public class TypesGameService : ITypesGameService
                 Player2Ready = state.RematchReadyJ2 || state.DresseurId2 == null,
                 RematchPartieId = state.RematchPartieId,
             };
-        }
     }
 
     private static double GetMultiplierAgainstSingle(string attackerNameEn, TypeData defender)

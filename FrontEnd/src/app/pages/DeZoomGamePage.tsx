@@ -3,37 +3,18 @@ import { useParams, useNavigate } from 'react-router'
 import { useSessionStore } from '../store/sessionStore'
 import { useBackgroundStore } from '../store/backgroundStore'
 import { useChatStore } from '../store/chatStore'
+import { usePokemonStore } from '../store/pokemonStore'
 import { colors } from '../design/colors'
 import Card from '../components/Card'
 import PokemonSearchInput from '../components/PokemonSearchInput'
 import Timer from '../components/Timer'
+import PageLoader from '../components/PageLoader'
+import PageError from '../components/PageError'
+import { formatGenerations, generationToNumber } from '../utils/generation'
 import { getDeZoomGame, submitDeZoomGuess } from '../services/dezoomService'
-import { getAllPokemons } from '../services/pokemonService'
 import { getPartie } from '../services/partieService'
-import type { PokemonDto } from '../types/pokemon'
 import type { DeZoomGameDto } from '../types/dezoom'
-
-const ROMAN_GEN: Record<string, number> = {
-  i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9,
-}
-
-function generationToNumber(nameEn: string): number | null {
-  const match = nameEn.toLowerCase().match(/generation-([ivx]+)/)
-  return match ? (ROMAN_GEN[match[1]] ?? null) : null
-}
-
-function formatGenerations(generations: number[], isShort: boolean = false): string {
-  if (!generations || generations.length === 0) return ''
-  const sorted = [...generations].sort((a, b) => a - b)
-  const prefix = isShort ? 'Gén' : 'Générations'
-  if (sorted.length === 9 && sorted[0] === 1 && sorted[8] === 9) return 'Toutes générations'
-  let isConsecutive = true
-  for (let i = 1; i < sorted.length; i++) {
-    if (sorted[i] !== sorted[i - 1] + 1) { isConsecutive = false; break }
-  }
-  if (isConsecutive) return `${prefix} ${sorted[0]}-${sorted[sorted.length - 1]}`
-  return `${prefix} ${sorted.join(',')}`
-}
+import type { PokemonDto } from '../types/pokemon'
 
 const DISPLAY_SCALE = 4
 const SPRITE_DISPLAY = 96 * DISPLAY_SCALE // 384px
@@ -55,7 +36,7 @@ export default function DeZoomGamePage() {
   }, [])
 
   const [game, setGame] = useState<DeZoomGameDto | null>(null)
-  const [pokemons, setPokemons] = useState<PokemonDto[]>([])
+  const { pokemons, load: loadPokemons } = usePokemonStore()
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [sessionCode, setSessionCode] = useState('')
@@ -100,10 +81,9 @@ export default function DeZoomGamePage() {
     setIsLoading(true)
     ;(async () => {
       try {
-        const [g, pkms] = await Promise.all([getDeZoomGame(partieId, sessionId), getAllPokemons()])
+        const [g] = await Promise.all([getDeZoomGame(partieId, sessionId), loadPokemons()])
         setGame(g)
         setAttemptCount(g.attemptCount)
-        setPokemons(pkms.sort((a, b) => a.nameFr.localeCompare(b.nameFr)))
         try {
           const p = await getPartie(partieId)
           setSessionCode(p.codeSession ?? 'N/A')
@@ -173,32 +153,8 @@ export default function DeZoomGamePage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="max-w-5xl mx-auto p-6">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
-          <p className="text-gray-500">Chargement...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (errorMessage) {
-    return (
-      <div className="max-w-5xl mx-auto p-6">
-        <div className="bg-white rounded-xl border-2 border-red-500 shadow-sm p-12 text-center">
-          <p className="text-red-600 font-medium mb-4">{errorMessage}</p>
-          <button
-            onClick={() => navigate('/dezoom')}
-            className="font-body font-semibold px-6 py-2.5 text-white rounded-xl hover:-translate-y-0.5 transition"
-            style={{ backgroundColor: colors.brand.red }}
-          >
-            Retour au menu
-          </button>
-        </div>
-      </div>
-    )
-  }
+  if (isLoading) return <PageLoader />
+  if (errorMessage) return <PageError message={errorMessage} onBack={() => navigate('/dezoom')} backLabel="Retour au menu" accentColor={colors.brand.red} />
 
   if (!game) return null
 

@@ -1,5 +1,6 @@
+using System.Collections.Concurrent;
 using PokéDesc.Business.Interfaces;
-using PokéDesc.Data.Repositories;
+using PokéDesc.Domain;
 using PokéDesc.Domain.Models;
 
 namespace PokéDesc.Business.Services;
@@ -7,21 +8,11 @@ namespace PokéDesc.Business.Services;
 public class DeZoomService : IDeZoomService
 {
     private readonly List<Pokemon> _pokemons;
-    private static readonly Dictionary<string, DeZoomGameState> _gameStore = new();
-    private static readonly object _lock = new();
+    private static readonly ConcurrentDictionary<string, DeZoomGameState> _gameStore = new();
 
-    private static readonly Dictionary<int, string> GenerationNames = new()
+    public DeZoomService(List<Pokemon> pokemons)
     {
-        { 1, "generation-i" },   { 2, "generation-ii" },  { 3, "generation-iii" },
-        { 4, "generation-iv" },  { 5, "generation-v" },   { 6, "generation-vi" },
-        { 7, "generation-vii" }, { 8, "generation-viii" }, { 9, "generation-ix" }
-    };
-
-    public DeZoomService(PokemonRepository repository)
-    {
-        _pokemons = repository.GetAllAsync().Result
-            .Where(p => !string.IsNullOrEmpty(p.Sprites?.FrontDefault))
-            .ToList();
+        _pokemons = pokemons;
     }
 
     private static string PickSpriteUrl(Pokemon pokemon, Random random)
@@ -36,8 +27,8 @@ public class DeZoomService : IDeZoomService
             return _pokemons;
 
         var genNames = selectedGenerations
-            .Where(g => GenerationNames.ContainsKey(g))
-            .Select(g => GenerationNames[g])
+            .Where(g => GameConstants.GenerationNames.ContainsKey(g))
+            .Select(g => GameConstants.GenerationNames[g])
             .ToHashSet();
 
         return _pokemons
@@ -47,47 +38,39 @@ public class DeZoomService : IDeZoomService
 
     public DeZoomGameDto GetOrCreateGame(string partieId, string dresseurId, List<int>? selectedGenerations = null)
     {
-        lock (_lock)
+        var state = _gameStore.GetOrAdd(partieId, _ =>
         {
-            if (!_gameStore.TryGetValue(partieId, out var state))
+            var random = Random.Shared;
+            var pool = FilterByGenerations(selectedGenerations);
+            if (pool.Count == 0) pool = _pokemons;
+            var pokemon = pool[random.Next(pool.Count)];
+            return new DeZoomGameState
             {
-                var random = new Random();
-                var pool = FilterByGenerations(selectedGenerations);
-                if (pool.Count == 0) pool = _pokemons; // fallback
-                var pokemon = pool[random.Next(pool.Count)];
-
-                state = new DeZoomGameState
-                {
-                    PartieId = partieId,
-                    PokemonNameFr = pokemon.NameFr,
-                    SpriteUrl = PickSpriteUrl(pokemon, random),
-                    DresseurId1 = dresseurId,
-                    SelectedGenerations = selectedGenerations ?? Enumerable.Range(1, 9).ToList(),
-                };
-                _gameStore[partieId] = state;
-            }
-            else if (state.DresseurId1 != dresseurId && state.DresseurId2 == null)
-            {
-                state.DresseurId2 = dresseurId;
-            }
-
-            bool isJ1 = dresseurId == state.DresseurId1;
-            int attemptCount = isJ1 ? (state.AttemptCountJ1 ?? 0) : (state.AttemptCountJ2 ?? 0);
-
-            return new DeZoomGameDto
-            {
-                SpriteUrl = state.SpriteUrl,
-                AttemptCount = attemptCount,
+                PartieId = partieId,
+                PokemonNameFr = pokemon.NameFr,
+                SpriteUrl = PickSpriteUrl(pokemon, random),
+                DresseurId1 = dresseurId,
+                SelectedGenerations = selectedGenerations ?? Enumerable.Range(1, 9).ToList(),
             };
-        }
+        });
+
+        if (state.DresseurId1 != dresseurId && state.DresseurId2 == null)
+            state.DresseurId2 = dresseurId;
+
+        bool isJ1 = dresseurId == state.DresseurId1;
+        int attemptCount = isJ1 ? (state.AttemptCountJ1 ?? 0) : (state.AttemptCountJ2 ?? 0);
+
+        return new DeZoomGameDto
+        {
+            SpriteUrl = state.SpriteUrl,
+            AttemptCount = attemptCount,
+        };
     }
 
     public DeZoomGuessResult SubmitGuess(string partieId, string dresseurId, string pokemonNameFr, int elapsedSeconds, int attemptCount)
     {
-        lock (_lock)
-        {
-            if (!_gameStore.TryGetValue(partieId, out var state))
-                return new DeZoomGuessResult { IsCorrect = false, Message = "Partie introuvable." };
+        if (!_gameStore.TryGetValue(partieId, out var state))
+            return new DeZoomGuessResult { IsCorrect = false, Message = "Partie introuvable." };
 
             bool isJ1 = dresseurId == state.DresseurId1;
             bool alreadyGuessed = isJ1 ? state.IsGuessedJ1 : state.IsGuessedJ2;
@@ -137,15 +120,12 @@ public class DeZoomService : IDeZoomService
                 IsCorrect = false,
                 Message = "Ce n'est pas ça, réessayez !",
             };
-        }
     }
 
     public DeZoomGuessResult SkipPokemon(string partieId, string dresseurId, int elapsedSeconds)
     {
-        lock (_lock)
-        {
-            if (!_gameStore.TryGetValue(partieId, out var state))
-                return new DeZoomGuessResult { IsCorrect = false, Message = "Partie introuvable." };
+        if (!_gameStore.TryGetValue(partieId, out var state))
+            return new DeZoomGuessResult { IsCorrect = false, Message = "Partie introuvable." };
 
             bool isJ1 = dresseurId == state.DresseurId1;
             if (isJ1)
@@ -165,15 +145,12 @@ public class DeZoomService : IDeZoomService
                 Message = "Passé !",
                 CorrectPokemonNameFr = state.PokemonNameFr,
             };
-        }
     }
 
     public DeZoomGameResultsDto GetResults(string partieId)
     {
-        lock (_lock)
-        {
-            if (!_gameStore.TryGetValue(partieId, out var state))
-                return new DeZoomGameResultsDto();
+        if (!_gameStore.TryGetValue(partieId, out var state))
+            return new DeZoomGameResultsDto();
 
             var player2 = state.DresseurId2 != null
                 ? new DeZoomPlayerResultDto
@@ -199,15 +176,12 @@ public class DeZoomService : IDeZoomService
                 Player2 = player2,
                 BothFinished = state.IsGuessedJ1 && (state.DresseurId2 == null || state.IsGuessedJ2),
             };
-        }
     }
 
     public DeZoomRematchStatusDto MarkRematchReady(string partieId, string dresseurId)
     {
-        lock (_lock)
-        {
-            if (!_gameStore.TryGetValue(partieId, out var state))
-                return new DeZoomRematchStatusDto();
+        if (!_gameStore.TryGetValue(partieId, out var state))
+            return new DeZoomRematchStatusDto();
 
             bool isJ1 = dresseurId == state.DresseurId1;
             if (isJ1)
@@ -221,7 +195,7 @@ public class DeZoomService : IDeZoomService
                 string newPartieId = Guid.NewGuid().ToString();
                 state.RematchPartieId = newPartieId;
 
-                var random = new Random();
+                var random = Random.Shared;
                 var pool = FilterByGenerations(state.SelectedGenerations);
                 if (pool.Count == 0) pool = _pokemons;
                 var pokemon = pool[random.Next(pool.Count)];
@@ -243,6 +217,5 @@ public class DeZoomService : IDeZoomService
                 Player2Ready = state.RematchReadyJ2 || state.DresseurId2 == null,
                 RematchPartieId = state.RematchPartieId,
             };
-        }
     }
 }

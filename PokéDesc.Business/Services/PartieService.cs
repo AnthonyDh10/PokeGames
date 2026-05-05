@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using PokéDesc.Business.Interfaces;
 using PokéDesc.Business.Models;
 using PokéDesc.Domain;
@@ -8,9 +9,7 @@ namespace PokéDesc.Business.Services;
 public class PartieService : IPartieService
 {
     private readonly IPokemonService _pokemonService;
-    // TODO: Injecter un Repository pour sauvegarder la Partie (ex: IPartieRepository)
-    // Pour l'instant, on va simuler le stockage en mémoire ou supposer qu'il existe.
-    private static readonly List<Partie> _fakeGameStore = new();
+    private static readonly ConcurrentDictionary<string, Partie> _fakeGameStore = new();
 
     // Configuration des coûts des indices
     private static readonly Dictionary<string, int> HintCosts = new()
@@ -43,12 +42,7 @@ public class PartieService : IPartieService
     private const int MaxAttempts = 3;
     private const int BaseScore = 100;
 
-    private static readonly Dictionary<int, string> GenerationNames = new()
-    {
-        { 1, "generation-i" },   { 2, "generation-ii" },  { 3, "generation-iii" },
-        { 4, "generation-iv" },  { 5, "generation-v" },   { 6, "generation-vi" },
-        { 7, "generation-vii" }, { 8, "generation-viii" }, { 9, "generation-ix" }
-    };
+    private static readonly Dictionary<int, string> GenerationNames = GameConstants.GenerationNames;
 
     public PartieService(IPokemonService pokemonService)
     {
@@ -66,7 +60,7 @@ public class PartieService : IPartieService
             Statut = "EnAttente"
         };
 
-        _fakeGameStore.Add(partie);
+        _fakeGameStore[partie.Id] = partie;
         return await Task.FromResult(partie);
     }
 
@@ -85,9 +79,10 @@ public class PartieService : IPartieService
             partie.SelectedGenerations = generations ?? Enumerable.Range(1, 8).ToList();
             partie.TimerDurationSeconds = timerDuration;
 
-            // Récupérer les listes de Pokémons
-            var basePokemons = await _pokemonService.GetAllPokemonsAsync();
-            var legendaryMythicalPokemons = await _pokemonService.GetLegendaryOrMythicalPokemonsAsync();
+            // Récupérer la liste complète une seule fois, puis partitionner
+            var allPokemon = await _pokemonService.GetAllPokemonsAsync();
+            var legendaryMythicalPokemons = allPokemon.Where(p => p.Status.IsLegendary || p.Status.IsMythical).ToList();
+            var basePokemons = allPokemon.Where(p => !p.Status.IsLegendary && !p.Status.IsMythical).ToList();
 
             // Filtrer par génération si nécessaire
             var genNames = partie.SelectedGenerations
@@ -117,7 +112,7 @@ public class PartieService : IPartieService
                 throw new ArgumentException("Aucun Pokémon de base trouvé pour les générations sélectionnées.");
 
             // Générer les tirages communs pour déterminer le type de chaque position
-            var random = new Random();
+            var random = Random.Shared;
             var rarityDraws = new bool[nbPokemons];
             for (int i = 0; i < nbPokemons; i++)
             {
@@ -185,11 +180,11 @@ public class PartieService : IPartieService
         // Normaliser le code de session (supprimer espaces et mettre en majuscules)
         var normalizedCode = codeSession?.Trim().ToUpper();
         
-        var partie = _fakeGameStore.FirstOrDefault(p => 
+        var partie = _fakeGameStore.Values.FirstOrDefault(p => 
             p.CodeSession?.Trim().ToUpper() == normalizedCode);
             
         if (partie == null) 
-            throw new KeyNotFoundException($"Partie introuvable avec le code '{codeSession}'. Codes disponibles: {string.Join(", ", _fakeGameStore.Select(p => p.CodeSession))}");
+            throw new KeyNotFoundException($"Partie introuvable avec le code '{codeSession}'. Codes disponibles: {string.Join(", ", _fakeGameStore.Values.Select(p => p.CodeSession))}");
         
         if (!string.IsNullOrEmpty(partie.Dresseur2Id))
             throw new ArgumentException("Cette partie a déjà deux joueurs.");
@@ -202,8 +197,8 @@ public class PartieService : IPartieService
 
     public async Task<Partie> GetGameAsync(string partieId)
     {
-        var partie = _fakeGameStore.FirstOrDefault(p => p.Id == partieId);
-        if (partie == null) throw new KeyNotFoundException("Partie introuvable.");
+        if (!_fakeGameStore.TryGetValue(partieId, out var partie))
+            throw new KeyNotFoundException("Partie introuvable.");
         return await Task.FromResult(partie);
     }
 
@@ -362,8 +357,7 @@ public class PartieService : IPartieService
 
     public void ResetTimer(string partieId, string dresseurId)
     {
-        var partie = _fakeGameStore.FirstOrDefault(p => p.Id == partieId);
-        if (partie == null)
+        if (!_fakeGameStore.TryGetValue(partieId, out var partie))
             return;
             
         bool isJ1 = dresseurId == partie.Dresseur1Id;
@@ -421,8 +415,7 @@ public class PartieService : IPartieService
     private string GenerateSessionCode()
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        var random = new Random();
-        return new string(Enumerable.Repeat(chars, 6).Select(s => s[random.Next(s.Length)]).ToArray());
+        return new string(Enumerable.Repeat(chars, 6).Select(s => s[Random.Shared.Next(s.Length)]).ToArray());
     }
 
     private bool CheckTimeout(Partie partie, bool isJ1)
@@ -475,8 +468,7 @@ public class PartieService : IPartieService
 
     public double GetRemainingTime(string partieId, string dresseurId)
     {
-        var partie = _fakeGameStore.FirstOrDefault(p => p.Id == partieId);
-        if (partie == null)
+        if (!_fakeGameStore.TryGetValue(partieId, out var partie))
             return 0;
 
         bool isJ1 = dresseurId == partie.Dresseur1Id;

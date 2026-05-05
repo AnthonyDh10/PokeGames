@@ -1,53 +1,27 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { useSessionStore } from '../store/sessionStore'
 import { useBackgroundStore } from '../store/backgroundStore'
 import { useChatStore } from '../store/chatStore'
+import { usePokemonStore } from '../store/pokemonStore'
 import { colors } from '../design/colors'
 import Card from '../components/Card'
 import PokemonSearchInput from '../components/PokemonSearchInput'
 import Timer from '../components/Timer'
-import { getAllPokemons, getCensoredDescription, getHints } from '../services/pokemonService'
+import PageLoader from '../components/PageLoader'
+import PageError from '../components/PageError'
+import { formatGenerations, generationToNumber } from '../utils/generation'
+import { getCensoredDescription, getHints } from '../services/pokemonService'
 import { getPartie, submitGuess, useHint, getTimer, resetTimer, markPlayerFinished } from '../services/partieService'
-import type { PokemonDto, PokemonHintsDto } from '../types/pokemon'
+import type { PokemonHintsDto } from '../types/pokemon'
 import type { PartieDto, GuessResultDto } from '../types/partie'
 
-const ROMAN_GEN: Record<string, number> = {
-  i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9,
-}
 
-function generationToNumber(nameEn: string): number | null {
-  const match = nameEn.toLowerCase().match(/generation-([ivx]+)/)
-  return match ? (ROMAN_GEN[match[1]] ?? null) : null
-}
-
-function formatGenerations(generations: number[], isShort: boolean = false): string {
-  if (!generations || generations.length === 0) return ''
-
-  const sorted = [...generations].sort((a, b) => a - b)
-  const prefix = isShort ? 'Gén' : 'Générations'
-
-  // Si toutes les générations (1-8)
-  if (sorted.length === 8 && sorted[0] === 1 && sorted[7] === 8) {
-    return 'Toutes générations'
-  }
-
-  // Vérifier si c'est une suite continue
-  let isConsecutive = true
-  for (let i = 1; i < sorted.length; i++) {
-    if (sorted[i] !== sorted[i - 1] + 1) {
-      isConsecutive = false
-      break
-    }
-  }
-
-  // Si suite continue, afficher "X-Y"
-  if (isConsecutive) {
-    return `${prefix} ${sorted[0]}-${sorted[sorted.length - 1]}`
-  }
-
-  // Sinon afficher "X,Y,Z"
-  return `${prefix} ${sorted.join(',')}`
+interface ModalState {
+  type: 'success' | 'failure' | null
+  sprite: string
+  isFinal: boolean
+  isTimeout: boolean
 }
 
 const HINT_PENALTIES: Record<string, number> = {
@@ -118,7 +92,7 @@ export default function PokeDescPage() {
   const [isPlayer1, setIsPlayer1] = useState(true)
 
   // Search
-  const [allPokemons, setAllPokemons] = useState<PokemonDto[]>([])
+  const { pokemons: allPokemons, load: loadPokemons } = usePokemonStore()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedPokemonName, setSelectedPokemonName] = useState('')
 
@@ -126,12 +100,8 @@ export default function PokeDescPage() {
   const [guessResultMessage, setGuessResultMessage] = useState('')
   const [lastGuessCorrect, setLastGuessCorrect] = useState(false)
 
-  // Modals
-  const [showSuccessModal, setShowSuccessModal] = useState(false)
-  const [showFailureModal, setShowFailureModal] = useState(false)
-  const [revealedPokemonSprite, setRevealedPokemonSprite] = useState('')
-  const [isFinalPokemon, setIsFinalPokemon] = useState(false)
-  const [isTimeout, setIsTimeout] = useState(false)
+  // Modal
+  const [modal, setModal] = useState<ModalState>({ type: null, sprite: '', isFinal: false, isTimeout: false })
 
   // Timer
   const [timeRemaining, setTimeRemaining] = useState(60)
@@ -142,12 +112,15 @@ export default function PokeDescPage() {
   const [hintAnimations, setHintAnimations] = useState<Record<string, number>>({})
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const serverSyncRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const serverTimeAtSyncRef = useRef<number>(60)
+  const clientTimerSyncAtRef = useRef<number>(Date.now())
   const isTimeoutRef = useRef(false)
   const currentPokemonIdRef = useRef<string>('')
   const timerDurationRef = useRef<number>(60)
 
   // Pre-filter by lobby generations and revealed hints (Type 1, Type 2, Generation — AND logic)
-  const hintFilteredPokemons = allPokemons.filter((p) => {
+  const hintFilteredPokemons = useMemo(() => allPokemons.filter((p) => {
     // Filter by selected generations from lobby settings
     if (partie?.selectedGenerations?.length) {
       const genNumber = p.generation?.nameEn ? generationToNumber(p.generation.nameEn) : null
@@ -170,10 +143,10 @@ export default function PokeDescPage() {
       if (p.generation?.nameFr !== revealedHints['Génération']) return false
     }
     return true
-  })
+  }), [allPokemons, partie?.selectedGenerations, revealedHints])
 
   // Filtered pokemons for search
-  const filteredPokemons = searchTerm.trim()
+  const filteredPokemons = useMemo(() => searchTerm.trim()
     ? hintFilteredPokemons
         .filter(
           (p) =>
@@ -182,7 +155,7 @@ export default function PokeDescPage() {
         )
         .sort((a, b) => a.pokedexNumber - b.pokedexNumber)
         .slice(0, 10)
-    : []
+    : [], [searchTerm, hintFilteredPokemons])
 
   function isHintLocked(hintKey: string): boolean {
     if (usedHints.includes(hintKey)) return false
@@ -191,10 +164,10 @@ export default function PokeDescPage() {
     return penalty > timeRemaining
   }
 
-  // Load all pokemons for search
+  // Load all pokemons (cached in pokemonStore)
   useEffect(() => {
-    getAllPokemons().then(setAllPokemons).catch(() => {})
-  }, [])
+    loadPokemons().catch(() => {})
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load game data
   const loadGameData = useCallback(async () => {
@@ -298,55 +271,73 @@ export default function PokeDescPage() {
     setRevealedHints(revealed)
   }
 
-  // Timer
-  function startTimer() {
-    if (timerRef.current) clearInterval(timerRef.current)
-    isTimeoutRef.current = false
-    timerRef.current = setInterval(async () => {
-      if (!partieId) return
-      try {
-        const result = await getTimer(partieId, sessionId)
-        setTimeRemaining(result.timeRemaining)
-        if (result.timeRemaining <= 0 && !isTimeoutRef.current && timerDurationRef.current !== -1) {
-          isTimeoutRef.current = true
-          clearInterval(timerRef.current!)
-          handleTimeout()
-        }
-      } catch {
-        // ignore
-      }
-    }, 100)
+  // Timer — affichage client-side (100ms), synchronisation serveur toutes les 2s
+  function clearAllTimers() {
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
+    if (serverSyncRef.current) { clearInterval(serverSyncRef.current); serverSyncRef.current = null }
   }
 
-  async function handleTimeout() {
+  async function syncTimerWithServer() {
+    if (!partieId) return
     try {
-      const result = await submitGuess(partieId!, sessionId, '__TIMEOUT__')
-      setIsFinalPokemon(result.isGameFinished)
-
-      // Récupérer le sprite correct du Pokémon courant via le ref (évite le stale closure)
-      try {
-        const hints = await getHints(currentPokemonIdRef.current)
-        if (hints.sprites?.frontDefault) {
-          setRevealedPokemonSprite(hints.sprites.frontDefault)
-        } else {
-          setRevealedPokemonSprite(currentPokemonSprite)
-        }
-      } catch {
-        setRevealedPokemonSprite(currentPokemonSprite)
+      const result = await getTimer(partieId, sessionId)
+      serverTimeAtSyncRef.current = result.timeRemaining
+      clientTimerSyncAtRef.current = Date.now()
+      if (result.timeRemaining <= 0 && !isTimeoutRef.current && timerDurationRef.current !== -1) {
+        isTimeoutRef.current = true
+        clearAllTimers()
+        handleTimeout()
       }
     } catch {
       // ignore
     }
-    setIsTimeout(true)
-    setShowFailureModal(true)
+  }
+
+  function startTimer() {
+    clearAllTimers()
+    isTimeoutRef.current = false
+
+    // Synchronisation initiale avec le serveur
+    syncTimerWithServer()
+
+    // Affichage local à 100ms, sans appel HTTP
+    timerRef.current = setInterval(() => {
+      const elapsed = (Date.now() - clientTimerSyncAtRef.current) / 1000
+      const remaining = Math.max(0, serverTimeAtSyncRef.current - elapsed)
+      setTimeRemaining(remaining)
+      if (remaining <= 0 && !isTimeoutRef.current && timerDurationRef.current !== -1) {
+        isTimeoutRef.current = true
+        clearAllTimers()
+        handleTimeout()
+      }
+    }, 100)
+
+    // Synchronisation serveur toutes les 2s pour corriger la dérive
+    serverSyncRef.current = setInterval(syncTimerWithServer, 2000)
+  }
+
+  async function handleTimeout() {
+    let isFinal = false
+    let sprite = currentPokemonSprite
+    try {
+      const result = await submitGuess(partieId!, sessionId, '__TIMEOUT__')
+      isFinal = result.isGameFinished
+      try {
+        const hints = await getHints(currentPokemonIdRef.current)
+        sprite = hints.sprites?.frontDefault ?? currentPokemonSprite
+      } catch {
+        // keep fallback sprite
+      }
+    } catch {
+      // ignore
+    }
+    setModal({ type: 'failure', sprite, isFinal, isTimeout: true })
   }
 
   // Init
   useEffect(() => {
     loadGameData().then(() => startTimer())
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
-    }
+    return () => clearAllTimers()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function triggerHintAnimation(hintKey: string, penalty: number) {
@@ -376,6 +367,8 @@ export default function PokeDescPage() {
     if (usedHints.includes(hintKey) || isHintLocked(hintKey)) return
     try {
       await useHint(partieId!, sessionId, hintKey)
+      // Sync timer so the client-side reference reflects the server-applied penalty
+      await syncTimerWithServer()
       const newUsed = [...usedHints, hintKey]
       setUsedHints(newUsed)
 
@@ -403,16 +396,11 @@ export default function PokeDescPage() {
       setCurrentScore(result.pointsEarned)
 
       if (result.isCorrect) {
-        clearInterval(timerRef.current!)
-        setRevealedPokemonSprite(currentPokemonSprite)
-        setIsFinalPokemon(result.isGameFinished)
-        setShowSuccessModal(true)
+        clearAllTimers()
+        setModal({ type: 'success', sprite: currentPokemonSprite, isFinal: result.isGameFinished, isTimeout: false })
       } else if (result.isTurnFinished || result.isTimeout) {
-        clearInterval(timerRef.current!)
-        setRevealedPokemonSprite(currentPokemonSprite)
-        setIsFinalPokemon(result.isGameFinished)
-        setIsTimeout(result.isTimeout)
-        setShowFailureModal(true)
+        clearAllTimers()
+        setModal({ type: 'failure', sprite: currentPokemonSprite, isFinal: result.isGameFinished, isTimeout: result.isTimeout })
       } else {
         setAttemptsUsed((prev) => prev + 1)
       }
@@ -437,14 +425,12 @@ export default function PokeDescPage() {
   }
 
   async function proceedAfterModal() {
-    setShowSuccessModal(false)
-    setShowFailureModal(false)
-    setIsTimeout(false)
+    const isFinal = modal.isFinal
+    setModal({ type: null, sprite: '', isFinal: false, isTimeout: false })
     setLastGuessCorrect(false)
     setGuessResultMessage('')
-    setIsFinalPokemon(false)
 
-    if (isFinalPokemon) {
+    if (isFinal) {
       try {
         // Prévenir le backend que ce joueur a cliqué sur "Terminer la partie".
         await markPlayerFinished(partieId!, sessionId)
@@ -469,33 +455,8 @@ export default function PokeDescPage() {
   }
 
   // --- States d'affichage ---
-  if (isLoading) {
-    return (
-      <div className="max-w-5xl mx-auto p-6">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
-          <p className="text-gray-500">Chargement...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (errorMessage) {
-    return (
-      <div className="max-w-5xl mx-auto p-6">
-        <div className="bg-white rounded-xl border-2 border-red-500 shadow-sm p-12 text-center">
-          <span className="text-5xl grayscale opacity-70 block mb-4">❌</span>
-          <p className="text-red-600 font-medium mb-4">Erreur : {errorMessage}</p>
-          <button
-            onClick={() => navigate('/pokedesc')}
-            className="font-body font-semibold px-6 py-2.5 text-white rounded-xl hover:-translate-y-0.5 transition"
-            style={{ backgroundColor: colors.brand.blue }}
-          >
-            Retour au menu
-          </button>
-        </div>
-      </div>
-    )
-  }
+  if (isLoading) return <PageLoader />
+  if (errorMessage) return <PageError message={`Erreur : ${errorMessage}`} onBack={() => navigate('/pokedesc')} backLabel="Retour au menu" accentColor={colors.brand.blue} />
 
   const isSolo = partie?.modeSolo ?? true
 
@@ -708,14 +669,14 @@ export default function PokeDescPage() {
       </div>
 
       {/* Modal succès */}
-      {showSuccessModal && revealedPokemonSprite && (
+      {modal.type === 'success' && modal.sprite && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
           <div className="bg-white border-2 rounded-2xl p-8 max-w-sm w-11/12 text-center shadow-2xl animate-[fadeInScale_0.3s_ease-out]" style={{ borderColor: colors.game.success }}>
             <span className="text-5xl grayscale opacity-70 block mb-3">🎉</span>
             <h4 className="font-body font-bold text-xl mb-4" style={{ color: colors.ui.textPrimary }}>Bravo ! C'était bien :</h4>
             <div>
               <img
-                src={revealedPokemonSprite}
+                src={modal.sprite}
                 alt="Pokémon trouvé"
                 className="max-w-48 h-auto mx-auto mb-2 animate-[spriteReveal_0.8s_ease-out]"
                 style={{ imageRendering: 'pixelated' }}
@@ -727,21 +688,21 @@ export default function PokeDescPage() {
               className="font-body font-semibold mt-6 w-full py-3 text-white rounded-xl hover:-translate-y-0.5 hover:shadow-md transition"
               style={{ backgroundColor: colors.brand.blue }}
             >
-              ➡️ {isFinalPokemon ? 'Terminer la partie' : 'Passer au Pokémon suivant'}
+              ➡️ {modal.isFinal ? 'Terminer la partie' : 'Passer au Pokémon suivant'}
             </button>
           </div>
         </div>
       )}
 
       {/* Modal échec */}
-      {showFailureModal && revealedPokemonSprite && (
+      {modal.type === 'failure' && modal.sprite && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
           <div className="bg-white border-2 rounded-2xl p-8 max-w-sm w-11/12 text-center shadow-2xl animate-[fadeInScale_0.3s_ease-out]" style={{ borderColor: colors.game.error }}>
-            <span className="text-5xl grayscale opacity-70 block mb-3">{isTimeout ? '⏱️' : '😔'}</span>
-            <h4 className="font-body font-bold text-xl mb-4" style={{ color: colors.game.error }}>{isTimeout ? "Temps écoulé ! C\u2019était :" : "Dommage ! C\u2019était :"}</h4>
+            <span className="text-5xl grayscale opacity-70 block mb-3">{modal.isTimeout ? '⏱️' : '😔'}</span>
+            <h4 className="font-body font-bold text-xl mb-4" style={{ color: colors.game.error }}>{modal.isTimeout ? "Temps écoulé ! C\u2019était :" : "Dommage ! C\u2019était :"}</h4>
             <div>
               <img
-                src={revealedPokemonSprite}
+                src={modal.sprite}
                 alt="Pokémon à deviner"
                 className="max-w-48 h-auto mx-auto mb-2 animate-[spriteReveal_0.8s_ease-out]"
                 style={{ imageRendering: 'pixelated' }}
@@ -755,7 +716,7 @@ export default function PokeDescPage() {
               className="font-body font-semibold mt-6 w-full py-3 text-white rounded-xl hover:-translate-y-0.5 hover:shadow-md transition"
               style={{ backgroundColor: colors.brand.blue }}
             >
-              ➡️ {isFinalPokemon ? 'Terminer la partie' : 'Passer au Pokémon suivant'}
+              ➡️ {modal.isFinal ? 'Terminer la partie' : 'Passer au Pokémon suivant'}
             </button>
           </div>
         </div>

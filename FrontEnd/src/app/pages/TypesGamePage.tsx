@@ -7,6 +7,8 @@ import { colors } from '../design/colors'
 import Card from '../components/Card'
 import PokemonSearchInput from '../components/PokemonSearchInput'
 import Timer from '../components/Timer'
+import PageLoader from '../components/PageLoader'
+import PageError from '../components/PageError'
 import { getAllTypes, getTypesGame, submitTypesGuess } from '../services/typesGameService'
 import { getPartie } from '../services/partieService'
 import type { TypeSimpleDto, TypesGameDto, TypesGuessResultDto } from '../types/typesGame'
@@ -156,32 +158,8 @@ export default function TypesGamePage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="max-w-5xl mx-auto p-6">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
-          <p className="text-gray-500">Chargement...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (errorMessage) {
-    return (
-      <div className="max-w-5xl mx-auto p-6">
-        <div className="bg-white rounded-xl border-2 border-red-500 shadow-sm p-12 text-center">
-          <p className="text-red-600 font-medium mb-4">{errorMessage}</p>
-          <button
-            onClick={() => navigate('/types')}
-            className="font-body font-semibold px-6 py-2.5 text-white rounded-xl hover:-translate-y-0.5 transition"
-            style={{ backgroundColor: colors.brand.yellow }}
-          >
-            Retour au menu
-          </button>
-        </div>
-      </div>
-    )
-  }
+  if (isLoading) return <PageLoader />
+  if (errorMessage) return <PageError message={errorMessage} onBack={() => navigate('/types')} backLabel="Retour au menu" accentColor={colors.brand.yellow} />
 
   if (!game) return null
 
