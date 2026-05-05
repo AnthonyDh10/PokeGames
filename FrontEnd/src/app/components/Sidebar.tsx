@@ -19,10 +19,10 @@ export default function Sidebar({
   const location = useLocation();
 
   const navItems = [
+    { icon: rulesLogo, label: "Règles", to: "/regles" },
     { icon: pokedescLogo, label: "PokéDesc", to: "/pokedesc" },
     { icon: typeLogo, label: "Quel est ce type ?", to: "/types" },
-    { icon: dezoomLogo, label: "Dézoom", to: "/dezoom" },
-    { icon: rulesLogo, label: "Règles", to: "/regles" }
+    { icon: dezoomLogo, label: "Dézoom", to: "/dezoom" }
   ];
 
   return (

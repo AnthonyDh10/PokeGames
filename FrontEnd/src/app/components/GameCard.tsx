@@ -9,6 +9,8 @@ interface GameCardProps {
   icon?: string;
   to: string;
   image?: string;
+  /** Si fourni, remplace la navigation par cet handler au clic */
+  onClick?: () => void;
 }
 
 export default function GameCard({
@@ -18,12 +20,13 @@ export default function GameCard({
   icon,
   to,
   image,
+  onClick,
 }: GameCardProps) {
   const navigate = useNavigate();
 
   return (
     <button
-      onClick={() => navigate(to)}
+      onClick={() => onClick ? onClick() : navigate(to)}
       style={{ backgroundColor: color }}
       className="rounded-3xl shadow-[0_8px_24px_rgba(0,0,0,0.25)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-1 flex flex-row overflow-hidden w-full text-left cursor-pointer"
     >
