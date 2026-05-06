@@ -1,48 +1,59 @@
-import { useEffect } from "react";
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import GameCard from "../components/GameCard";
 import SectionTitle from "../components/SectionTitle";
 import { useBackgroundStore } from "../store/backgroundStore";
-import { useNavDirectionStore } from "../store/navDirectionStore";
 import { useChatStore } from "../store/chatStore";
 import { colors } from "../design/colors";
-import oakWebp from "../components/images/oak.webp";
-import dialogueImg from "../components/images/dialogue.png";
-import rulesIcon from "../components/images/rules-icon.png";
+import pokeballFace from "../components/images/pokéball_face.png";
+import pokeballShaking from "../components/images/pokéball_shaking.gif";
 import pokedescLogo from "../components/images/pokedesc-logo-transparant.png";
 import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
 
-// Chen : slide horizontal basé sur la direction
-// forward (home→regles) : Chen sort par la gauche, entre depuis la droite
-// backward (regles→home) : Chen sort par la droite, entre depuis la gauche
-const chenVariants = {
-  initial: (dir: string) => ({
-    x: dir === "backward" ? -120 : 120,
-    opacity: 0,
-  }),
-  animate: { x: 0, opacity: 1, transition: { duration: 0.45, ease: "easeOut" as const } },
-  exit: (dir: string) => ({
-    x: dir === "forward" ? -120 : 120,
-    opacity: 0,
-    transition: { duration: 0.35, ease: "easeIn" as const },
-  }),
-};
-
-// GameCards : slide vertical de haut en bas (toujours la même direction)
-// Entrent depuis le haut, sortent vers le bas
-const cardsVariants = {
-  initial: { y: -40, opacity: 0 },
-  animate: { y: 0, opacity: 1, transition: { duration: 0.45, ease: "easeOut" as const } },
-  exit: { y: 40, opacity: 0, transition: { duration: 0.3, ease: "easeIn" as const } },
-};
+const games = [
+  {
+    title: "PokéDesc",
+    description: "Connais-tu ton pokédex sur le bout des doigts ? Devine le pokémon à partir d'une description et d'autres indices !",
+    color: colors.brand.blue,
+    image: pokedescLogo,
+    to: "/pokedesc",
+  },
+  {
+    title: "Quel est ce type ?",
+    description: "J'espère que tu connais ta table de types ! Devine les types à partir de leurs forces, faiblesses et immunités !",
+    color: colors.brand.yellow,
+    image: typeLogo,
+    to: "/types",
+  },
+  {
+    title: "Dézoom",
+    description: "Penses-tu reconnaître un pokémon du premier coup d'œil ? Devine le pokémon à partir d'une partie de son corps !",
+    color: colors.brand.red,
+    image: dezoomLogo,
+    to: "/dezoom",
+  },
+];
 
 export default function HomePage() {
   const { setBackground } = useBackgroundStore();
-  const { direction, setDirection } = useNavDirectionStore();
-  const navigate = useNavigate();
   const { clearContext, setOpen } = useChatStore();
+
+  // hoveredIndex : survol souris (desktop)
+  // selectedIndex : tap / clic (mobile + desktop pour épingler la card)
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  // Le hover a priorité sur la sélection; sinon on affiche la sélection
+  const activeIndex = hoveredIndex !== null ? hoveredIndex : selectedIndex;
+
+  // Préchargement du GIF dès le montage du composant
+  const gifRef = useRef<HTMLImageElement | null>(null);
+  useEffect(() => {
+    const img = new window.Image();
+    img.src = pokeballShaking;
+    gifRef.current = img;
+  }, []);
 
   useEffect(() => {
     setBackground({ colorLeft: colors.ui.bgLeft, colorStripe: colors.ui.bgStripe, colorRight: colors.ui.bgRight });
@@ -50,84 +61,115 @@ export default function HomePage() {
     setOpen(false);
   }, []);
 
+  const handlePokeballClick = (index: number) => {
+    // Mobile : bascule la sélection ; desktop : épingle/désépingle
+    setSelectedIndex(prev => prev === index ? null : index);
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <SectionTitle>Teste tes connaissances en Pokémon !</SectionTitle>
 
-      <div className="flex items-stretch min-h-screen gap-8">
-        {/* Gauche — GameCards */}
-        <motion.div
-          className="flex-1 space-y-6"
-          custom={direction}
-          variants={cardsVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-        >
-          <GameCard
-            title="PokéDesc"
-            description="Connais-tu ton pokédex sur le bout des doigts ? Devine le pokémon à partir d'une description et d'autres indices !"
-            color={colors.brand.blue}
-            image={pokedescLogo}
-            to="/pokedesc"
-          />
+      {/* Zone interactive : pokéballs + card — mouseleave sur le wrapper global */}
+      <div onMouseLeave={() => setHoveredIndex(null)}>
 
-          <GameCard
-            title="Quel est ce type ?"
-            description="J'espère que tu connais ta table de types ! Devine les types à partir de leurs forces, faiblesses et immunités !"
-            color={colors.brand.yellow}
-            image={typeLogo}
-            to="/types"
-          />
-
-          <GameCard
-            title="Dézoom"
-            description="Penses-tu reconnaître un pokémon du premier coup d'œil ? Devine le pokémon à partir d'une partie de son corps !"
-            color={colors.brand.red}
-            image={dezoomLogo}
-            to="/dezoom"
-          />
-        </motion.div>
-
-        {/* Droite (masqué sur mobile) */}
-        <motion.div
-          className="hidden md:flex flex-col flex-1 items-center justify-start h-screen pt-8"
-          custom={direction}
-          variants={chenVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-        >
-          <img
-            src={oakWebp}
-            alt="Professeur Chen"
-            className="w-128 h-128 object-contain"
-          />
-          <div className="relative inline-block w-64 md:w-80 lg:w-96">
-            <img
-              src={dialogueImg}
-              alt="Bulle de dialogue"
-              className="mt-4 w-full object-contain"
-            />
-            <div className="absolute inset-0 flex items-center justify-center px-4 md:px-6">
-              {/* Texte centré verticalement, ne bouge pas */}
-              <p className="mt-4 w-full text-center lg:text-left lg:pr-20 text-sm md:text-lg leading-relaxed min-w-0 break-words">
-                N'hésite pas à aller regarder les règles en cliquant ici !
-              </p>
-              {/* Icône positionnée absolument: bottom-center sur petits écrans, right-center sur grands */}
-              <button
-                onClick={() => {
-                  setDirection("forward");
-                  navigate("/regles");
-                }}
-                className="mt-2 absolute left-1/2 top-full transform -translate-x-1/2 translate-y-3 lg:left-auto lg:right-4 lg:top-1/2 lg:translate-x-0 lg:-translate-y-1/2 flex-shrink-0 p-3 rounded-lg animate-pulse-scale hover:scale-110 transition-transform cursor-pointer"
-                aria-label="Voir les règles"
+        {/* Rangée des 3 pokéballs */}
+        <div className="flex items-end justify-center gap-10 md:gap-20 lg:gap-32 py-6">
+          {games.map((game, index) => {
+            const isActive = activeIndex === index;
+            return (
+              <div
+                key={index}
+                className="flex flex-col items-center gap-3 cursor-pointer select-none"
+                onMouseEnter={() => setHoveredIndex(index)}
+                onClick={() => handlePokeballClick(index)}
+                role="button"
+                aria-label={`Choisir ${game.title}`}
               >
-                <img src={rulesIcon} alt="Règles" className="h-14 w-14 md:h-16 md:w-16 lg:h-14 lg:w-14 object-contain" />
-              </button>
-            </div>
-          </div>
-        </motion.div>
+                {/* Flèche indicatrice au-dessus de la pokéball */}
+                <div className="h-7 flex items-end justify-center">
+                  <AnimatePresence>
+                    {isActive && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.15 }}
+                        style={{
+                          width: 0,
+                          height: 0,
+                          borderLeft: "13px solid transparent",
+                          borderRight: "13px solid transparent",
+                          borderTop: "17px solid white",
+                          filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.45))",
+                        }}
+                      />
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Pokéball — swap PNG statique / GIF animé */}
+                <div className="w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 transition-transform duration-150 hover:scale-105">
+                  <img
+                    src={isActive ? pokeballShaking : pokeballFace}
+                    alt={game.title}
+                    className="w-full h-full object-contain"
+                    draggable={false}
+                  />
+                </div>
+
+                {/* Nom du jeu */}
+                <span
+                  className="font-display text-base md:text-lg text-white transition-opacity duration-200"
+                  style={{ opacity: isActive ? 1 : 0.55 }}
+                >
+                  {game.title}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Message d'invite quand aucune pokéball n'est active */}
+        <div className="flex justify-center h-6">
+          <AnimatePresence>
+            {activeIndex === null && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="text-white/50 text-sm italic"
+              >
+                Survole ou appuie sur une Pokéball pour découvrir le jeu
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* GameCard révélée sous les pokéballs */}
+        <div className="mt-4">
+          <AnimatePresence mode="wait">
+            {activeIndex !== null && (
+              <motion.div
+                key={activeIndex}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.28, ease: "easeOut" }}
+              >
+                <GameCard
+                  title={games[activeIndex].title}
+                  description={games[activeIndex].description}
+                  color={games[activeIndex].color}
+                  image={games[activeIndex].image}
+                  to={games[activeIndex].to}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
       </div>
     </div>
   );

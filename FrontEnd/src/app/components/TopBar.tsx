@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import Pokeball from "./Pokeball";
+import { useNavigate } from "react-router";
+import Pokeball from "../components/images/pokéball_face.png";
 import { colors } from "../design/colors";
 import "../../styles/sidebar-retro.css";
 
@@ -19,6 +20,15 @@ export default function TopBar({
   split = 70,
   diagonalOffset = 12,
 }: TopBarProps) {
+  const navigate = useNavigate();
+
+  const handlePokeballClick = () => {
+    if (window.innerWidth < 768) {
+      onToggleSidebar();
+    } else {
+      navigate("/");
+    }
+  };
   // Génère les clip-paths polygon qui tracent la diagonale en "escalier":
   // - leftClip : la partie gauche (forme principale)
   // - rightClip: la partie droite (complémentaire) utilisée pour l'ombre de la fine barre
@@ -64,8 +74,9 @@ export default function TopBar({
 
   return (
     <header
-      className="w-full h-25 flex items-center justify-between px-4 md:px-8 relative retro-topbar"
+      className="w-full flex items-center justify-between px-2 sm:px-4 md:px-6 lg:px-8 relative retro-topbar"
       style={{
+        height: "clamp(2.8rem, 10vh, 6rem)",
         // header itself stays transparent so the right side shows the page background
         backgroundColor: "transparent",
         ["--topbar-text-color" as any]: colors.ui.textOnColor,
@@ -84,7 +95,7 @@ export default function TopBar({
           left: 0,
           right: 0,
           top: 0,
-          height: "40px",
+          height: "clamp(2.8rem, 10vh, 4rem)",
           backgroundColor: colors.brand.red,
           zIndex: 9,
           boxShadow: "none",
@@ -98,7 +109,7 @@ export default function TopBar({
           left: 0,
           right: 0,
           top: 0,
-          height: "40px",
+          height: "clamp(2.8rem, 10vh, 4rem)",
           backgroundColor: "rgba(0,0,0,0.35)",
           clipPath: rightClip,
           WebkitClipPath: rightClip,
@@ -144,18 +155,27 @@ export default function TopBar({
             // ensure no inner shadow adds an extra line
             boxShadow: "none",
             WebkitBoxShadow: "none",
-            paddingLeft: "3rem",
+            paddingLeft: "1rem",
             paddingRight: "1rem",
             display: "flex",
             alignItems: "center",
             gap: "0.75rem",
           } as any}
         >
-          <div>
-              <Pokeball onClick={onToggleSidebar} />
-            </div>
+          <img
+            src={Pokeball}
+            alt="Pokéball"
+            className="object-contain cursor-pointer retro-pokeball-btn"
+            style={{ width: "clamp(2.5rem, 8vw, 4rem)", height: "clamp(2.5rem, 8vw, 4rem)", flexShrink: 0 }}
+            onClick={handlePokeballClick}
+          />
 
-          <h2 className="text-3xl font-display tracking-wide text-white uppercase ml-8">
+          <h2 className="font-display tracking-wide text-white uppercase"
+            style={{
+              fontSize: "clamp(0.9rem, 3vw, 1.875rem)",
+              lineHeight: "1.2",
+              marginLeft: "clamp(0.5rem, 2vw, 1rem)"
+            }}>
             PokéGames
           </h2>
         </div>

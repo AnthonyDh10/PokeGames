@@ -39,7 +39,7 @@ export default function Sidebar({
       <aside
         className={`
         fixed md:static top-0 left-0 h-full md:h-auto md:self-stretch
-        md:w-[8%] w-full flex-col items-center py-6 gap-4 z-50
+        w-full md:w-[clamp(4rem,8vw,7rem)] flex-col items-center py-2 sm:py-3 gap-2 sm:gap-3 z-50
         transition-transform duration-300 retro-sidebar-container
         ${isOpen ? "flex translate-x-0" : "flex -translate-x-full md:translate-x-0"}
       `}
@@ -55,10 +55,24 @@ export default function Sidebar({
           ["--retro-gray-active" as any]: colors.ui.grayActive,
         } as any}
       >
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: "clamp(3px, 0.6vw, 8px)",
+            backgroundColor: "rgba(0,0,0,0.35)",
+            transform: "translateX(3px)",
+            zIndex: 8,
+            pointerEvents: "none",
+          } as any}
+        />
         {/* Pokéball moved to TopBar — keep sidebar with only nav buttons */}
 
         {/* Home button */}
         <button
+          style={{ width: "clamp(2.5rem, 12vw, 3.5rem)", height: "clamp(2.5rem, 12vw, 3.5rem)" }}
           onClick={() => {
             navigate("/");
             onClose();
@@ -71,7 +85,7 @@ export default function Sidebar({
           title="Home"
         >
           <svg
-            className="w-8 h-8"
+            style={{ width: "80%", height: "80%" }}
             fill="currentColor"
             viewBox="0 0 24 24"
             stroke="white"
@@ -83,6 +97,7 @@ export default function Sidebar({
 
         {navItems.map((item, index) => (
           <button
+            style={{ width: "clamp(2.5rem, 12vw, 3.5rem)", height: "clamp(2.5rem, 12vw, 3.5rem)" }}
             key={index}
             onClick={() => {
               navigate(item.to);
@@ -95,7 +110,12 @@ export default function Sidebar({
             }`}
             title={item.label}
           >
-            <img src={item.icon} alt={item.label} className="w-8 h-8 object-contain retro-icon" />
+            <img
+              src={item.icon}
+              alt={item.label}
+              className="object-contain retro-icon"
+              style={{ width: "80%", height: "80%" }}
+            />
           </button>
         ))}
       </aside>
