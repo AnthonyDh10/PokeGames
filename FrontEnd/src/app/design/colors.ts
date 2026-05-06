@@ -86,6 +86,13 @@ export const colors = {
     overlay:     "rgba(0,0,0,0.5)",
     /** Décoration semi-transparente (Pokéball sur GameCard) */
     decorOverlay: "rgba(0,0,0,0.1)",
+    /** Gris rétro pour UI (ajoutés pour la sidebar rétro) */
+    grayLight:   "#C0C0C0",
+    grayMid:     "#CBCBCB",
+    grayBorderLight: "#DFDFDF",
+    grayBorderDark:  "#585858",
+    grayShadow:  "#303030",
+    grayActive:  "#A0A0A0",
   },
 
   // ─── Types Pokémon ─────────────────────────────────────────────────────────

@@ -1,10 +1,11 @@
 import { useNavigate, useLocation } from "react-router";
 import { colors } from "../design/colors";
-import Pokeball from "./Pokeball";
+import Pokeball from "../components/images/pokéball_face.png";
 import pokedescLogo from "../components/images/pokedesc-logo-transparant.png";
 import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
 import rulesLogo from "../components/images/rules-icon.png";
+import "../../styles/sidebar-retro.css";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -39,13 +40,26 @@ export default function Sidebar({
       <aside
         className={`
         fixed md:static top-0 left-0 h-full md:h-auto md:self-stretch
-        w-20 flex-col items-center py-6 gap-4 shadow-lg z-50
-        transition-transform duration-300
+        md:w-[8%] w-full flex-col items-center py-6 gap-4 z-50
+        transition-transform duration-300 retro-sidebar-container
         ${isOpen ? "flex translate-x-0" : "flex -translate-x-full md:translate-x-0"}
       `}
-        style={{ backgroundColor: colors.brand.red }}
+        style={{
+          backgroundColor: colors.brand.red,
+          ["--sidebar-border-top-left" as any]: colors.brand.redDark,
+          ["--sidebar-border-right-bottom" as any]: colors.brand.redDeep,
+          ["--retro-gray-base" as any]: colors.ui.grayLight,
+          ["--retro-gray-mid" as any]: colors.ui.grayMid,
+          ["--retro-gray-border-light" as any]: colors.ui.grayBorderLight,
+          ["--retro-gray-border-dark" as any]: colors.ui.grayBorderDark,
+          ["--retro-gray-shadow" as any]: colors.ui.grayShadow,
+          ["--retro-gray-active" as any]: colors.ui.grayActive,
+        } as any}
       >
-        <Pokeball
+        <img
+          src={Pokeball}
+          alt="Pokéball"
+          className="w-2/3 object-contain cursor-pointer"
           onClick={() => {
             navigate("/");
             onClose();
@@ -58,10 +72,10 @@ export default function Sidebar({
             navigate("/");
             onClose();
           }}
-          className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200 ${
+          className={`retro-button flex items-center justify-center transition-none ${
             location.pathname === "/"
-              ? "bg-white shadow-md scale-110"
-              : "bg-pokered hover:bg-pokered-dark hover:scale-105"
+              ? "retro-button-active"
+              : ""
           }`}
           title="Home"
         >
@@ -83,14 +97,14 @@ export default function Sidebar({
               navigate(item.to);
               onClose();
             }}
-            className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200 ${
+            className={`retro-button flex items-center justify-center transition-none ${
               location.pathname.startsWith(item.to)
-                ? "bg-white shadow-md scale-110"
-                : "bg-pokered hover:bg-pokered-dark hover:scale-105"
+                ? "retro-button-active"
+                : ""
             }`}
             title={item.label}
           >
-            <img src={item.icon} alt={item.label} className="w-8 h-8 object-contain" />
+            <img src={item.icon} alt={item.label} className="w-8 h-8 object-contain retro-icon" />
           </button>
         ))}
       </aside>

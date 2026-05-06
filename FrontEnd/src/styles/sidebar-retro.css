@@ -1,0 +1,92 @@
+/* Import police pixel art 8-bit */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+
+/* Conteneur sidebar rétro avec cadre Game Boy */
+.retro-sidebar-container {
+  position: relative;
+  border: 3px solid;
+  border-color: var(--sidebar-border-top-left, #DFDFDF) var(--sidebar-border-right-bottom, #808080) var(--sidebar-border-right-bottom, #808080) var(--sidebar-border-top-left, #DFDFDF);
+  box-shadow: 
+    inset 1px 1px 0 var(--retro-gray-white, #FFFFFF),
+    inset -1px -1px 0 var(--retro-gray-border-dark, #585858);
+  font-family: 'Press Start 2P', cursive;
+}
+
+/* Style de base du bouton rétro */
+.retro-button {
+  width: 56px;
+  height: 56px;
+  background-color: var(--retro-gray-base, #C0C0C0);
+  border: 2px solid;
+  border-color: var(--retro-gray-border-light, #DFDFDF) var(--retro-gray-border-dark, #585858) var(--retro-gray-border-dark, #585858) var(--retro-gray-border-light, #DFDFDF);
+  box-shadow: 
+    inset 1px 1px 0 var(--retro-gray-white, #FFFFFF),
+    inset -1px -1px 0 var(--retro-gray-shadow, #303030);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  margin: 4px;
+}
+
+/* État hover du bouton rétro */
+.retro-button:hover:not(.retro-button-active) {
+  border-color: var(--retro-gray-border-light-hover, #E8E8E8) var(--retro-gray-border-dark-hover, #606060) var(--retro-gray-border-dark-hover, #606060) var(--retro-gray-border-light-hover, #E8E8E8);
+  background-color: var(--retro-gray-mid, #CBCBCB);
+}
+
+/* État actif du bouton (enfoncé) */
+.retro-button-active {
+  background-color: var(--retro-gray-active, #A0A0A0);
+  border-color: var(--retro-gray-border-dark, #585858) var(--retro-gray-border-light, #DFDFDF) var(--retro-gray-border-light, #DFDFDF) var(--retro-gray-border-dark, #585858);
+  box-shadow: 
+    inset -1px -1px 0 var(--retro-gray-white, #FFFFFF),
+    inset 1px 1px 0 var(--retro-gray-shadow, #303030);
+}
+
+/* Effet embossé des icônes */
+.retro-icon {
+  filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 0.3)) 
+          drop-shadow(-1px -1px 0px rgba(255, 255, 255, 0.5));
+}
+
+/* État actif avec icône inversée */
+.retro-button-active .retro-icon {
+  filter: drop-shadow(-1px -1px 0px rgba(0, 0, 0, 0.5))
+          drop-shadow(1px 1px 0px rgba(255, 255, 255, 0.2));
+}
+
+/* Responsive: ajuster la taille des boutons sur mobile */
+@media (max-width: 768px) {
+  .retro-button {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .retro-button > img {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* TopBar rétro — réutilise la même police et variables */
+.retro-topbar {
+  position: relative;
+  font-family: 'Press Start 2P', cursive;
+  border-top: 3px solid var(--retro-topbar-border-top, #DFDFDF);
+  border-bottom: 4px solid var(--retro-topbar-border-bottom, #A30000);
+  box-shadow:
+    inset 0 1px 0 var(--retro-gray-white, #FFFFFF),
+    inset 0 -1px 0 var(--retro-gray-border-dark, #585858);
+}
+
+.retro-topbar h2 {
+  font-family: 'Press Start 2P', cursive;
+  color: var(--topbar-text-color, #FFFFFF);
+  margin: 0;
+}
+
+
+

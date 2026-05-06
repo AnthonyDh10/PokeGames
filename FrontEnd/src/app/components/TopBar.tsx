@@ -1,28 +1,164 @@
+import { useMemo } from "react";
 import Pokeball from "./Pokeball";
 import { colors } from "../design/colors";
+import "../../styles/sidebar-retro.css";
 
 interface TopBarProps {
   onToggleSidebar: () => void;
+  /** Nombre de marches pour l'escalier (ex: 8, 10) */
+  steps?: number;
+  /** Position centrale de la séparation en pourcentage (default 50) */
+  split?: number;
+  /** Décalage total en pourcentage entre le point haut et bas (ex: 8 => +/-4%) */
+  diagonalOffset?: number;
 }
 
 export default function TopBar({
   onToggleSidebar,
+  steps = 30,
+  split = 70,
+  diagonalOffset = 12,
 }: TopBarProps) {
+  // Génère les clip-paths polygon qui tracent la diagonale en "escalier":
+  // - leftClip : la partie gauche (forme principale)
+  // - rightClip: la partie droite (complémentaire) utilisée pour l'ombre de la fine barre
+  const { leftClip, rightClip } = useMemo(() => {
+    // Symétrie axiale verticale: inverse la direction de l'escalier
+    const topX = split + diagonalOffset / 2;
+    const bottomX = split - diagonalOffset / 2;
+    const dx = bottomX - topX;
+
+    const leftPoints: string[] = [];
+    leftPoints.push(`0% 0%`);
+    leftPoints.push(`${topX}% 0%`);
+
+    for (let i = 0; i < steps; i++) {
+      const y = ((i + 1) / steps) * 100;
+      const xPrev = topX + (i / steps) * dx;
+      const xNext = topX + ((i + 1) / steps) * dx;
+      leftPoints.push(`${xPrev}% ${y}%`);
+      leftPoints.push(`${xNext}% ${y}%`);
+    }
+
+    leftPoints.push(`0% 100%`);
+    const leftClip = `polygon(${leftPoints.join(",")})`;
+
+    // Build right-side polygon (complement of left) so the thin-bar shadow
+    // can be shown on the transparent/right side of the header.
+    const rightPoints: string[] = [];
+    rightPoints.push(`${topX}% 0%`);
+    rightPoints.push(`100% 0%`);
+    rightPoints.push(`100% 100%`);
+    rightPoints.push(`${bottomX}% 100%`);
+    for (let i = steps - 1; i >= 0; i--) {
+      const y = ((i + 1) / steps) * 100;
+      const xPrev = topX + (i / steps) * dx;
+      const xNext = topX + ((i + 1) / steps) * dx;
+      rightPoints.push(`${xNext}% ${y}%`);
+      rightPoints.push(`${xPrev}% ${y}%`);
+    }
+    const rightClip = `polygon(${rightPoints.join(",")})`;
+
+    return { leftClip, rightClip };
+  }, [steps, split, diagonalOffset]);
+
   return (
     <header
-      className="h-20 border-b-4 flex items-center justify-between px-4 md:px-8 shadow-lg relative"
-      style={{ backgroundColor: colors.brand.redDark, borderBottomColor: colors.brand.redDark }}
+      className="h-25 flex items-center justify-between px-4 md:px-8 relative retro-topbar"
+      style={{
+        // header itself stays transparent so the right side shows the page background
+        backgroundColor: "transparent",
+        ["--topbar-text-color" as any]: colors.ui.textOnColor,
+        // remove decorative borders coming from .retro-topbar
+        borderTop: "none",
+        borderBottom: "none",
+        // remove any shadow that produces a floating line under transparent area
+        boxShadow: "none",
+        WebkitBoxShadow: "none",
+      } as any}
     >
-      <div className="flex items-center gap-3">
-        {/* Pokéball logo - hamburger menu on mobile */}
-        <div className="md:hidden">
-          <Pokeball onClick={onToggleSidebar} />
+      {/* Thin red bar behind TopBar — visible through the transparent area */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: "40px",
+          backgroundColor: colors.brand.red,
+          zIndex: 9,
+          boxShadow: "none",
+        } as any}
+      />
+
+      {/* Thin bar shadow: stepped shadow matching the stair shape (slightly offset) */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: "40px",
+          backgroundColor: "rgba(0,0,0,0.35)",
+          clipPath: rightClip,
+          WebkitClipPath: rightClip,
+          transform: "translate(3px, 3px)",
+          zIndex: 8,
+          pointerEvents: "none",
+        } as any}
+      />
+
+      {/* Left area: background + clipped shape + content */}
+      <div
+        className="absolute inset-0 flex items-center px-4 md:px-8"
+        style={{
+          backgroundColor: "transparent",
+        } as any}
+      >
+        {/* Shadow stair: same leftClip, slightly offset to simulate shadow */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.45)",
+            clipPath: leftClip,
+            WebkitClipPath: leftClip,
+            transform: "translate(3px, 3px)",
+            zIndex: 8,
+            boxShadow: "none",
+            WebkitBoxShadow: "none",
+            pointerEvents: "none",
+          } as any}
+        />
+        <div
+          className="relative flex items-center gap-3"
+          style={{
+            // element covers the full header box but is clipped to the left 'stair' shape
+            position: "absolute",
+            inset: 0,
+            backgroundColor: colors.brand.red,
+            ["--topbar-text-color" as any]: colors.ui.textOnColor,
+            clipPath: leftClip,
+            WebkitClipPath: leftClip,
+            zIndex: 10,
+            // ensure no inner shadow adds an extra line
+            boxShadow: "none",
+            WebkitBoxShadow: "none",
+            paddingLeft: "3rem",
+            paddingRight: "1rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+          } as any}
+        >
+          <div className="md:hidden">
+            <Pokeball onClick={onToggleSidebar} />
+          </div>
+
+          <h2 className="text-3xl font-display tracking-wide text-white uppercase ml-8">
+            PokéGames
+          </h2>
         </div>
-
-        <h2 className="text-3xl font-display tracking-wide text-white uppercase">
-          PokéGames
-        </h2>
-
       </div>
     </header>
   );

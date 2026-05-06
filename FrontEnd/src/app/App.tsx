@@ -5,9 +5,8 @@ import { AnimatePresence } from "framer-motion";
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 import Footer from "./components/Footer";
-import DiagonalBackground from "./components/DiagonalBackground";
 import ChatPanel from "./components/ChatPanel";
-import { useBackgroundStore } from "./store/backgroundStore";
+import palletTown from "./components/images/palletTown.webp";
 import { useNavDirectionStore } from "./store/navDirectionStore";
 import HomePage from "./pages/HomePage";
 import LobbyPokedescPage from "./pages/LobbyPokedescPage";
@@ -30,7 +29,6 @@ function isHomeOrRegles(path: string) {
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { colorLeft, colorStripe, colorRight } = useBackgroundStore();
   const { setDirection } = useNavDirectionStore();
   const location = useLocation();
   const prevPathRef = useRef(location.pathname);
@@ -52,14 +50,29 @@ export default function App() {
   }, [location.pathname]);
 
   return (
-    <DiagonalBackground colorLeft={colorLeft} colorStripe={colorStripe} colorRight={colorRight}>
-      <div className="flex-1 flex">
+    <div className="min-h-screen flex flex-col relative">
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: `url(${palletTown})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          filter: "blur(4px)",
+          transform: "scale(1.03)",
+          zIndex: 0,
+        }}
+      />
+
+      <div style={{ position: "relative", zIndex: 1 }} className="flex-1 flex">
         <Sidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />
 
-        <div className="flex-1 flex flex-col border-4 md:border-8" style={{ borderColor: colors.brand.redDark }}>
+        <div className="flex-1 flex flex-col">
           <TopBar
             onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           />
@@ -85,8 +98,10 @@ export default function App() {
         </div>
       </div>
 
-      <Footer />
-      <ChatPanel />
-    </DiagonalBackground>
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <Footer />
+        <ChatPanel />
+      </div>
+    </div>
   );
 }
