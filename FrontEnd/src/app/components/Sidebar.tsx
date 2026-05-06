@@ -1,6 +1,5 @@
 import { useNavigate, useLocation } from "react-router";
 import { colors } from "../design/colors";
-import Pokeball from "../components/images/pokéball_face.png";
 import pokedescLogo from "../components/images/pokedesc-logo-transparant.png";
 import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
@@ -56,15 +55,7 @@ export default function Sidebar({
           ["--retro-gray-active" as any]: colors.ui.grayActive,
         } as any}
       >
-        <img
-          src={Pokeball}
-          alt="Pokéball"
-          className="w-2/3 object-contain cursor-pointer"
-          onClick={() => {
-            navigate("/");
-            onClose();
-          }}
-        />
+        {/* Pokéball moved to TopBar — keep sidebar with only nav buttons */}
 
         {/* Home button */}
         <button

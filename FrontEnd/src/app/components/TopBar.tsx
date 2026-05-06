@@ -64,7 +64,7 @@ export default function TopBar({
 
   return (
     <header
-      className="h-25 flex items-center justify-between px-4 md:px-8 relative retro-topbar"
+      className="w-full h-25 flex items-center justify-between px-4 md:px-8 relative retro-topbar"
       style={{
         // header itself stays transparent so the right side shows the page background
         backgroundColor: "transparent",
@@ -151,9 +151,9 @@ export default function TopBar({
             gap: "0.75rem",
           } as any}
         >
-          <div className="md:hidden">
-            <Pokeball onClick={onToggleSidebar} />
-          </div>
+          <div>
+              <Pokeball onClick={onToggleSidebar} />
+            </div>
 
           <h2 className="text-3xl font-display tracking-wide text-white uppercase ml-8">
             PokéGames

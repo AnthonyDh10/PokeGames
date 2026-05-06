@@ -54,17 +54,37 @@ export default function App() {
       <div
         aria-hidden
         style={{
-          position: "absolute",
+          position: "fixed",
           inset: 0,
-          backgroundImage: `url(${palletTown})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          filter: "blur(4px)",
-          transform: "scale(1.03)",
+          overflow: "hidden",
           zIndex: 0,
+          pointerEvents: "none",
         }}
-      />
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            width: "110%",
+            height: "110%",
+            transform: "translate(-50%, -50%) scale(0.985)",
+            transformOrigin: "center",
+            backgroundImage: `url(${palletTown})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            filter: "blur(4px)",
+            willChange: "transform, filter",
+          }}
+        />
+      </div>
+
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <TopBar
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        />
+      </div>
 
       <div style={{ position: "relative", zIndex: 1 }} className="flex-1 flex">
         <Sidebar
@@ -73,10 +93,6 @@ export default function App() {
         />
 
         <div className="flex-1 flex flex-col">
-          <TopBar
-            onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          />
-
           <main className="flex-1 p-4 md:p-8 overflow-auto">
             <AnimatePresence mode="wait" initial={false}>
               <Routes location={location} key={location.pathname}>
