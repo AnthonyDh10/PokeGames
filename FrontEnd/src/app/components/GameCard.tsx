@@ -28,12 +28,21 @@ export default function GameCard({
     <button
       onClick={() => onClick ? onClick() : navigate(to)}
       style={{ backgroundColor: color }}
-      className="rounded-3xl shadow-[0_8px_24px_rgba(0,0,0,0.25)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-1 flex flex-row overflow-hidden w-full text-left cursor-pointer"
+      // Remplacement des ombres floues par des ombres dures (blocks), ajout d'une bordure noire épaisse
+      // et modification de l'effet de survol/clic pour un mouvement "mécanique"
+      className="border-4 border-black shadow-[6px_6px_0px_rgba(0,0,0,0.8)] hover:shadow-[2px_2px_0px_rgba(0,0,0,0.8)] hover:translate-x-1 hover:translate-y-1 active:shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-none flex flex-row overflow-hidden w-full text-left cursor-pointer"
     >
       {/* Gauche — image ou icône */}
-      <div className="hidden md:flex items-center justify-center w-40 md:w-52 shrink-0 bg-black/10">
+      {/* Ajout d'une bordure interne droite pour séparer les sections */}
+      <div className="hidden md:flex items-center justify-center w-40 md:w-52 shrink-0 bg-black/20 border-r-4 border-black">
         {image ? (
-          <img src={image} alt={title} className="w-32 md:w-40 h-auto object-contain" />
+          <img 
+            src={image} 
+            alt={title} 
+            // Rendu pixélisé pour garder l'aspect brut si tu utilises des sprites
+            style={{ imageRendering: "pixelated" }}
+            className="w-32 md:w-40 h-auto object-contain" 
+          />
         ) : (
           <span className="text-5xl md:text-6xl">{icon}</span>
         )}
@@ -43,11 +52,14 @@ export default function GameCard({
       <div className="relative flex flex-col justify-center flex-1 p-6 md:p-8 overflow-hidden">
         <PokeballDecor
           size={130}
-          opacity={0.10}
+          opacity={0.15}
           className="absolute top-1/2 right-6 -translate-y-1/2"
         />
-        <h2 className="font-display text-4xl tracking-wide text-white mb-3">{title}</h2>
-        <p className="text-white/90 text-lg md:text-xl leading-relaxed">
+        {/* Typographie "monospace" ou pixel, avec une ombre portée dure sur le texte pour le style rétro */}
+        <h2 className="font-mono uppercase font-bold text-3xl tracking-widest text-white mb-3 drop-shadow-[2px_2px_0px_rgba(0,0,0,0.6)]">
+          {title}
+        </h2>
+        <p className="font-mono text-white/90 text-base md:text-lg leading-relaxed drop-shadow-[1px_1px_0px_rgba(0,0,0,0.4)]">
           {description}
         </p>
       </div>
