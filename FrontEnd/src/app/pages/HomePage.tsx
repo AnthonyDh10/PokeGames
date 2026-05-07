@@ -10,6 +10,7 @@ import pokeballShaking from "../components/images/pokéball_shaking.gif";
 import pokedescLogo from "../components/images/pokedesc-logo-transparant.png";
 import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
+import pointerImg from "../components/images/pointer.png";
 
 const games = [
   {
@@ -89,24 +90,31 @@ export default function HomePage() {
                 role="button"
                 aria-label={`Choisir ${game.title}`}
               >
-                {/* Flèche indicatrice au-dessus de la pokéball */}
+                {/* Indicative pointer image above the pokéball */}
                 <div className="h-7 flex items-end justify-center">
                   <AnimatePresence>
                     {isActive && (
                       <motion.div
                         initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        animate={{ opacity: 1, y: [0, -6, 0] }}
                         exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.15 }}
-                        style={{
-                          width: 0,
-                          height: 0,
-                          borderLeft: "13px solid transparent",
-                          borderRight: "13px solid transparent",
-                          borderTop: "17px solid white",
-                          filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.45))",
+                        transition={{
+                          opacity: { duration: 0.15 },
+                          y: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
                         }}
-                      />
+                      >
+                        <img
+                          src={pointerImg}
+                          alt={`${game.title} pointer`}
+                          className="rotate-205"
+                          style={{
+                            width: "32px",
+                            height: "32px",
+                            filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.45))",
+                          }}
+                          draggable={false}
+                        />
+                      </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
