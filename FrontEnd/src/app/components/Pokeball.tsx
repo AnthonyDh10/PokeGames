@@ -13,7 +13,56 @@ interface PokeballDecorProps {
 }
 
 export function PokeballDecor({ size = 90, opacity = 0.10, color = colors.brand.white, className = '' }: PokeballDecorProps) {
-  const stroke = Math.max(2, size * 0.04);
+  // Résolution de la grille (Modifiable : 30, 40, 50...)
+  const GRID_SIZE = 32; 
+  const PIXEL_SIZE = 100 / GRID_SIZE; // On divise la viewBox(100) par le nombre de cellules
+
+  const pixels = [];
+
+  // Centre mathématique de la grille
+  const cx = GRID_SIZE / 2;
+  const cy = GRID_SIZE / 2;
+
+  // Calculs dynamiques basés sur GRID_SIZE pour que le dessin ne déborde jamais
+  const maxRadius = (GRID_SIZE / 2) - 1; // Le rayon max s'arrête 1 "pixel" avant le bord
+  const strokeThickness = Math.max(1, GRID_SIZE * 0.05); // Épaisseur des traits relative
+  const centerRadius = GRID_SIZE * 0.16; // Rayon du bouton central
+
+  for (let y = 0; y < GRID_SIZE; y++) {
+    for (let x = 0; x < GRID_SIZE; x++) {
+      const dx = x - cx + 0.5;
+      const dy = y - cy + 0.5;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      let isPixelFilled = false;
+
+      // 1. Cercle extérieur (dynamique)
+      if (distance <= maxRadius && distance >= maxRadius - strokeThickness * 1.2) {
+        isPixelFilled = true;
+      }
+      // 2. Bouton central
+      else if (distance <= centerRadius) {
+        isPixelFilled = true;
+      }
+      // 3. Ligne horizontale centrale
+      else if (Math.abs(dy) <= strokeThickness / 2 && distance < maxRadius) {
+        isPixelFilled = true;
+      }
+
+      if (isPixelFilled) {
+        pixels.push(
+          <rect
+            key={`${x}-${y}`}
+            x={x * PIXEL_SIZE}
+            y={y * PIXEL_SIZE}
+            width={PIXEL_SIZE}
+            height={PIXEL_SIZE}
+            fill={color}
+          />
+        );
+      }
+    }
+  }
 
   return (
     <svg
@@ -24,42 +73,9 @@ export function PokeballDecor({ size = 90, opacity = 0.10, color = colors.brand.
       xmlns="http://www.w3.org/2000/svg"
       className={`pointer-events-none ${className}`}
       style={{ opacity }}
+      shapeRendering="crispEdges" // Force le rendu "escalier" brut (pixel art)
     >
-      {/* Cercle extérieur */}
-      <circle cx="50" cy="50" r={50 - stroke / 2} stroke={color} strokeWidth={stroke} />
-
-      {/* Ligne horizontale centrale */}
-      <line x1={stroke / 2} y1="50" x2={100 - stroke / 2} y2="50" stroke={color} strokeWidth={stroke} />
-
-      {/* Bouton central — plein */}
-      <circle cx="50" cy="50" r="14" fill={color} />
+      {pixels}
     </svg>
-  );
-}
-
-export default function Pokeball({ onClick, className = '' }: PokeballProps) {
-  return (
-    <div
-      onClick={onClick}
-      className={`group relative w-14 h-14 bg-white rounded-full border-[3px] border-gray-900 shadow-inner overflow-hidden cursor-pointer hover:rotate-12 transition-transform duration-300 ${className}`}
-    >
-      {/* Moitié Rouge (Top) */}
-      <div
-        className="absolute top-0 left-0 w-full h-1/2 border-b-[3px] border-gray-900"
-        style={{ backgroundColor: colors.brand.pokeballRed }}
-      ></div>
-
-      {/* Reflet de brillance (Glossy effect) pour le réalisme */}
-      <div className="absolute top-1 left-2 w-4 h-2 bg-white/30 rounded-full rotate-[-20deg]"></div>
-
-      {/* Bouton Central */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-        {/* Cercle noir extérieur */}
-        <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center">
-          {/* Cercle blanc intérieur */}
-          <div className="w-3 h-3 bg-white rounded-full border-[1.5px] border-gray-300 shadow-sm"></div>
-        </div>
-      </div>
-    </div>
   );
 }
