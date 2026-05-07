@@ -44,13 +44,6 @@
     inset 1px 1px 0 var(--retro-gray-shadow, #303030);
 }
 
-/* Effet embossé des icônes + rendu pixélisé */
-.retro-icon {
-  filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 0.3)) 
-          drop-shadow(-1px -1px 0px rgba(255, 255, 255, 0.5));
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-}
 
 /* État actif avec icône inversée */
 .retro-button-active .retro-icon {
@@ -105,17 +98,11 @@
 
 /* Pokéball dans la TopBar */
 .retro-pokeball-btn {
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.5))
-          drop-shadow(-1px -1px 0px rgba(255,255,255,0.3));
   transition: filter 0.05s, transform 0.05s;
 }
 
 .retro-pokeball-btn:hover {
-  filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.7))
-          drop-shadow(-1px -1px 0px rgba(255,255,255,0.5))
-          brightness(1.1);
+  filter: brightness(1.1);
   transform: scale(1.08);
 }
 
