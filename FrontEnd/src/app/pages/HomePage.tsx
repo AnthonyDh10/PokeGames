@@ -8,7 +8,7 @@ import { colors } from "../design/colors";
 import pokeballFace from "../components/images/pokéball_face.png";
 import pokeballShaking from "../components/images/pokéball_shaking.gif";
 import solHerbes from "../components/images/sol-herbes.png";
-import pokedescLogo from "../components/images/pokedesc-logo-transparant.png";
+import pokedescLogo from "../components/images/pokedesc-logo.png";
 import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
 import pointerImg from "../components/images/pointer.png";

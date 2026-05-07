@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router";
 import { colors } from "../design/colors";
-import pokedescLogo from "../components/images/pokedesc-logo-transparant.png";
+import pokedescLogo from "../components/images/pokedesc-logo.png";
 import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
 import rulesLogo from "../components/images/rules-icon.png";
