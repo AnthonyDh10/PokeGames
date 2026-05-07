@@ -7,6 +7,7 @@ import { useChatStore } from "../store/chatStore";
 import { colors } from "../design/colors";
 import pokeballFace from "../components/images/pokéball_face.png";
 import pokeballShaking from "../components/images/pokéball_shaking.gif";
+import solHerbes from "../components/images/sol-herbes.png";
 import pokedescLogo from "../components/images/pokedesc-logo-transparant.png";
 import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
@@ -119,12 +120,19 @@ export default function HomePage() {
                   </AnimatePresence>
                 </div>
 
-                {/* Pokéball — swap PNG statique / GIF animé */}
-                <div className={`w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 transition-transform duration-150 ${isActive ? "scale-125" : "scale-100"}`}>
+                {/* Pokéball + Sol group — sol positionné derrière et rapproché */}
+                <div className={`relative w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 transition-transform duration-150 ${isActive ? "scale-125" : "scale-100"}`}>
+                  <img
+                    src={solHerbes}
+                    alt={`${game.title} sol`}
+                    className="absolute left-0 right-0 w-full h-full object-contain pointer-events-none"
+                    style={{ bottom: "-35%", zIndex: 0 }}
+                    draggable={false}
+                  />
                   <img
                     src={isActive ? pokeballShaking : pokeballFace}
                     alt={game.title}
-                    className={`w-full h-full object-contain transition-filter duration-150 ${!isActive ? "grayscale-[0.4]" : ""}`}
+                    className={`relative z-10 w-full h-full object-contain transition-filter duration-150 ${!isActive ? "grayscale-[0.4]" : ""}`}
                     draggable={false}
                   />
                 </div>
