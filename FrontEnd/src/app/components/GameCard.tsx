@@ -11,6 +11,8 @@ interface GameCardProps {
   image?: string;
   /** Si fourni, remplace la navigation par cet handler au clic */
   onClick?: () => void;
+  /** Couleur secondaire pour les bordures (par défaut: 'black') */
+  secondColor?: string;
 }
 
 export default function GameCard({
@@ -21,20 +23,21 @@ export default function GameCard({
   to,
   image,
   onClick,
+  secondColor,
 }: GameCardProps) {
   const navigate = useNavigate();
 
   return (
     <button
       onClick={() => onClick ? onClick() : navigate(to)}
-      style={{ backgroundColor: color }}
+      style={{ backgroundColor: color, borderColor: secondColor ?? "black" }}
       // Remplacement des ombres floues par des ombres dures (blocks), ajout d'une bordure noire épaisse
       // et modification de l'effet de survol/clic pour un mouvement "mécanique"
-      className="border-4 border-black shadow-[6px_6px_0px_rgba(0,0,0,0.8)] hover:shadow-[2px_2px_0px_rgba(0,0,0,0.8)] hover:translate-x-1 hover:translate-y-1 active:shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-none flex flex-row overflow-hidden w-full text-left cursor-pointer"
+      className="border-4 shadow-[6px_6px_0px_rgba(0,0,0,0.8)] hover:shadow-[2px_2px_0px_rgba(0,0,0,0.8)] hover:translate-x-1 hover:translate-y-1 active:shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-none flex flex-row overflow-hidden w-full text-left cursor-pointer"
     >
       {/* Gauche — image ou icône */}
       {/* Ajout d'une bordure interne droite pour séparer les sections */}
-      <div className="hidden md:flex items-center justify-center w-40 md:w-52 shrink-0 bg-black/20 border-r-4 border-black">
+      <div className="hidden md:flex items-center justify-center w-40 md:w-52 shrink-0 bg-black/20 border-r-4" style={{ borderRightColor: secondColor ?? "black" }}>
         {image ? (
           <img 
             src={image} 

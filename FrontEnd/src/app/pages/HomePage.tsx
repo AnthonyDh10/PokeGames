@@ -16,6 +16,7 @@ const games = [
     title: "PokéDesc",
     description: "Connais-tu ton pokédex sur le bout des doigts ? Devine le pokémon à partir d'une description et d'autres indices !",
     color: colors.brand.blue,
+    secondColor: colors.brand.blueDark,
     image: pokedescLogo,
     to: "/pokedesc",
   },
@@ -23,6 +24,7 @@ const games = [
     title: "Quel est ce type ?",
     description: "J'espère que tu connais ta table de types ! Devine les types à partir de leurs forces, faiblesses et immunités !",
     color: colors.brand.yellow,
+    secondColor: colors.brand.yellowWarm,
     image: typeLogo,
     to: "/types",
   },
@@ -30,6 +32,7 @@ const games = [
     title: "Dézoom",
     description: "Penses-tu reconnaître un pokémon du premier coup d'œil ? Devine le pokémon à partir d'une partie de son corps !",
     color: colors.brand.red,
+    secondColor: colors.brand.redDark,
     image: dezoomLogo,
     to: "/dezoom",
   },
@@ -162,6 +165,7 @@ export default function HomePage() {
                   title={games[activeIndex].title}
                   description={games[activeIndex].description}
                   color={games[activeIndex].color}
+                  secondColor={games[activeIndex].secondColor}
                   image={games[activeIndex].image}
                   to={games[activeIndex].to}
                 />
