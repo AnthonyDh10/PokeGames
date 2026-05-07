@@ -109,18 +109,18 @@ export default function HomePage() {
                 </div>
 
                 {/* Pokéball — swap PNG statique / GIF animé */}
-                <div className="w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 transition-transform duration-150 hover:scale-105">
+                <div className={`w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 transition-transform duration-150 ${isActive ? "scale-125" : "scale-100"}`}>
                   <img
                     src={isActive ? pokeballShaking : pokeballFace}
                     alt={game.title}
-                    className="w-full h-full object-contain"
+                    className={`w-full h-full object-contain transition-filter duration-150 ${!isActive ? "grayscale-[0.4]" : ""}`}
                     draggable={false}
                   />
                 </div>
 
                 {/* Nom du jeu */}
                 <span
-                  className="font-display text-base md:text-lg text-white transition-opacity duration-200"
+                  className={`font-display text-base md:text-lg text-white transition-all duration-150 ${isActive ? "text-lg md:text-xl" : ""}`}
                   style={{ opacity: isActive ? 1 : 0.55 }}
                 >
                   {game.title}
