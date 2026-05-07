@@ -139,7 +139,7 @@ export default function HomePage() {
 
                 {/* Nom du jeu */}
                 <span
-                  className={`font-display text-base md:text-lg text-white transition-all duration-150 ${isActive ? "text-lg md:text-xl" : ""}`}
+                  className={`font-display text-base md:text-lg mt-2 text-white transition-all duration-150 ${isActive ? "text-lg md:text-xl" : ""}`}
                   style={{ opacity: isActive ? 1 : 0.55 }}
                 >
                   {game.title}
