@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import GameCard from "../components/GameCard";
 import { useBackgroundStore } from "../store/backgroundStore";
@@ -74,6 +75,9 @@ export default function HomePage() {
   const activeIndex = hoveredIndex !== null ? hoveredIndex : selectedIndex;
 
   const gifRef = useRef<HTMLImageElement | null>(null);
+
+  const navigate = useNavigate();
+  const lastTapRef = useRef<number | null>(null);
 
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -162,6 +166,23 @@ export default function HomePage() {
         className="flex flex-col items-center gap-3 cursor-pointer select-none"
         onMouseEnter={opts.noInteraction ? undefined : () => setHoveredIndex(index)}
         onClick={opts.noInteraction ? undefined : () => handlePokeballClick(index)}
+        onDoubleClick={() => navigate(game.to)}
+        onTouchEnd={(e) => {
+          const touchX = e.changedTouches?.[0]?.clientX;
+          if (touchX == null) return;
+          if (touchStart != null) {
+            const distance = Math.abs(touchStart - touchX);
+            if (distance > minSwipeDistance) return; // ignore swipes
+          }
+          const now = Date.now();
+          const DOUBLE_TAP_DELAY = 300;
+          if (lastTapRef.current && now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+            lastTapRef.current = null;
+            navigate(game.to);
+          } else {
+            lastTapRef.current = now;
+          }
+        }}
         role="button"
         aria-label={`Choisir ${game.title}`}
       >
