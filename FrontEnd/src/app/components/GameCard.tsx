@@ -47,11 +47,20 @@ export default function GameCard({
   return (
     <button
       onClick={() => onClick ? onClick() : navigate(to)}
-      className="relative w-full text-left cursor-pointer flex items-stretch"
+      className="relative w-full text-left cursor-pointer flex items-stretch gamecard-container"
     >
+      <style>{`
+        .gamecard-container { container-type: inline-size; }
+        .gamecard-left { display: none; }
+        .gamecard-gap { display: none; }
+        @container (min-width: 720px) {
+          .gamecard-left { display: flex; }
+          .gamecard-gap { display: block; }
+        }
+      `}</style>
       {/* PARTIE GAUCHE — Image ou icône */}
       <div
-        className="hidden md:flex items-center justify-center shrink-0 drop-shadow-[6px_6px_0px_rgba(0,0,0,0.8)] hover:drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)] hover:translate-x-1 hover:translate-y-1 active:drop-shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-none w-40 md:w-52"
+        className="gamecard-left items-center justify-center shrink-0 drop-shadow-[6px_6px_0px_rgba(0,0,0,0.8)] hover:drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)] hover:translate-x-1 hover:translate-y-1 active:drop-shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-none w-40 md:w-52"
         style={{
           backgroundColor: color,
           border: `4px solid ${secondColor || "black"}`,
@@ -71,7 +80,7 @@ export default function GameCard({
       </div>
 
       {/* GAP VIDE — 1% de la largeur (desktop seulement) */}
-      <div className="hidden md:block" style={{ width: gapSize, flexShrink: 0 }} />
+      <div className="gamecard-gap" style={{ width: gapSize, flexShrink: 0 }} />
 
       {/* PARTIE DROITE — Texte */}
       <div

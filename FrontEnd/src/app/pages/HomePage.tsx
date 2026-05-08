@@ -14,10 +14,23 @@ import pointerImg from "../components/images/pointer.png";
 import oakImg from "../components/images/oak.png";
 import rulesIconImg from "../components/images/rules-icon.png";
 
-const games = [
+// Création d'une interface pour typer correctement tes jeux
+interface Game {
+  title: string;
+  description: string;
+  color: string;
+  secondColor: string;
+  image?: string;
+  icon?: string;
+  to: string;
+  isOak?: boolean;
+  text_color?: string;
+}
+
+const games: Game[] = [
   {
-    title: "Professeur Chen",
-    description: "Bienvenue dresseur ! Relève les défis du Professeur Chen pour tester tes connaissances sur les pokémon ! Chaque pokéball renferme un défi différent, survole les pour les découvrir ! Prends connaissance de leurs règles en cliquant sur le livre !",
+    title: "Prof. Chen",
+    description: "Bienvenue dresseur ! Relève les défis du Professeur pour tester tes connaissances sur les pokémon ! Chaque pokéball renferme un défi différent, survole les pour les découvrir ! Prends connaissance de leurs règles en cliquant sur le livre !",
     color: colors.ui.grayBorderLight,
     secondColor: colors.ui.grayBorderDark,
     image: rulesIconImg,
@@ -55,16 +68,12 @@ export default function HomePage() {
   const { setBackground } = useBackgroundStore();
   const { clearContext, setOpen } = useChatStore();
 
-  // hoveredIndex : survol souris (desktop)
-  // selectedIndex : tap / clic (mobile + desktop pour épingler la card)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(0); // Oak (index 0) sélectionné par défaut
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
 
-  // Le hover a priorité sur la sélection; sinon on affiche la sélection
   const activeIndex = hoveredIndex !== null ? hoveredIndex : selectedIndex;
 
-  // Préchargement du GIF dès le montage du composant
   const gifRef = useRef<HTMLImageElement | null>(null);
   useEffect(() => {
     const img = new window.Image();
@@ -76,10 +85,9 @@ export default function HomePage() {
     setBackground({ colorLeft: colors.ui.bgLeft, colorStripe: colors.ui.bgStripe, colorRight: colors.ui.bgRight });
     clearContext();
     setOpen(false);
-  }, []);
+  }, [setBackground, clearContext, setOpen]);
 
   const handlePokeballClick = (index: number) => {
-    // Mobile : bascule la sélection ; desktop : épingle/désépingle
     setSelectedIndex(prev => prev === index ? null : index);
   };
 
@@ -95,51 +103,25 @@ export default function HomePage() {
     setSelectedIndex(newIndex);
   };
 
-  // Oak vertical offset (tweak this to move Oak up/down without affecting the ground or pokéballs)
   const oakBottomOffset = "8%";
-
-  // Tailles proportionnelles communes
   const pointerSize = "clamp(20px, 2.5vw, 44px)";
   const textSize = "clamp(0.8rem, 1.5vw, 1.25rem)";
 
-  // Tailles des pokéballs par layout
-  // lg+ (4 en ligne) : 4 × 10vw + 3 × 4vw = 52vw → OK
   const lgPokeballSize = "clamp(100px, 20vw, 250px)";
   const lgGapSize = "clamp(1rem, 4vw, 6rem)";
-  // sm–lg (quinconce, 2 par rangée) : 2 × 15vw + 1 × 8vw = 38vw → OK
   const mdPokeballSize = "clamp(80px, 15vw, 200px)";
   const mdGapSize = "clamp(1.5rem, 6vw, 5rem)";
-  // carousel (écran étroit, 1 seul) : 1 × 40vw → OK
   const smPokeballSize = "clamp(100px, 40vw, 200px)";
 
-  const [cardWidth, setCardWidth] = useState(() => {
-    if (typeof window === "undefined") return "clamp(50%, 60vw, 95%)";
-    return window.matchMedia("(max-width: 639px)").matches ? "clamp(80%, 85vw, 95%)" : "clamp(50%, 60vw, 95%)";
-  });
-  const cardMinHeight = "clamp(20vh, 25vw, 35vh)";
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(max-width: 639px)");
-    const onChange = (e: any) => setCardWidth(e.matches ? "clamp(85%, 90vw, 95%)" : "clamp(50%, 60vw, 95%)");
-    onChange(mq);
-    if (mq.addEventListener) {
-      mq.addEventListener("change", onChange);
-      return () => mq.removeEventListener("change", onChange);
-    } else {
-      mq.addListener(onChange);
-      return () => mq.removeListener(onChange);
-    }
-  }, []);
-
   const renderItem = (
-    game: typeof games[0],
+    game: Game,
     index: number,
     opts: { forceActive?: boolean; noInteraction?: boolean; pokeballSize?: string } = {},
   ) => {
     const isActive = opts.forceActive ?? activeIndex === index;
-    const isOak = (game as any).isOak;
+    const isOak = game.isOak;
     const size = opts.pokeballSize ?? lgPokeballSize;
+    
     return (
       <div
         key={index}
@@ -149,7 +131,6 @@ export default function HomePage() {
         role="button"
         aria-label={`Choisir ${game.title}`}
       >
-        {/* Pointer au-dessus */}
         <div
           className="flex items-end justify-center"
           style={isOak ? { marginBottom: oakBottomOffset } : undefined}
@@ -181,7 +162,6 @@ export default function HomePage() {
           </AnimatePresence>
         </div>
 
-        {/* Pokéball/Oak + Sol */}
         <div
           className="relative transition-transform duration-150"
           style={{ width: size, height: size, transform: `scale(${isActive ? 1.1 : 0.9})` }}
@@ -211,9 +191,8 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* Nom du jeu */}
         <span
-          className="font-display text-white transition-all duration-150 mt-2"
+          className="font-display text-white transition-all duration-150 mt-2 text-center"
           style={{
             fontSize: isActive ? `calc(${textSize} * 1.15)` : textSize,
             opacity: isActive ? 1 : 0.55,
@@ -227,15 +206,14 @@ export default function HomePage() {
 
   return (
     <div className="space-y-8">
-      {/* Zone interactive : pokéballs + card — mouseleave sur le wrapper global */}
       <div onMouseLeave={() => setHoveredIndex(null)}>
 
-        {/* ≥1024px : ligne unique, tous les éléments alignés en bas */}
+        {/* ≥1024px : Ligne */}
         <div className="hidden lg:flex items-end justify-center py-6" style={{ gap: lgGapSize }}>
           {games.map((game, index) => renderItem(game, index, { pokeballSize: lgPokeballSize }))}
         </div>
 
-        {/* 640px–1023px : quinconce — Oak+PokéDesc en haut/bas, Types+Dézoom en bas/haut */}
+        {/* 640px–1023px : Quinconce */}
         <div
           className="hidden sm:flex lg:hidden items-stretch justify-center py-6"
           style={{ gap: mdGapSize, minHeight: `calc(${mdPokeballSize} * 2.4)` }}
@@ -247,13 +225,13 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* <640px : carousel — une pokéball à la fois avec flèches de navigation */}
-        <div className="sm:hidden flex flex-col items-center py-4 gap-4">
-          <div className="flex items-center gap-4">
+        {/* <640px : Carrousel mobile */}
+        <div className="sm:hidden flex flex-col items-center py-4 gap-4 w-full">
+          <div className="flex items-center justify-center w-full gap-2">
             <button
               onClick={handleCarouselPrev}
               aria-label="Pokéball précédente"
-              className="text-white/60 active:text-white text-5xl font-light transition-colors select-none leading-none px-2"
+              className="text-white/60 active:text-white hover:text-white text-5xl font-light transition-colors select-none leading-none p-3"
             >
               ‹
             </button>
@@ -261,12 +239,12 @@ export default function HomePage() {
             <button
               onClick={handleCarouselNext}
               aria-label="Pokéball suivante"
-              className="text-white/60 active:text-white text-5xl font-light transition-colors select-none leading-none px-2"
+              className="text-white/60 active:text-white hover:text-white text-5xl font-light transition-colors select-none leading-none p-3"
             >
               ›
             </button>
           </div>
-          {/* Dots de navigation */}
+          
           <div className="flex gap-3">
             {games.map((_, i) => (
               <button
@@ -279,8 +257,8 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Message d'invite quand aucune pokéball n'est active */}
-        <div className="flex justify-center h-6">
+        {/* Helper text */}
+        <div className="flex justify-center h-6 mt-2">
           <AnimatePresence>
             {activeIndex === null && (
               <motion.p
@@ -288,7 +266,7 @@ export default function HomePage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.25 }}
-                className="text-white/50 italic"
+                className="text-white/50 italic text-center px-4"
                 style={{ fontSize: "clamp(0.75rem, 1vw, 0.875rem)" }}
               >
                 Survole ou appuie sur une Pokéball pour découvrir le jeu
@@ -297,8 +275,8 @@ export default function HomePage() {
           </AnimatePresence>
         </div>
 
-        {/* GameCard révélée sous les pokéballs */}
-        <div className="mt-4 flex justify-center w-full">
+        {/* GameCard - Largeur gérée via Tailwind */}
+        <div className="mt-4 flex justify-center w-full px-4">
           <AnimatePresence mode="wait">
             {activeIndex !== null && (
               <motion.div
@@ -307,20 +285,17 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
                 transition={{ duration: 0.28, ease: "easeOut" }}
-                // Application des tailles fluides ici :
-                style={{ 
-                  width: cardWidth, 
-                  minHeight: cardMinHeight 
-                }}
+                // Les classes Tailwind gèrent parfaitement le responsive ici
+                className="w-full sm:w-[85%] md:w-[75%] lg:w-[60%] min-h-[30vh] sm:min-h-[25vh]"
               >
                 <GameCard
                   title={games[activeIndex].title}
                   description={games[activeIndex].description}
                   color={games[activeIndex].color}
-                  text_color={(games[activeIndex] as any).text_color}
+                  text_color={games[activeIndex].text_color}
                   secondColor={games[activeIndex].secondColor}
-                  image={(games[activeIndex] as any).image}
-                  icon={(games[activeIndex] as any).icon}
+                  image={games[activeIndex].image}
+                  icon={games[activeIndex].icon}
                   to={games[activeIndex].to}
                 />
               </motion.div>
