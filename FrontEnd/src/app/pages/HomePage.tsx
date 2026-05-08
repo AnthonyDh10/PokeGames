@@ -12,8 +12,20 @@ import pokedescLogo from "../components/images/pokedesc-logo.png";
 import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
 import pointerImg from "../components/images/pointer.png";
+import oakImg from "../components/images/oak.png";
+import rulesIconImg from "../components/images/rules-icon.png";
 
 const games = [
+  {
+    title: "Professeur Chen",
+    description: "Bienvenue dresseur ! Relève les défis du Professeur Chen pour tester tes connaissances sur les pokémon ! Prends connaissance de ces règles en cliquant sur le livre !",
+    color: colors.ui.grayBorderLight,
+    secondColor: colors.ui.grayBorderDark,
+    image: rulesIconImg,
+    to: "/regles",
+    isOak: true,
+    text_color: colors.ui.grayBorderDark,
+  },
   {
     title: "PokéDesc",
     description: "Connais-tu ton pokédex sur le bout des doigts ? Devine le pokémon à partir d'une description et d'autres indices !",
@@ -47,7 +59,7 @@ export default function HomePage() {
   // hoveredIndex : survol souris (desktop)
   // selectedIndex : tap / clic (mobile + desktop pour épingler la card)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(0); // Oak (index 0) sélectionné par défaut
 
   // Le hover a priorité sur la sélection; sinon on affiche la sélection
   const activeIndex = hoveredIndex !== null ? hoveredIndex : selectedIndex;
@@ -71,15 +83,19 @@ export default function HomePage() {
     setSelectedIndex(prev => prev === index ? null : index);
   };
 
+  // Oak vertical offset (tweak this to move Oak up/down without affecting the ground or pokéballs)
+  const oakBottomOffset = "8%";
+
   return (
     <div className="space-y-8">
       {/* Zone interactive : pokéballs + card — mouseleave sur le wrapper global */}
       <div onMouseLeave={() => setHoveredIndex(null)}>
 
-        {/* Rangée des 3 pokéballs */}
+        {/* Rangée des pokéballs et Oak */}
         <div className="flex items-end justify-center gap-10 md:gap-20 lg:gap-32 py-6">
           {games.map((game, index) => {
             const isActive = activeIndex === index;
+            const isOak = (game as any).isOak;
             return (
               <div
                 key={index}
@@ -89,8 +105,11 @@ export default function HomePage() {
                 role="button"
                 aria-label={`Choisir ${game.title}`}
               >
-                {/* Indicative pointer image above the pokéball */}
-                <div className="h-7 flex items-end justify-center">
+                {/* Indicative pointer image above the pokéball/Oak */}
+                <div
+                  className="h-7 flex items-end justify-center"
+                  style={isOak ? { marginBottom: oakBottomOffset } : undefined}
+                >
                   <AnimatePresence>
                     {isActive && (
                       <motion.div
@@ -118,8 +137,8 @@ export default function HomePage() {
                   </AnimatePresence>
                 </div>
 
-                {/* Pokéball + Sol group — sol positionné derrière et rapproché */}
-                <div className={`relative w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 transition-transform duration-150 ${isActive ? "scale-125" : "scale-100"}`}>
+                {/* Pokéball/Oak + Sol group — sol positionné derrière et rapproché */}
+                <div className={`relative w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 transition-transform duration-150 ${isActive ? "scale-110" : "scale-90"}`}>
                   <img
                     src={solHerbes}
                     alt={`${game.title} sol`}
@@ -127,12 +146,24 @@ export default function HomePage() {
                     style={{ bottom: "-35%", zIndex: 0 }}
                     draggable={false}
                   />
-                  <img
-                    src={isActive ? pokeballShaking : pokeballFace}
-                    alt={game.title}
-                    className={`relative z-10 w-full h-full object-contain transition-filter duration-150 ${!isActive ? "grayscale-[0.4]" : ""}`}
-                    draggable={false}
-                  />
+
+                  {/* Oak rendered with its own absolute positioning so its offset can be tweaked independently */}
+                  {isOak ? (
+                    <img
+                      src={oakImg}
+                      alt={game.title}
+                      className="absolute z-10 left-0 right-0 w-full h-full object-contain transition-all duration-150 pointer-events-none"
+                      style={{ bottom: oakBottomOffset }}
+                      draggable={false}
+                    />
+                  ) : (
+                    <img
+                      src={isActive ? pokeballShaking : pokeballFace}
+                      alt={game.title}
+                      className={`relative z-10 w-full h-full object-contain transition-filter duration-150 ${!isActive ? "grayscale-[0.4]" : ""}`}
+                      draggable={false}
+                    />
+                  )}
                 </div>
 
                 {/* Nom du jeu */}
@@ -179,8 +210,10 @@ export default function HomePage() {
                   title={games[activeIndex].title}
                   description={games[activeIndex].description}
                   color={games[activeIndex].color}
+                  text_color={(games[activeIndex] as any).text_color}
                   secondColor={games[activeIndex].secondColor}
-                  image={games[activeIndex].image}
+                  image={(games[activeIndex] as any).image}
+                  icon={(games[activeIndex] as any).icon}
                   to={games[activeIndex].to}
                 />
               </motion.div>

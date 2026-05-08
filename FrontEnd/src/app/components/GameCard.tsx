@@ -6,6 +6,8 @@ interface GameCardProps {
   description: string;
   /** Couleur de fond de la carte — utiliser `colors.brand.xxx` depuis design/colors.ts */
   color: string;
+  /** Couleur du texte (ex: '#ffffff' ou 'white') — défaut: blanc */
+  text_color?: string;
   icon?: string;
   to: string;
   image?: string;
@@ -24,6 +26,7 @@ export default function GameCard({
   image,
   onClick,
   secondColor,
+  text_color = "#ffffff",
 }: GameCardProps) {
   const navigate = useNavigate();
 
@@ -84,10 +87,16 @@ export default function GameCard({
           opacity={0.15}
           className="absolute top-1/2 right-6 -translate-y-1/2"
         />
-        <h2 className="font-display uppercase font-bold text-2xl tracking-wide text-white mb-3 drop-shadow-[2px_2px_0px_rgba(0,0,0,0.6)]">
+        <h2
+          className="font-display uppercase font-bold text-2xl tracking-wide mb-3 drop-shadow-[2px_2px_0px_rgba(0,0,0,0.6)]"
+          style={{ color: text_color }}
+        >
           {title}
         </h2>
-        <p className="font-body text-white/90 text-base md:text-lg leading-relaxed drop-shadow-[1px_1px_0px_rgba(0,0,0,0.4)]">
+        <p
+          className="font-body text-base md:text-lg leading-relaxed drop-shadow-[1px_1px_0px_rgba(0,0,0,0.4)]"
+          style={{ color: text_color, opacity: 0.9 }}
+        >
           {description}
         </p>
       </div>
