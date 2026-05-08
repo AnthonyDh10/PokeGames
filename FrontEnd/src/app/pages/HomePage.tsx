@@ -18,7 +18,7 @@ import rulesIconImg from "../components/images/rules-icon.png";
 const games = [
   {
     title: "Professeur Chen",
-    description: "Bienvenue dresseur ! Relève les défis du Professeur Chen pour tester tes connaissances sur les pokémon ! Prends connaissance de ces règles en cliquant sur le livre !",
+    description: "Bienvenue dresseur ! Relève les défis du Professeur Chen pour tester tes connaissances sur les pokémon ! Chaque pokéball renferme un défi différent, survole les pour les découvrir ! Prends connaissance de leurs règles en cliquant sur le livre !",
     color: colors.ui.grayBorderLight,
     secondColor: colors.ui.grayBorderDark,
     image: rulesIconImg,
