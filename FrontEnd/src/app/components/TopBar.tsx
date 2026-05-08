@@ -22,189 +22,89 @@ export default function TopBar({
   const navigate = useNavigate();
 
   const handlePokeballClick = () => {
+    // Utilisation de la largeur standard des breakpoints Tailwind (md = 768px)
     if (window.innerWidth < 768) {
       onToggleSidebar();
     } else {
       navigate("/");
     }
   };
-  // Match sidebar/button sizes so we can horizontally center the pokéball
+
+  // Tailles fluides (Responsive)
   const sidebarWidth = "clamp(3.75rem, 12vw, 8rem)";
   const pokeballSize = "clamp(2.25rem, 8vw, 4.8rem)";
   const topbarHeight = "clamp(2.8rem, 10vh, 6rem)";
-  // Génère les clip-paths polygon qui tracent la diagonale en "escalier":
-  // - leftClip : la partie gauche (forme principale)
-  // - rightClip: la partie droite (complémentaire) utilisée pour l'ombre de la fine barre
-  const { leftClip, rightClip } = useMemo(() => {
-    // Symétrie axiale verticale: inverse la direction de l'escalier
+
+  // Génération du clip-path polygon (forme d'escalier gauche)
+  const leftClip = useMemo(() => {
     const topX = split + diagonalOffset / 2;
     const bottomX = split - diagonalOffset / 2;
     const dx = bottomX - topX;
 
-    const leftPoints: string[] = [];
-    leftPoints.push(`0% 0%`);
-    leftPoints.push(`${topX}% 0%`);
+    const leftPoints: string[] = ["0% 0%", `${topX}% 0%`];
 
     for (let i = 0; i < steps; i++) {
       const y = ((i + 1) / steps) * 100;
       const xPrev = topX + (i / steps) * dx;
       const xNext = topX + ((i + 1) / steps) * dx;
-      leftPoints.push(`${xPrev}% ${y}%`);
-      leftPoints.push(`${xNext}% ${y}%`);
+      leftPoints.push(`${xPrev}% ${y}%`, `${xNext}% ${y}%`);
     }
 
-    leftPoints.push(`0% 100%`);
-    const leftClip = `polygon(${leftPoints.join(",")})`;
-
-    // Build right-side polygon (complement of left) so the thin-bar shadow
-    // can be shown on the transparent/right side of the header.
-    const rightPoints: string[] = [];
-    rightPoints.push(`${topX}% 0%`);
-    rightPoints.push(`100% 0%`);
-    rightPoints.push(`100% 100%`);
-    rightPoints.push(`${bottomX}% 100%`);
-    for (let i = steps - 1; i >= 0; i--) {
-      const y = ((i + 1) / steps) * 100;
-      const xPrev = topX + (i / steps) * dx;
-      const xNext = topX + ((i + 1) / steps) * dx;
-      rightPoints.push(`${xNext}% ${y}%`);
-      rightPoints.push(`${xPrev}% ${y}%`);
-    }
-    const rightClip = `polygon(${rightPoints.join(",")})`;
-
-    return { leftClip, rightClip };
+    leftPoints.push("0% 100%");
+    return `polygon(${leftPoints.join(",")})`;
   }, [steps, split, diagonalOffset]);
 
   return (
-    <header
-      className="w-full flex items-center justify-between px-2 sm:px-4 md:px-6 lg:px-8 relative retro-topbar"
-      style={{
-        height: "clamp(2.8rem, 10vh, 6rem)",
-        // header itself stays transparent so the right side shows the page background
-        backgroundColor: "transparent",
-        ["--topbar-text-color" as any]: colors.ui.textOnColor,
-        // Ensure header stacks above the sidebar (sidebar uses z-50)
-        zIndex: 100,
-        // remove decorative borders coming from .retro-topbar
-        borderTop: "none",
-        borderBottom: "none",
-        // remove any shadow that produces a floating line under transparent area
-        boxShadow: "none",
-        WebkitBoxShadow: "none",
-      } as any}
+    <header 
+      className="relative w-full flex items-center justify-between px-2 sm:px-4 md:px-6 lg:px-8 z-[100]"
+      style={{ height: topbarHeight }}
     >
-      {/* Thin red bar behind TopBar — visible through the transparent area */}
+      {/* Fine barre rouge en arrière-plan (visible sur la partie droite transparente) */}
       <div
+        className="absolute left-0 right-0 top-0 z-0"
+        style={{ height: "clamp(2.8rem, 10vh, 3rem)", backgroundColor: colors.brand.red }}
+      />
+
+      {/* Zone de gauche : Fond rouge coupé en escalier + Titre */}
+      <div
+        className="absolute inset-0 z-10 flex items-center"
         style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          height: "clamp(2.8rem, 10vh, 3rem)",
           backgroundColor: colors.brand.red,
-          zIndex: 9,
-          boxShadow: "none",
-        } as any}
-      />
-
-      {/* Pokéball overlay positioned above the sidebar (keeps vertical alignment with the TopBar) */}
-      <img
-        src={Pokeball}
-        alt="Pokéball"
-        onClick={handlePokeballClick}
-        className="retro-pokeball-btn"
-        style={{
-          position: "absolute",
-          // center horizontally relative to the sidebar: (sidebarWidth/2 - pokeballSize/2)
-          left: `calc(${sidebarWidth} / 2 - ${pokeballSize} / 2)`,
-          // vertically centered inside the TopBar
-          top: "50%",
-          transform: "translateY(-50%)",
-          // Keep natural aspect ratio: set width and let height adjust
-          width: pokeballSize,
-          height: "auto",
-          objectFit: "contain",
-          zIndex: 100000,
-          cursor: "pointer",
-        } as any}
-      />
-
-      {/* Thin bar shadow: stepped shadow matching the stair shape (slightly offset) */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          height: "clamp(2.8rem, 10vh, 3rem)",
-          backgroundColor: "rgba(0,0,0,0.35)",
-          clipPath: rightClip,
-          WebkitClipPath: rightClip,
-          transform: "translate(3px, 3px)",
-          zIndex: 8,
-          pointerEvents: "none",
-        } as any}
-      />
-
-      {/* Left area: background + clipped shape + content */}
-      <div
-        className="absolute inset-0 flex items-center px-4 md:px-8"
-        style={{
-          backgroundColor: "transparent",
-        } as any}
+          clipPath: leftClip,
+          WebkitClipPath: leftClip,
+        }}
       >
-        {/* Shadow stair: same leftClip, slightly offset to simulate shadow */}
-        <div
+        <h2 
+          className="font-display tracking-wide text-white uppercase"
           style={{
-            position: "absolute",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.45)",
-            clipPath: leftClip,
-            WebkitClipPath: leftClip,
-            transform: "translate(3px, 3px)",
-            zIndex: 8,
-            boxShadow: "none",
-            WebkitBoxShadow: "none",
-            pointerEvents: "none",
-          } as any}
-        />
-        <div
-          className="relative flex items-center gap-3"
-          style={{
-            // element covers the full header box but is clipped to the left 'stair' shape
-            position: "absolute",
-            inset: 0,
-            backgroundColor: colors.brand.red,
-            ["--topbar-text-color" as any]: colors.ui.textOnColor,
-            clipPath: leftClip,
-            WebkitClipPath: leftClip,
-            zIndex: 10,
-            // ensure no inner shadow adds an extra line
-            boxShadow: "none",
-            WebkitBoxShadow: "none",
-            paddingLeft: "1rem",
-            paddingRight: "1rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.75rem",
-          } as any}
+            fontSize: "clamp(0.9rem, 3vw, 1.875rem)",
+            // Décalage calculé pour laisser la place à la Pokéball et son espacement
+            marginLeft: `calc(${sidebarWidth} + clamp(0.5rem, 1vw, 2rem))`
+          }}
         >
-          <div
-            aria-hidden="true"
-            style={{ width: "clamp(2.5rem, 8vw, 4rem)", height: "clamp(2.5rem, 8vw, 4rem)", flexShrink: 0 }}
-          />
-
-          <h2 className="font-display tracking-wide text-white uppercase"
-            style={{
-              fontSize: "clamp(0.9rem, 3vw, 1.875rem)",
-              lineHeight: "1.2",
-              // increased left margin to give breathing space from the pokéball
-              marginLeft: "clamp(1rem, 3vw, 3rem)"
-            }}>
-            PokéGames
-          </h2>
-        </div>
+          PokéGames
+        </h2>
       </div>
+
+      {/* Pokéball / Bouton d'action */}
+      <button
+        onClick={handlePokeballClick}
+        aria-label="Menu principal"
+        className="absolute z-[100000] top-1/2 -translate-y-1/2 transition-transform hover:scale-105 active:scale-95 cursor-pointer outline-none"
+        style={{
+          // Centrage par rapport à la largeur de la sidebar
+          left: `calc(${sidebarWidth} / 2 - ${pokeballSize} / 2)`,
+          width: pokeballSize,
+          height: pokeballSize,
+        }}
+      >
+        <img
+          src={Pokeball}
+          alt=""
+          className="w-full h-full object-contain"
+          draggable={false}
+        />
+      </button>
     </header>
   );
 }
