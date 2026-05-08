@@ -29,7 +29,7 @@ interface Game {
 
 const games: Game[] = [
   {
-    title: "Prof. Chen",
+    title: "PROF. CHEN",
     description: "Bienvenue dresseur ! Relève les défis du Professeur pour tester tes connaissances sur les pokémon ! Chaque pokéball renferme un défi différent, survole les pour les découvrir ! Prends connaissance de leurs règles en cliquant sur le livre !",
     color: colors.ui.grayBorderLight,
     secondColor: colors.ui.grayBorderDark,
@@ -39,7 +39,7 @@ const games: Game[] = [
     text_color: colors.ui.grayBorderDark,
   },
   {
-    title: "PokéDesc",
+    title: "POKÉDESC",
     description: "Connais-tu ton pokédex sur le bout des doigts ? Devine le pokémon à partir d'une description et d'autres indices !",
     color: colors.brand.blue,
     secondColor: colors.brand.blueDark,
@@ -47,7 +47,7 @@ const games: Game[] = [
     to: "/pokedesc",
   },
   {
-    title: "Quel est ce type ?",
+    title: "TYPUZZLE",
     description: "J'espère que tu connais ta table de types ! Devine les types à partir de leurs forces, faiblesses et immunités !",
     color: colors.brand.yellow,
     secondColor: colors.brand.yellowWarm,
@@ -55,7 +55,7 @@ const games: Game[] = [
     to: "/types",
   },
   {
-    title: "Dézoom",
+    title: "DEX-ZOOM",
     description: "Penses-tu reconnaître un pokémon du premier coup d'œil ? Devine le pokémon à partir d'une partie de son corps !",
     color: colors.brand.red,
     secondColor: colors.brand.redDark,
@@ -285,8 +285,7 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
                 transition={{ duration: 0.28, ease: "easeOut" }}
-                // Les classes Tailwind gèrent parfaitement le responsive ici
-                className="w-full sm:w-[85%] md:w-[75%] lg:w-[60%] min-h-[30vh] sm:min-h-[25vh]"
+                className="w-full sm:w-[85%] md:w-[75%] lg:w-[70%] min-h-[30vh] sm:min-h-[25vh]"
               >
                 <GameCard
                   title={games[activeIndex].title}
