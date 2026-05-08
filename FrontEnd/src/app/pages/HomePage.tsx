@@ -14,7 +14,6 @@ import pointerImg from "../components/images/pointer.png";
 import oakImg from "../components/images/oak.png";
 import rulesIconImg from "../components/images/rules-icon.png";
 
-// Création d'une interface pour typer correctement tes jeux
 interface Game {
   title: string;
   description: string;
@@ -75,6 +74,39 @@ export default function HomePage() {
   const activeIndex = hoveredIndex !== null ? hoveredIndex : selectedIndex;
 
   const gifRef = useRef<HTMLImageElement | null>(null);
+
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  // Distance minimale pour qu'un swipe soit validé
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null); // Réinitialiser à chaque nouvelle touche
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleCarouselNext();
+    } else if (isRightSwipe) {
+      handleCarouselPrev();
+    }
+  };
+
+  // Calcul des index adjacents
+  const prevIndex = (carouselIndex - 1 + games.length) % games.length;
+  const nextIndex = (carouselIndex + 1) % games.length;
+
   useEffect(() => {
     const img = new window.Image();
     img.src = pokeballShaking;
@@ -107,11 +139,11 @@ export default function HomePage() {
   const pointerSize = "clamp(20px, 2.5vw, 44px)";
   const textSize = "clamp(0.8rem, 1.5vw, 1.25rem)";
 
-  const lgPokeballSize = "clamp(100px, 20vw, 250px)";
+  // Ajouts / Ajustements des tailles pour la nouvelle grille :
+  const lgPokeballSize = "clamp(110px, 16vw, 220px)"; // Légèrement affiné pour la ligne de 4
   const lgGapSize = "clamp(1rem, 4vw, 6rem)";
-  const mdPokeballSize = "clamp(80px, 15vw, 200px)";
-  const mdGapSize = "clamp(1.5rem, 6vw, 5rem)";
-  const smPokeballSize = "clamp(100px, 40vw, 200px)";
+  const mdPokeballSize = "clamp(120px, 25vw, 200px)"; // Plus grand car il y a seulement 2 éléments par ligne
+  const smPokeballSize = "clamp(130px, 45vw, 220px)"; 
 
   const renderItem = (
     game: Game,
@@ -208,54 +240,87 @@ export default function HomePage() {
     <div className="space-y-8">
       <div onMouseLeave={() => setHoveredIndex(null)}>
 
-        {/* ≥1024px : Ligne */}
+        {/* ≥1024px (lg) : Ligne unique - S'affiche quand la GameCard est complète */}
         <div className="hidden lg:flex items-end justify-center py-6" style={{ gap: lgGapSize }}>
           {games.map((game, index) => renderItem(game, index, { pokeballSize: lgPokeballSize }))}
         </div>
 
-        {/* 640px–1023px : Quinconce */}
-        <div
-          className="hidden sm:flex lg:hidden items-stretch justify-center py-6"
-          style={{ gap: mdGapSize, minHeight: `calc(${mdPokeballSize} * 2.4)` }}
-        >
+        {/* 640px–1023px (sm à lg) : Quinconce sur 2 LIGNES (Grille 2 colonnes) 
+            S'active en même temps que le responsive de la GameCard */}
+        <div className="hidden sm:grid lg:hidden grid-cols-2 gap-x-6 gap-y-4 max-w-2xl mx-auto pt-4 pb-12">
           {games.map((game, index) => (
-            <div key={index} style={{ alignSelf: index % 2 === 0 ? "flex-start" : "flex-end" }}>
+            <div 
+              key={index} 
+              className={`flex justify-center ${
+                index % 2 !== 0 ? "mt-16" : "mb-8" // Pousse les éléments pairs vers le haut et les impairs vers le bas
+              }`}
+            >
               {renderItem(game, index, { pokeballSize: mdPokeballSize })}
             </div>
           ))}
         </div>
 
-        {/* <640px : Carrousel mobile */}
-        <div className="sm:hidden flex flex-col items-center py-4 gap-4 w-full">
-          <div className="flex items-center justify-center w-full gap-2">
-            <button
-              onClick={handleCarouselPrev}
-              aria-label="Pokéball précédente"
-              className="text-white/60 active:text-white hover:text-white text-5xl font-light transition-colors select-none leading-none p-3"
-            >
-              ‹
-            </button>
-            {renderItem(games[carouselIndex], carouselIndex, { forceActive: true, noInteraction: true, pokeballSize: smPokeballSize })}
-            <button
-              onClick={handleCarouselNext}
-              aria-label="Pokéball suivante"
-              className="text-white/60 active:text-white hover:text-white text-5xl font-light transition-colors select-none leading-none p-3"
-            >
-              ›
-            </button>
-          </div>
-          
-          <div className="flex gap-3">
-            {games.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => { setCarouselIndex(i); setSelectedIndex(i); }}
-                className={`w-2 h-2 rounded-full transition-all duration-200 ${i === carouselIndex ? "bg-white scale-125" : "bg-white/30"}`}
-                aria-label={`Aller à ${games[i].title}`}
-              />
-            ))}
-          </div>
+    {/* <640px (sm) : Carrousel mobile avec Swipe et Profondeur */}
+    <div 
+      className="sm:hidden flex flex-col items-center py-4 w-full"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* Conteneur du carousel avec une hauteur définie pour le positionnement absolu */}
+      <div className="relative flex items-center justify-center w-full min-h-[250px] mb-4">
+        
+        {/* Élément Précédent (Gauche) */}
+        <div
+          className="absolute left-[-20%] transition-all duration-300 ease-in-out opacity-40 blur-[1px] cursor-pointer"
+          style={{ transform: 'scale(0.65) translateY(-30px)', zIndex: 0 }}
+          onClick={handleCarouselPrev} // Permet de cliquer sur l'élément pour changer
+        >
+          {renderItem(games[prevIndex], prevIndex, { 
+            forceActive: false, 
+            noInteraction: true, 
+            pokeballSize: smPokeballSize 
+          })}
         </div>
+
+        {/* Élément Central (Actif) */}
+        <div 
+          className="relative z-10 transition-all duration-300 ease-in-out" 
+          style={{ transform: 'scale(1) translateY(0)' }}
+        >
+          {renderItem(games[carouselIndex], carouselIndex, { 
+            forceActive: true, 
+            noInteraction: true, 
+            pokeballSize: smPokeballSize 
+          })}
+        </div>
+
+        {/* Élément Suivant (Droite) */}
+        <div
+          className="absolute right-[-20%] transition-all duration-300 ease-in-out opacity-40 blur-[1px] cursor-pointer"
+          style={{ transform: 'scale(0.65) translateY(-30px)', zIndex: 0 }}
+          onClick={handleCarouselNext} // Permet de cliquer sur l'élément pour changer
+        >
+          {renderItem(games[nextIndex], nextIndex, { 
+            forceActive: false, 
+            noInteraction: true, 
+            pokeballSize: smPokeballSize 
+          })}
+        </div>
+      </div>
+      
+      {/* Indicateurs / Dots */}
+      <div className="flex gap-3">
+        {games.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => { setCarouselIndex(i); setSelectedIndex(i); }}
+            className={`w-2 h-2 rounded-full transition-all duration-200 ${i === carouselIndex ? "bg-white scale-125" : "bg-white/30"}`}
+            aria-label={`Aller à ${games[i].title}`}
+          />
+        ))}
+      </div>
+    </div>
 
         {/* Helper text */}
         <div className="flex justify-center h-6 mt-2">
@@ -275,7 +340,7 @@ export default function HomePage() {
           </AnimatePresence>
         </div>
 
-        {/* GameCard - Largeur gérée via Tailwind */}
+        {/* GameCard */}
         <div className="mt-4 flex justify-center w-full px-4">
           <AnimatePresence mode="wait">
             {activeIndex !== null && (
