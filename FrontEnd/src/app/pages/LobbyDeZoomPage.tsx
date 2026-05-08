@@ -58,7 +58,7 @@ export default function LobbyDeZoomPage() {
             <div className="p-6">
               <div className="flex items-center gap-3 mb-5">
                 <span className="text-xl">⚙️</span>
-                <h3 className="font-display text-2xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
+                <h3 className="font-heading text-xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
                   Générations
                 </h3>
                 {!isPlayer1 && (

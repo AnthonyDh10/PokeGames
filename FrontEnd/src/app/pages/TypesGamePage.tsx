@@ -159,7 +159,7 @@ export default function TypesGamePage() {
   if (isLoading) {
     return (
       <div className="max-w-5xl mx-auto p-6">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
+        <div className="bg-white border border-gray-200 shadow-px-sm p-12 text-center">
           <p className="text-gray-500">Chargement...</p>
         </div>
       </div>
@@ -169,11 +169,11 @@ export default function TypesGamePage() {
   if (errorMessage) {
     return (
       <div className="max-w-5xl mx-auto p-6">
-        <div className="bg-white rounded-xl border-2 border-red-500 shadow-sm p-12 text-center">
+        <div className="bg-white border-2 border-red-500 shadow-px-sm p-12 text-center">
           <p className="text-red-600 font-medium mb-4">{errorMessage}</p>
           <button
             onClick={() => navigate('/types')}
-            className="font-body font-semibold px-6 py-2.5 text-white rounded-xl hover:-translate-y-0.5 transition"
+            className="font-body font-semibold px-6 py-2.5 text-white rounded hover:-translate-y-0.5 transition"
             style={{ backgroundColor: colors.brand.yellow }}
           >
             Retour au menu
@@ -195,7 +195,7 @@ export default function TypesGamePage() {
             headerColor={colors.brand.yellow}
             headerClassName="py-4"
             header={
-              <h1 className="font-display text-2xl md:text-3xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
+              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
                 Quel est ce type ?{game.isMono ? '' : ' (paire)'}
               </h1>
             }
@@ -222,7 +222,7 @@ export default function TypesGamePage() {
             headerColor={colors.brand.yellow}
             headerClassName="py-4"
             header={
-              <h1 className="font-display text-2xl md:text-3xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
+              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
                 Ta réponse
               </h1>
             }
@@ -291,7 +291,7 @@ export default function TypesGamePage() {
                   <button
                     type="submit"
                     disabled={isSubmitting || !selectedType1 || (!game.isMono && !selectedType2)}
-                    className="font-body font-semibold px-6 py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed text-white w-full"
+                    className="font-body font-semibold px-6 py-2.5 rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:cursor-not-allowed text-white w-full"
                     style={{ backgroundColor: colors.brand.yellow }}
                   >
                     {isSubmitting ? 'Vérification...' : 'Valider'}
@@ -308,7 +308,7 @@ export default function TypesGamePage() {
             headerColor={colors.brand.yellow}
             headerClassName="py-4"
             header={
-              <h1 className="font-display text-2xl md:text-3xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
+              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
                 Interactions défensives
               </h1>
             }

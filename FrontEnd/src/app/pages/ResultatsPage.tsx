@@ -202,12 +202,12 @@ export default function ResultatsPage() {
         <Card 
           headerColor={colors.game.error}
           headerClassName="py-3"
-          header={<h3 className="font-display text-xl tracking-wide text-white">Erreur</h3>}
+          header={<h3 className="font-heading text-base tracking-wide text-white">Erreur</h3>}
           className="border-red-500 text-center"
         >
           <div className="p-12">
             <p className="text-red-600 font-medium mb-4">❌ {errorMessage}</p>
-            <button onClick={() => navigate('/home')} className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:-translate-y-0.5 transition">
+            <button onClick={() => navigate('/home')} className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded hover:-translate-y-0.5 transition">
               Retour au menu
             </button>
           </div>
@@ -232,7 +232,7 @@ export default function ResultatsPage() {
         pokeballColor={!isSolo && j1Won ? colors.brand.yellow : colors.brand.blue}
         headerClassName="py-3"
         header={
-          <h2 className="font-display text-xl tracking-wide" style={{ color: colors.ui.textOnColor }}>
+          <h2 className="font-heading text-lg tracking-wide" style={{ color: colors.ui.textOnColor }}>
             {player1Name} {!isSolo && j1Won && '👑'}
           </h2>
         }
@@ -242,16 +242,16 @@ export default function ResultatsPage() {
           boxShadow: !isSolo && j1Won ? `0 8px 24px ${colors.brand.yellow}40` : undefined,
         }}
       >
-        <div className="p-6 flex flex-col h-full text-center rounded-b-xl">
+        <div className="p-6 flex flex-col h-full text-center">
           <div className="text-5xl font-bold my-3" style={{ color: colors.brand.blue }}>
             {partie.scoreJ1}
           </div>
           <p className="text-sm mb-4" style={{ color: colors.ui.textMuted }}>points</p>
           <div className="flex gap-3 justify-center text-sm flex-wrap mt-auto" style={{ color: colors.ui.textMuted }}>
-            <span className="px-2 py-1 rounded-md shadow-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
+              <span className="px-2 py-1 shadow-px-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
               ✅ {partie.completedPokemonsJ1?.filter(p => p.wasGuessed).length ?? 0} devinés
             </span>
-            <span className="px-2 py-1 rounded-md shadow-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
+            <span className="px-2 py-1 shadow-px-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
               ❌ {partie.completedPokemonsJ1?.filter(p => !p.wasGuessed).length ?? 0} ratés
             </span>
           </div>
@@ -275,7 +275,7 @@ export default function ResultatsPage() {
           headerClassName="py-3"
           pokeballColor={j2Won ? colors.brand.yellow : colors.brand.blue}
           header={
-            <h2 className="font-display text-xl tracking-wide" style={{ color: colors.ui.textOnColor }}>
+            <h2 className="font-heading text-lg tracking-wide" style={{ color: colors.ui.textOnColor }}>
               {player2Name} {j2Won && '👑'}
             </h2>
           }
@@ -285,7 +285,7 @@ export default function ResultatsPage() {
             boxShadow: j2Won ? `0 8px 24px ${colors.brand.yellow}40` : undefined,
           }}
         >
-          <div className="p-6 flex flex-col h-full text-center rounded-b-xl">
+          <div className="p-6 flex flex-col h-full text-center">
             {!gameFullyComplete && (partie.completedPokemonsJ2?.length ?? 0) === 0 && (
               <span
                 className="mx-auto inline-block text-xs font-medium px-2 py-1 rounded-full mb-2 animate-pulse border"
@@ -303,10 +303,10 @@ export default function ResultatsPage() {
             </div>
             <p className="text-sm mb-4" style={{ color: colors.ui.textMuted }}>points</p>
             <div className="flex gap-3 justify-center text-sm flex-wrap mt-auto" style={{ color: colors.ui.textMuted }}>
-              <span className="px-2 py-1 rounded-md shadow-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
+              <span className="px-2 py-1 shadow-px-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
                 ✅ {partie.completedPokemonsJ2?.filter(p => p.wasGuessed).length ?? 0} devinés
               </span>
-              <span className="px-2 py-1 rounded-md shadow-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
+              <span className="px-2 py-1 shadow-px-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
                 ❌ {partie.completedPokemonsJ2?.filter(p => !p.wasGuessed).length ?? 0} ratés
               </span>
             </div>
@@ -329,7 +329,7 @@ export default function ResultatsPage() {
       <Card headerClassName="py-4" pokeballOpacity={0}>
         <div className="p-6">
           <h2
-            className="font-display text-2xl md:text-3xl tracking-wide text-center mb-6"
+            className="font-heading text-xl md:text-2xl tracking-wide text-center mb-6"
             style={{ color: colors.ui.textPrimary }}
           >
             Détails des Pokémon
@@ -402,7 +402,7 @@ function PokemonColumn({
       headerColor={colors.brand.blueDark} // blue-900 equivalent
       headerClassName="py-3"
       pokeballColor={colors.brand.blueDark}
-      header={<h3 className="font-display text-lg tracking-wide text-white">{title}</h3>}
+      header={<h3 className="font-heading text-base tracking-wide text-white">{title}</h3>}
       className="h-full"
     >
       <div className="p-4 flex flex-col gap-3">
@@ -419,7 +419,7 @@ function PokemonColumn({
         {pokemons.map((cp) => (
           <div
             key={cp.pokemonId}
-            className={`rounded-xl border-2 p-4 transition hover:-translate-y-0.5 hover:shadow-sm bg-white
+            className={`border-2 p-4 transition hover:-translate-y-0.5 hover:shadow-px-sm bg-white
               ${cp.wasGuessed
                 ? 'border-green-400'
                 : 'border-red-300'}`}

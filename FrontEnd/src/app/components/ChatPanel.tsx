@@ -104,7 +104,7 @@ export default function ChatPanel() {
           className="flex items-center justify-between px-4 py-3 shrink-0"
           style={{ backgroundColor: colors.brand.red }}
         >
-          <span className="font-display text-white text-lg tracking-wide">💬 Chat</span>
+          <span className="font-heading text-white text-base tracking-wide">💬 Chat</span>
           <button
             onClick={() => setOpen(false)}
             className="text-white hover:text-yellow-200 transition text-xl leading-none"
@@ -122,7 +122,7 @@ export default function ChatPanel() {
             </p>
             <div className="flex items-center gap-2">
               <span
-                className="flex-1 text-center font-display text-2xl tracking-[0.3em] rounded-lg px-3 py-2 select-all"
+                className="flex-1 text-center font-display text-sm tracking-[0.3em] rounded-lg px-3 py-2 select-all"
                 style={{ backgroundColor: colors.brand.yellow + '33', color: colors.ui.textPrimary }}
               >
                 {sessionCode}

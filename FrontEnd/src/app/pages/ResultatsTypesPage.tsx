@@ -187,13 +187,13 @@ export default function ResultatsTypesPage() {
         <Card
           headerColor="#EF4444"
           headerClassName="py-3"
-          header={<h3 className="font-display text-xl tracking-wide text-white">Erreur</h3>}
+          header={<h3 className="font-heading text-base tracking-wide text-white">Erreur</h3>}
         >
           <div className="p-12 text-center">
             <p className="text-red-600 font-medium mb-4">{errorMessage || 'Erreur inconnue'}</p>
             <button
               onClick={() => navigate('/types')}
-              className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:-translate-y-0.5 transition"
+              className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded hover:-translate-y-0.5 transition"
             >
               Retour au menu
             </button>
@@ -245,7 +245,7 @@ export default function ResultatsTypesPage() {
         pokeballColor={isWinner ? colors.brand.yellowWarm : colors.brand.yellowLight}
         headerClassName="py-3"
         header={
-          <h2 className="font-display text-xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
+          <h2 className="font-heading text-lg tracking-wide" style={{ color: colors.ui.textPrimary }}>
             {name} {isWinner && (
               <span style={{ filter: 'grayscale(1)', marginLeft: '0.5rem' }}>
                 👑
@@ -259,7 +259,7 @@ export default function ResultatsTypesPage() {
           boxShadow: isWinner ? `0 8px 24px ${colors.ui.textPrimary}40` : undefined,
         }}
       >
-        <div className="p-6 flex flex-col h-full text-center rounded-b-xl">
+        <div className="p-6 flex flex-col h-full text-center">
           {pending && (
             <span
               className="mx-auto inline-block text-xs font-medium px-2 py-1 rounded-full mb-3 animate-pulse border"
@@ -279,7 +279,7 @@ export default function ResultatsTypesPage() {
                 {formatElapsed(playerResult.elapsedSeconds)}
               </div>
               <div className="flex gap-3 justify-center text-sm flex-wrap mt-auto" style={{ color: colors.ui.textMuted }}>
-                <span className="px-2 py-1 rounded-md shadow-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
+                <span className="px-2 py-1 shadow-px-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
                   {playerResult.attemptCount} tentative{(playerResult.attemptCount ?? 0) > 1 ? 's' : ''}
                 </span>
               </div>
@@ -333,7 +333,7 @@ export default function ResultatsTypesPage() {
         headerColor={colors.brand.yellowLight}
         headerClassName="py-4"
         header={
-          <h2 className="font-display text-2xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
+          <h2 className="font-heading text-xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
             Interactions défensives{correctAnswer && ` — ${correctAnswer}`}
           </h2>
         }

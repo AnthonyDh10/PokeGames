@@ -466,7 +466,7 @@ export default function PokeDescPage() {
   if (isLoading) {
     return (
       <div className="max-w-5xl mx-auto p-6">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
+        <div className="bg-white border border-gray-200 shadow-px-sm p-12 text-center">
           <p className="text-gray-500">Chargement...</p>
         </div>
       </div>
@@ -476,12 +476,12 @@ export default function PokeDescPage() {
   if (errorMessage) {
     return (
       <div className="max-w-5xl mx-auto p-6">
-        <div className="bg-white rounded-xl border-2 border-red-500 shadow-sm p-12 text-center">
+        <div className="bg-white border-2 border-red-500 shadow-px-sm p-12 text-center">
           <span className="text-5xl grayscale opacity-70 block mb-4">❌</span>
           <p className="text-red-600 font-medium mb-4">Erreur : {errorMessage}</p>
           <button
             onClick={() => navigate('/pokedesc')}
-            className="font-body font-semibold px-6 py-2.5 text-white rounded-xl hover:-translate-y-0.5 transition"
+            className="font-body font-semibold px-6 py-2.5 text-white rounded hover:-translate-y-0.5 transition"
             style={{ backgroundColor: colors.brand.blue }}
           >
             Retour au menu
@@ -502,11 +502,11 @@ export default function PokeDescPage() {
           headerClassName="py-4"
           header={
             <div className="flex flex-col md:flex-row md:items-center md:gap-3">
-              <h1 className="font-display text-2xl md:text-3xl tracking-wide" style={{ color: colors.ui.textOnColor }}>
+              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textOnColor }}>
                 Devine le Pokémon !
               </h1>
               {partie?.selectedGenerations && (
-                <span className="font-display text-2xl md:text-3xl tracking-wide" style={{ color: colors.ui.textOnColorSoft }}>
+                <span className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textOnColorSoft }}>
                   <span className="hidden md:inline">{formatGenerations(partie.selectedGenerations, false)}</span>
                   <span className="md:hidden">{formatGenerations(partie.selectedGenerations, true)}</span>
                 </span>
@@ -551,11 +551,11 @@ export default function PokeDescPage() {
             headerClassName="py-4"
             pokeballColor={colors.brand.blueLight}
             pokeballOpacity={0}
-            header={<h2 className="font-display text-2xl tracking-wide text-white">Description du Pokédex</h2>}
+            header={<h2 className="font-heading text-xl tracking-wide text-white">Description du Pokédex</h2>}
           >
             <div className="p-4 md:p-6 flex flex-col pb-6 min-h-[160px] md:min-h-[220px]">
                 <div className="flex-1">
-                  <div className="font-body bg-blue-50 border-l-4 rounded-xl p-4 text-base leading-relaxed h-full" style={{ borderColor: colors.brand.blue }}>
+                  <div className="font-body bg-blue-50 border-l-4 p-4 text-base leading-relaxed h-full" style={{ borderColor: colors.brand.blue }}>
                     {descriptions[descriptionIndex] || <span className="text-gray-400 italic">Chargement de la description...</span>}
                   </div>
                 </div>
@@ -563,7 +563,7 @@ export default function PokeDescPage() {
                   <div className="flex items-center justify-center gap-4 mt-auto">
                     <button
                       onClick={() => setDescriptionIndex(i => (i - 1 + descriptions.length) % descriptions.length)}
-                      className="w-9 h-9 flex items-center justify-center rounded-full border-2 font-bold text-lg hover:-translate-y-0.5 hover:shadow-sm transition"
+                      className="w-9 h-9 flex items-center justify-center rounded-full border-2 font-bold text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
                       style={{ borderColor: colors.brand.blue, color: colors.brand.blue }}
                     >
                       ‹
@@ -571,7 +571,7 @@ export default function PokeDescPage() {
                     <span className="font-body text-sm text-gray-500 tabular-nums">{descriptionIndex + 1} / {descriptions.length}</span>
                     <button
                       onClick={() => setDescriptionIndex(i => (i + 1) % descriptions.length)}
-                      className="w-9 h-9 flex items-center justify-center rounded-full border-2 font-bold text-lg hover:-translate-y-0.5 hover:shadow-sm transition"
+                      className="w-9 h-9 flex items-center justify-center rounded-full border-2 font-bold text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
                       style={{ borderColor: colors.brand.blue, color: colors.brand.blue }}
                     >
                       ›
@@ -587,7 +587,7 @@ export default function PokeDescPage() {
             headerClassName="py-4 z-50"
             pokeballColor={colors.brand.white}
             pokeballOpacity={0}
-            header={<h3 className="font-display text-2xl tracking-wide text-white">Ta réponse</h3>}
+            header={<h3 className="font-heading text-xl tracking-wide text-white">Ta réponse</h3>}
             overflowVisible
           >
             <div className="p-4 md:p-6">
@@ -610,7 +610,7 @@ export default function PokeDescPage() {
             <button
               onClick={handleSubmitGuess}
               disabled={!selectedPokemonName || isSubmitting}
-              className="font-body font-semibold w-full h-12 text-white rounded-xl hover:-translate-y-0.5 hover:shadow-md transition disabled:opacity-50 disabled:translate-y-0"
+              className="font-body font-semibold w-full h-12 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:translate-y-0"
               style={{ backgroundColor: colors.brand.blue }}
             >
               {isSubmitting ? 'Envoi...' : '✓ Valider la réponse'}
@@ -639,7 +639,7 @@ export default function PokeDescPage() {
           pokeballSize={300}
           header={
             <>
-              <h3 className="font-display text-2xl tracking-wide text-white">Indices disponibles</h3>
+              <h3 className="font-heading text-xl tracking-wide text-white">Indices disponibles</h3>
               <p className="font-body text-sm mt-1" style={{ color: colors.ui.textOnColorSoft }}>{partie?.timerDurationSeconds === -1 ? 'Les indices coûtent des points !' : 'Chaque indice coûte du temps !'}</p>
             </>
           
@@ -663,7 +663,7 @@ export default function PokeDescPage() {
                   title={locked ? `Temps insuffisant — il reste ${timeRemaining.toFixed(1)}s, cet indice coûte ${penalty}s` : ''}
                   className={`font-body relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border-2 font-medium min-h-24 transition
                     ${!used ? 'bg-white border-gray-200' : ''}
-                    ${!used && !locked ? 'hover:bg-blue-50 hover:border-blue-400 hover:-translate-y-0.5 hover:shadow-sm cursor-pointer' : ''}
+                    ${!used && !locked ? 'hover:bg-blue-50 hover:border-blue-400 hover:-translate-y-0.5 hover:shadow-px-sm cursor-pointer' : ''}
                     ${locked || used ? 'cursor-not-allowed' : ''}`}
                   style={used ? { backgroundColor: colors.brand.blue + '18', borderColor: colors.brand.blue } : {}}
                 >
@@ -704,7 +704,7 @@ export default function PokeDescPage() {
       {/* Modal succès */}
       {showSuccessModal && revealedPokemonSprite && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-          <div className="bg-white border-2 rounded-2xl p-8 max-w-sm w-11/12 text-center shadow-2xl animate-[fadeInScale_0.3s_ease-out]" style={{ borderColor: colors.game.success }}>
+          <div className="bg-white border-2 p-8 max-w-sm w-11/12 text-center shadow-px-lg animate-[fadeInScale_0.3s_ease-out]" style={{ borderColor: colors.game.success }}>
             <span className="text-5xl grayscale opacity-70 block mb-3">🎉</span>
             <h4 className="font-body font-bold text-xl mb-4" style={{ color: colors.ui.textPrimary }}>Bravo ! C'était bien :</h4>
             <div>
@@ -718,7 +718,7 @@ export default function PokeDescPage() {
             </div>
             <button
               onClick={proceedAfterModal}
-              className="font-body font-semibold mt-6 w-full py-3 text-white rounded-xl hover:-translate-y-0.5 hover:shadow-md transition"
+              className="font-body font-semibold mt-6 w-full py-3 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition"
               style={{ backgroundColor: colors.brand.blue }}
             >
               ➡️ {isFinalPokemon ? 'Terminer la partie' : 'Passer au Pokémon suivant'}
@@ -730,7 +730,7 @@ export default function PokeDescPage() {
       {/* Modal échec */}
       {showFailureModal && revealedPokemonSprite && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-          <div className="bg-white border-2 rounded-2xl p-8 max-w-sm w-11/12 text-center shadow-2xl animate-[fadeInScale_0.3s_ease-out]" style={{ borderColor: colors.game.error }}>
+          <div className="bg-white border-2 p-8 max-w-sm w-11/12 text-center shadow-px-lg animate-[fadeInScale_0.3s_ease-out]" style={{ borderColor: colors.game.error }}>
             <span className="text-5xl grayscale opacity-70 block mb-3">{isTimeout ? '⏱️' : '😔'}</span>
             <h4 className="font-body font-bold text-xl mb-4" style={{ color: colors.game.error }}>{isTimeout ? "Temps écoulé ! C\u2019était :" : "Dommage ! C\u2019était :"}</h4>
             <div>
@@ -746,7 +746,7 @@ export default function PokeDescPage() {
             </div>
             <button
               onClick={proceedAfterModal}
-              className="font-body font-semibold mt-6 w-full py-3 text-white rounded-xl hover:-translate-y-0.5 hover:shadow-md transition"
+              className="font-body font-semibold mt-6 w-full py-3 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition"
               style={{ backgroundColor: colors.brand.blue }}
             >
               ➡️ {isFinalPokemon ? 'Terminer la partie' : 'Passer au Pokémon suivant'}

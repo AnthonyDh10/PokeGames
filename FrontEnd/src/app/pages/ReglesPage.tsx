@@ -7,8 +7,7 @@ import SectionTitle from "../components/SectionTitle";
 import { useBackgroundStore } from "../store/backgroundStore";
 import { useNavDirectionStore } from "../store/navDirectionStore";
 import { colors } from "../design/colors";
-import oakWebp from "../components/images/oak.webp";
-import dialogueImg from "../components/images/dialogue.png";
+import oak from "../components/images/oak.png";
 import pokedescLogo from "../components/images/pokedesc-logo-transparant.png";
 import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
@@ -383,22 +382,11 @@ export default function ReglesPage() {
           exit="exit"
         >
           <img
-            src={oakWebp}
+            src={oak}
             alt="Professeur Chen"
             className="w-128 h-128 object-contain"
           />
-          <div className="relative inline-block w-64 md:w-80 lg:w-96">
-            <img
-              src={dialogueImg}
-              alt="Bulle de dialogue"
-              className="mt-4 w-full object-contain"
-            />
-            <div className="absolute inset-0 flex items-center justify-center px-4 md:px-6">
-              <p className="mt-4 w-full text-center lg:text-center text-sm md:text-lg leading-relaxed min-w-0 break-words">
-                Clique sur un jeu pour en lire les règles !
-              </p>
-            </div>
-          </div>
+
         </motion.div>
 
         {/* Droite — GameCards */}
@@ -447,7 +435,7 @@ export default function ReglesPage() {
               {/* Header fixe */}
               <DialogHeader className="px-6 py-5 border-b border-gray-100 bg-white z-10 flex-shrink-0">
                 <DialogTitle
-                  className="text-2xl font-display tracking-wide"
+                  className="text-2xl font-heading tracking-wide"
                   style={{ color: activeRules.color }}
                 >
                   {activeRules.title}

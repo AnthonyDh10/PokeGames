@@ -9,7 +9,8 @@
   --color-pokeblue: #3B4CCA;
 
   /* Polices */
-  --font-display: "Bangers", cursive;
+  --font-display: "Press Start 2P", monospace;
+  --font-heading: "Pixelify Sans", sans-serif;
   --font-body: "Nunito", sans-serif;
 }
 
@@ -172,8 +173,9 @@
 
   /**
   * Hiérarchie typographique PokéGames :
-  *  h1          → Bangers (display) — titres principaux
-  *  h2, h3, h4  → Nunito (body) — sous-titres et sections
+  *  h1          → Press Start 2P (display) — titres principaux, logo
+  *  h2, h3      → Pixelify Sans (heading) — sous-titres, titres de carte
+  *  h4          → Nunito (body) — labels de section mineurs
   */
 
   html {
@@ -182,24 +184,25 @@
 
   h1 {
     font-family: var(--font-display);
-    font-size: var(--text-3xl);
-    font-weight: 400; /* Bangers est naturellement gras */
+    font-size: var(--text-2xl);
+    font-weight: 400; /* Press Start 2P est naturellement gras */
     letter-spacing: 0.05em;
-    line-height: 1.2;
+    line-height: 1.3;
   }
 
   h2 {
-    font-family: var(--font-body);
+    font-family: var(--font-heading);
     font-size: var(--text-xl);
-    font-weight: 800;
-    letter-spacing: -0.01em;
+    font-weight: 600;
+    letter-spacing: 0.01em;
     line-height: 1.4;
   }
 
   h3 {
-    font-family: var(--font-body);
+    font-family: var(--font-heading);
     font-size: var(--text-lg);
-    font-weight: 700;
+    font-weight: 500;
+    letter-spacing: 0.01em;
     line-height: 1.5;
   }
 
@@ -236,4 +239,32 @@
     font-weight: 400;
     line-height: 1.5;
   }
+}
+
+/* ─── Ombres pixel PokéGames ──────────────────────────────────────────────────
+ *  Toujours utiliser ces classes plutôt que des valeurs brutes.
+ *  Règle :
+ *    shadow-px-sm  → petits éléments interactifs (badges, tags, boutons secondaires)
+ *    shadow-px     → boutons principaux, entrées de formulaire
+ *    shadow-px-lg  → cartes, modals, panneaux importants
+ *    shadow-px-xl  → éléments au premier plan (game cards, drag items)
+ *    drop-px / drop-px-lg → même échelle mais via filter: drop-shadow
+ *                           (obligatoire quand clip-path est actif)
+ * ─────────────────────────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Box-shadow (éléments sans clip-path) */
+  .shadow-px-sm  { box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.70); }
+  .shadow-px     { box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.80); }
+  .shadow-px-lg  { box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.80); }
+  .shadow-px-xl  { box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.85); }
+
+  /* Drop-shadow (éléments avec clip-path ou SVG) */
+  .drop-px-sm    { filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 0.60)); }
+  .drop-px       { filter: drop-shadow(4px 4px 0px rgba(0, 0, 0, 0.80)); }
+  .drop-px-lg    { filter: drop-shadow(6px 6px 0px rgba(0, 0, 0, 0.80)); }
+  .drop-px-xl    { filter: drop-shadow(8px 8px 0px rgba(0, 0, 0, 0.85)); }
+
+  /* Text-shadow pixel (texte sur fond coloré) */
+  .text-shadow-px    { text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.60); }
+  .text-shadow-px-sm { text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.40); }
 }

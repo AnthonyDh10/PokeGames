@@ -260,7 +260,7 @@ export default function LobbyPage({
           pokeballColor={theme.primaryDark}
           header={
             <>
-              <h1 className="font-display text-4xl tracking-wide mb-1" style={{ color: theme.textOnColor }}>
+              <h1 className="font-heading text-2xl tracking-wide mb-1" style={{ color: theme.textOnColor }}>
                 Bienvenue !
               </h1>
               <p className="font-body text-center" style={{ color: theme.textOnColor, opacity: 0.8 }}>
@@ -277,12 +277,12 @@ export default function LobbyPage({
                 onChange={(e) => setPseudoInput(e.target.value)}
                 placeholder="Votre pseudo..."
                 maxLength={20}
-                className="font-body w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none transition"
+                className="font-body w-full px-4 py-3 border border-gray-300 rounded text-base focus:outline-none transition"
               />
               <button
                 type="submit"
                 disabled={!pseudoInput.trim()}
-                className="font-body font-semibold w-full py-3 rounded-xl hover:-translate-y-0.5 hover:shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0"
+                className="font-body font-semibold w-full py-3 rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0"
                 style={{ backgroundColor: theme.primaryDark, color: theme.textOnColor }}
               >
                 Continuer
@@ -302,14 +302,14 @@ export default function LobbyPage({
         pokeballOpacity={0}
         header={
           <>
-            <h2 className="font-display text-4xl tracking-wide mb-4" style={{ color: theme.textOnColor }}>
+            <h2 className="font-heading text-2xl tracking-wide mb-4" style={{ color: theme.textOnColor }}>
               Salle d'attente
             </h2>
             <div className="inline-flex items-center gap-3 bg-white/20 px-4 py-2 rounded-full">
               <span className="font-body text-sm" style={{ color: theme.textOnColor, opacity: 0.8 }}>
                 Code :
               </span>
-              <span className="font-display text-2xl tracking-widest" style={{ color: theme.textOnColor }}>
+              <span className="font-display text-xs tracking-widest" style={{ color: theme.textOnColor }}>
                 {partie.codeSession}
               </span>
               <button
@@ -352,7 +352,7 @@ export default function LobbyPage({
               )}
             </div>
 
-            <div className="font-display text-2xl tracking-wide" style={{ color: theme.primaryDark }}>VS</div>
+            <div className="font-heading text-2xl tracking-wide" style={{ color: theme.primaryDark }}>VS</div>
 
             <div
               className={`flex-1 max-w-48 text-center p-4 rounded-xl border-2 relative transition ${!isPlayer1 ? '' : 'border-gray-200'}`}
@@ -385,7 +385,7 @@ export default function LobbyPage({
                   <button
                     onClick={() => handleStart(false)}
                     disabled={isLoading}
-                    className="font-body font-semibold inline-flex items-center gap-2 px-6 py-2.5 text-white rounded-xl hover:-translate-y-0.5 hover:shadow-md transition disabled:opacity-50"
+                    className="font-body font-semibold inline-flex items-center gap-2 px-6 py-2.5 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50"
                     style={{ backgroundColor: '#16a34a' }}
                   >
                     Démarrer la partie
@@ -415,7 +415,7 @@ export default function LobbyPage({
                   <button
                     onClick={() => handleStart(true)}
                     disabled={isLoading}
-                    className="font-body font-semibold inline-flex items-center gap-2 px-6 py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-md transition disabled:opacity-50 mx-4"
+                    className="font-body font-semibold inline-flex items-center gap-2 px-6 py-2.5 rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 mx-4"
                     style={{ backgroundColor: theme.primaryLight, color: theme.textOnColor }}
                   >
                     Jouer en solo
@@ -432,7 +432,7 @@ export default function LobbyPage({
 
             <button
               onClick={handleCancel}
-              className="font-body font-semibold inline-flex items-center gap-2 px-6 py-2.5 text-white rounded-xl hover:-translate-y-0.5 hover:shadow-md transition mx-4"
+              className="font-body font-semibold inline-flex items-center gap-2 px-6 py-2.5 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition mx-4"
               style={{ backgroundColor: '#dc2626' }}
             >
               Annuler
@@ -480,7 +480,7 @@ export default function LobbyPage({
 
           header={
             <div className="text-center flex flex-col flex-1">
-              <h3 className="font-display text-3xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
+              <h3 className="font-heading text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
                 {gameTitle}
               </h3>
             </div>
@@ -502,7 +502,7 @@ export default function LobbyPage({
           cardSize={{ height: 350 }}
           header={
             <div className="text-center flex flex-col flex-1">
-              <h3 className="font-display text-3xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
+              <h3 className="font-heading text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
                 Créer une partie
               </h3>
             </div>
@@ -515,7 +515,7 @@ export default function LobbyPage({
             <button
               onClick={handleCreate}
               disabled={isLoading}
-              className="font-body font-semibold w-full py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-md transition disabled:opacity-50 disabled:translate-y-0 mt-auto"
+              className="font-body font-semibold w-full py-2.5 rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:translate-y-0 mt-auto"
               style={{ backgroundColor: theme.primary, color: theme.textOnColor }}
             >
               {isLoading ? 'Chargement...' : 'Créer une nouvelle partie'}
@@ -532,7 +532,7 @@ export default function LobbyPage({
           cardSize={{ height: 350 }}
           header={
             <div className="text-center flex flex-col flex-1">
-              <h3 className="font-display text-3xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
+              <h3 className="font-heading text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
                 Rejoindre une partie
               </h3>
             </div>
@@ -548,7 +548,7 @@ export default function LobbyPage({
                 value={codeSession}
                 onChange={(e) => setCodeSession(e.target.value)}
                 placeholder="Code de session"
-                className={`font-body text-lg mb-4 w-full px-3 py-2.5 border rounded-xl text-base focus:outline-none transition ${joinErrorMessage ? 'border-red-500' : 'border-gray-300'}`}
+                className={`font-body text-lg mb-4 w-full px-3 py-2.5 border rounded text-base focus:outline-none transition ${joinErrorMessage ? 'border-red-500' : 'border-gray-300'}`}
               />
               {joinErrorMessage && (
                 <p className="font-body text-sm text-red-500">{joinErrorMessage}</p>
@@ -557,7 +557,7 @@ export default function LobbyPage({
             <button
               onClick={handleJoin}
               disabled={isLoading}
-              className="font-body font-semibold w-full py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-md transition disabled:opacity-50 disabled:translate-y-0 mt-auto"
+              className="font-body font-semibold w-full py-2.5 rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:translate-y-0 mt-auto"
               style={{ backgroundColor: theme.primaryLight, color: theme.textOnColor }}
             >
               {isLoading ? 'Chargement...' : 'Rejoindre la partie'}

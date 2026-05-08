@@ -215,7 +215,7 @@ export default function DeZoomGamePage() {
             headerColor={colors.brand.red}
             headerClassName="py-4"
             header={
-              <h1 className="font-display text-2xl md:text-3xl tracking-wide" style={{ color: '#ffffff' }}>
+              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: '#ffffff' }}>
                 DéZoom
               </h1>
             }
@@ -244,7 +244,7 @@ export default function DeZoomGamePage() {
             headerColor={colors.brand.red}
             headerClassName="py-4"
             header={
-              <h1 className="font-display text-2xl md:text-3xl tracking-wide" style={{ color: '#ffffff' }}>
+              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: '#ffffff' }}>
                 Ta réponse
               </h1>
             }
@@ -330,7 +330,7 @@ export default function DeZoomGamePage() {
             headerColor={colors.brand.red}
             headerClassName="py-4"
             header={
-              <h1 className="font-display text-2xl md:text-3xl tracking-wide" style={{ color: '#ffffff' }}>
+              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: '#ffffff' }}>
                 Quel est ce Pokémon ?
               </h1>
             }

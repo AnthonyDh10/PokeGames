@@ -73,8 +73,6 @@ export default function HomePage() {
 
   return (
     <div className="space-y-8">
-      <SectionTitle>Teste tes connaissances en Pokémon !</SectionTitle>
-
       {/* Zone interactive : pokéballs + card — mouseleave sur le wrapper global */}
       <div onMouseLeave={() => setHoveredIndex(null)}>
 

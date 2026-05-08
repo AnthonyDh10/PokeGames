@@ -26,7 +26,7 @@ interface ResultsActionsProps {
 }
 
 const BASE =
-  'px-6 py-3 font-semibold rounded-xl border-2 border-white shadow-md hover:-translate-y-0.5 hover:shadow-lg transition'
+  'px-6 py-3 font-semibold border-2 border-white shadow-px hover:-translate-y-0.5 hover:shadow-px-lg transition'
 
 export default function ResultsActions({
   isSolo,

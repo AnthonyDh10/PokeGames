@@ -149,13 +149,13 @@ export default function ResultatsDeZoomPage() {
         <Card
           headerColor={colors.brand.red}
           headerClassName="py-3"
-          header={<h3 className="font-display text-xl tracking-wide text-white">Erreur</h3>}
+          header={<h3 className="font-heading text-base tracking-wide text-white">Erreur</h3>}
         >
           <div className="p-12 text-center">
             <p className="text-red-600 font-medium mb-4">{errorMessage || 'Erreur inconnue'}</p>
             <button
               onClick={() => navigate('/dezoom')}
-              className="px-6 py-2.5 text-white font-semibold rounded-xl hover:-translate-y-0.5 transition"
+              className="px-6 py-2.5 text-white font-semibold rounded hover:-translate-y-0.5 transition"
               style={{ backgroundColor: colors.brand.red }}
             >
               Retour au menu
@@ -199,7 +199,7 @@ export default function ResultatsDeZoomPage() {
         pokeballColor={isWinner ? colors.brand.red : colors.brand.redDeep}
         headerClassName="py-3"
         header={
-          <h2 className="font-display text-xl tracking-wide text-white">
+          <h2 className="font-heading text-lg tracking-wide text-white">
             {name} {isWinner && <span style={{ filter: 'grayscale(1)', marginLeft: '0.5rem' }}>👑</span>}
           </h2>
         }
@@ -208,7 +208,7 @@ export default function ResultatsDeZoomPage() {
           boxShadow: isWinner ? `0 8px 24px ${colors.brand.red}40` : undefined,
         }}
       >
-        <div className="p-6 flex flex-col h-full text-center rounded-b-xl">
+        <div className="p-6 flex flex-col h-full text-center">
           {pending && (
             <span
               className="mx-auto inline-block text-xs font-medium px-2 py-1 rounded-full mb-3 animate-pulse border"
@@ -223,7 +223,7 @@ export default function ResultatsDeZoomPage() {
                 {formatElapsed(playerResult.elapsedSeconds)}
               </div>
               <div className="flex gap-3 justify-center text-sm flex-wrap mt-auto" style={{ color: colors.ui.textMuted }}>
-                <span className="px-2 py-1 rounded-md shadow-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
+                <span className="px-2 py-1 shadow-px-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
                   {playerResult.attemptCount} tentative{(playerResult.attemptCount ?? 0) > 1 ? 's' : ''}
                 </span>
               </div>
@@ -270,7 +270,7 @@ export default function ResultatsDeZoomPage() {
         headerColor={colors.brand.redDeep}
         headerClassName="py-4"
         header={
-          <h2 className="font-display text-2xl tracking-wide text-white">
+          <h2 className="font-heading text-xl tracking-wide text-white">
             C'était... {results.correctPokemonNameFr}
           </h2>
         }
@@ -285,7 +285,7 @@ export default function ResultatsDeZoomPage() {
               imageRendering: 'pixelated',
             }}
           />
-          <p className="font-display text-2xl" style={{ color: colors.ui.textPrimary }}>
+          <p className="font-heading text-xl" style={{ color: colors.ui.textPrimary }}>
             {results.correctPokemonNameFr}
           </p>
         </div>
