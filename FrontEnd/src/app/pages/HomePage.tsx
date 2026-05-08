@@ -138,6 +138,8 @@ export default function HomePage() {
   const oakBottomOffset = "8%";
   const pointerSize = "clamp(20px, 2.5vw, 44px)";
   const textSize = "clamp(0.8rem, 1.5vw, 1.25rem)";
+  // Espace sous la TopBar — identique à la hauteur utilisée dans TopBar.tsx
+  const topbarHeight = "clamp(1rem, 5vh, 2rem)";
 
   // Ajouts / Ajustements des tailles pour la nouvelle grille :
   const lgPokeballSize = "clamp(110px, 16vw, 220px)"; // Légèrement affiné pour la ligne de 4
@@ -237,7 +239,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" style={{ marginTop: topbarHeight }}>
       <div onMouseLeave={() => setHoveredIndex(null)}>
 
         {/* ≥1024px (lg) : Ligne unique - S'affiche quand la GameCard est complète */}
@@ -260,67 +262,66 @@ export default function HomePage() {
           ))}
         </div>
 
-    {/* <640px (sm) : Carrousel mobile avec Swipe et Profondeur */}
-    <div 
-      className="sm:hidden flex flex-col items-center py-4 w-full"
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-    >
-      {/* Conteneur du carousel avec une hauteur définie pour le positionnement absolu */}
-      <div className="relative flex items-center justify-center w-full min-h-[250px] mb-4">
-        
-        {/* Élément Précédent (Gauche) */}
-        <div
-          className="absolute left-[-20%] transition-all duration-300 ease-in-out opacity-40 blur-[1px] cursor-pointer"
-          style={{ transform: 'scale(0.65) translateY(-30px)', zIndex: 0 }}
-          onClick={handleCarouselPrev} // Permet de cliquer sur l'élément pour changer
-        >
-          {renderItem(games[prevIndex], prevIndex, { 
-            forceActive: false, 
-            noInteraction: true, 
-            pokeballSize: smPokeballSize 
-          })}
-        </div>
-
-        {/* Élément Central (Actif) */}
+        {/* <640px (sm) : Carrousel mobile avec Swipe et Rotation (Framer Motion) */}
         <div 
-          className="relative z-10 transition-all duration-300 ease-in-out" 
-          style={{ transform: 'scale(1) translateY(0)' }}
+          className="sm:hidden flex flex-col items-center py-4 w-full"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
         >
-          {renderItem(games[carouselIndex], carouselIndex, { 
-            forceActive: true, 
-            noInteraction: true, 
-            pokeballSize: smPokeballSize 
-          })}
-        </div>
+          {/* Conteneur du carousel avec une hauteur définie pour le positionnement absolu */}
+          <div className="relative flex items-center justify-center w-full min-h-[250px] mb-4">
+            {games.map((game, index) => {
+              // Détermination de la position de chaque élément par rapport à l'index actif
+              let position = "hidden";
+              if (index === carouselIndex) position = "center";
+              else if (index === prevIndex) position = "left";
+              else if (index === nextIndex) position = "right";
 
-        {/* Élément Suivant (Droite) */}
-        <div
-          className="absolute right-[-20%] transition-all duration-300 ease-in-out opacity-40 blur-[1px] cursor-pointer"
-          style={{ transform: 'scale(0.65) translateY(-30px)', zIndex: 0 }}
-          onClick={handleCarouselNext} // Permet de cliquer sur l'élément pour changer
-        >
-          {renderItem(games[nextIndex], nextIndex, { 
-            forceActive: false, 
-            noInteraction: true, 
-            pokeballSize: smPokeballSize 
-          })}
+              // Configuration des animations de rotation pour Framer Motion
+              const variants = {
+                center: { x: "0%", y: 0, scale: 1, zIndex: 10, opacity: 1, filter: "blur(0px)" },
+                left: { x: "-65%", y: -30, scale: 0.65, zIndex: 5, opacity: 0.4, filter: "blur(1px)" },
+                right: { x: "65%", y: -30, scale: 0.65, zIndex: 5, opacity: 0.4, filter: "blur(1px)" },
+                hidden: { x: "0%", y: -40, scale: 0.4, zIndex: 0, opacity: 0, filter: "blur(2px)" }
+              };
+
+              return (
+                <motion.div
+                  key={game.title}
+                  className="absolute cursor-pointer"
+                  variants={variants}
+                  initial={false}
+                  animate={position}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  style={{ pointerEvents: position === "hidden" ? "none" : "auto" }}
+                  onClick={() => {
+                    if (position === "left") handleCarouselPrev();
+                    if (position === "right") handleCarouselNext();
+                  }}
+                >
+                  {renderItem(game, index, { 
+                    forceActive: position === "center", 
+                    noInteraction: true, 
+                    pokeballSize: smPokeballSize 
+                  })}
+                </motion.div>
+              );
+            })}
+          </div>
+          
+          {/* Indicateurs / Dots */}
+          <div className="flex gap-3">
+            {games.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => { setCarouselIndex(i); setSelectedIndex(i); }}
+                className={`w-2 h-2 mt-5 rounded-full transition-all duration-300 ${i === carouselIndex ? "bg-white scale-125" : "bg-white/30"}`}
+                aria-label={`Aller à ${games[i].title}`}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-      
-      {/* Indicateurs / Dots */}
-      <div className="flex gap-3">
-        {games.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => { setCarouselIndex(i); setSelectedIndex(i); }}
-            className={`w-2 h-2 rounded-full transition-all duration-200 ${i === carouselIndex ? "bg-white scale-125" : "bg-white/30"}`}
-            aria-label={`Aller à ${games[i].title}`}
-          />
-        ))}
-      </div>
-    </div>
 
         {/* Helper text */}
         <div className="flex justify-center h-6 mt-2">
