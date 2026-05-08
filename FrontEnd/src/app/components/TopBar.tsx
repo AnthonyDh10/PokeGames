@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router";
 import Pokeball from "../components/images/pokéball_face.png";
 import { colors } from "../design/colors";
-import "../../styles/sidebar-retro.css";
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -29,6 +28,10 @@ export default function TopBar({
       navigate("/");
     }
   };
+  // Match sidebar/button sizes so we can horizontally center the pokéball
+  const sidebarWidth = "clamp(3.75rem, 12vw, 8rem)";
+  const pokeballSize = "clamp(2.25rem, 8vw, 4.8rem)";
+  const topbarHeight = "clamp(2.8rem, 10vh, 6rem)";
   // Génère les clip-paths polygon qui tracent la diagonale en "escalier":
   // - leftClip : la partie gauche (forme principale)
   // - rightClip: la partie droite (complémentaire) utilisée pour l'ombre de la fine barre
@@ -80,6 +83,8 @@ export default function TopBar({
         // header itself stays transparent so the right side shows the page background
         backgroundColor: "transparent",
         ["--topbar-text-color" as any]: colors.ui.textOnColor,
+        // Ensure header stacks above the sidebar (sidebar uses z-50)
+        zIndex: 100,
         // remove decorative borders coming from .retro-topbar
         borderTop: "none",
         borderBottom: "none",
@@ -99,6 +104,28 @@ export default function TopBar({
           backgroundColor: colors.brand.red,
           zIndex: 9,
           boxShadow: "none",
+        } as any}
+      />
+
+      {/* Pokéball overlay positioned above the sidebar (keeps vertical alignment with the TopBar) */}
+      <img
+        src={Pokeball}
+        alt="Pokéball"
+        onClick={handlePokeballClick}
+        className="retro-pokeball-btn"
+        style={{
+          position: "absolute",
+          // center horizontally relative to the sidebar: (sidebarWidth/2 - pokeballSize/2)
+          left: `calc(${sidebarWidth} / 2 - ${pokeballSize} / 2)`,
+          // vertically centered inside the TopBar
+          top: "50%",
+          transform: "translateY(-50%)",
+          // Keep natural aspect ratio: set width and let height adjust
+          width: pokeballSize,
+          height: "auto",
+          objectFit: "contain",
+          zIndex: 100000,
+          cursor: "pointer",
         } as any}
       />
 
@@ -162,19 +189,17 @@ export default function TopBar({
             gap: "0.75rem",
           } as any}
         >
-          <img
-            src={Pokeball}
-            alt="Pokéball"
-            className="object-contain cursor-pointer retro-pokeball-btn"
+          <div
+            aria-hidden="true"
             style={{ width: "clamp(2.5rem, 8vw, 4rem)", height: "clamp(2.5rem, 8vw, 4rem)", flexShrink: 0 }}
-            onClick={handlePokeballClick}
           />
 
           <h2 className="font-display tracking-wide text-white uppercase"
             style={{
               fontSize: "clamp(0.9rem, 3vw, 1.875rem)",
               lineHeight: "1.2",
-              marginLeft: "clamp(0.5rem, 2vw, 1rem)"
+              // increased left margin to give breathing space from the pokéball
+              marginLeft: "clamp(1rem, 3vw, 3rem)"
             }}>
             PokéGames
           </h2>

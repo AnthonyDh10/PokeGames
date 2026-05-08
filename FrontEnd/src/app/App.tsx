@@ -80,13 +80,13 @@ export default function App() {
         />
       </div>
 
-      <div style={{ position: "relative", zIndex: 1 }}>
+      <div style={{ position: "relative", zIndex: 100001 }}>
         <TopBar
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         />
       </div>
 
-      <div style={{ position: "relative", zIndex: 1 }} className="flex-1 flex">
+      <div style={{ position: "relative", zIndex: 1 }} className="flex-1 flex overflow-hidden">
         <Sidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}

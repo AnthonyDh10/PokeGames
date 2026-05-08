@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import GameCard from "../components/GameCard";
-import SectionTitle from "../components/SectionTitle";
 import { useBackgroundStore } from "../store/backgroundStore";
 import { useChatStore } from "../store/chatStore";
 import { colors } from "../design/colors";
@@ -60,6 +59,7 @@ export default function HomePage() {
   // selectedIndex : tap / clic (mobile + desktop pour épingler la card)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(0); // Oak (index 0) sélectionné par défaut
+  const [carouselIndex, setCarouselIndex] = useState(0);
 
   // Le hover a priorité sur la sélection; sinon on affiche la sélection
   const activeIndex = hoveredIndex !== null ? hoveredIndex : selectedIndex;
@@ -83,99 +83,200 @@ export default function HomePage() {
     setSelectedIndex(prev => prev === index ? null : index);
   };
 
+  const handleCarouselPrev = () => {
+    const newIndex = (carouselIndex - 1 + games.length) % games.length;
+    setCarouselIndex(newIndex);
+    setSelectedIndex(newIndex);
+  };
+
+  const handleCarouselNext = () => {
+    const newIndex = (carouselIndex + 1) % games.length;
+    setCarouselIndex(newIndex);
+    setSelectedIndex(newIndex);
+  };
+
   // Oak vertical offset (tweak this to move Oak up/down without affecting the ground or pokéballs)
   const oakBottomOffset = "8%";
+
+  // Tailles proportionnelles communes
+  const pointerSize = "clamp(20px, 2.5vw, 44px)";
+  const textSize = "clamp(0.8rem, 1.5vw, 1.25rem)";
+
+  // Tailles des pokéballs par layout
+  // lg+ (4 en ligne) : 4 × 10vw + 3 × 4vw = 52vw → OK
+  const lgPokeballSize = "clamp(100px, 20vw, 250px)";
+  const lgGapSize = "clamp(1rem, 4vw, 6rem)";
+  // sm–lg (quinconce, 2 par rangée) : 2 × 15vw + 1 × 8vw = 38vw → OK
+  const mdPokeballSize = "clamp(80px, 15vw, 200px)";
+  const mdGapSize = "clamp(1.5rem, 6vw, 5rem)";
+  // carousel (écran étroit, 1 seul) : 1 × 40vw → OK
+  const smPokeballSize = "clamp(100px, 40vw, 200px)";
+
+  const [cardWidth, setCardWidth] = useState(() => {
+    if (typeof window === "undefined") return "clamp(50%, 60vw, 95%)";
+    return window.matchMedia("(max-width: 639px)").matches ? "clamp(80%, 85vw, 95%)" : "clamp(50%, 60vw, 95%)";
+  });
+  const cardMinHeight = "clamp(20vh, 25vw, 35vh)";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 639px)");
+    const onChange = (e: any) => setCardWidth(e.matches ? "clamp(85%, 90vw, 95%)" : "clamp(50%, 60vw, 95%)");
+    onChange(mq);
+    if (mq.addEventListener) {
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    } else {
+      mq.addListener(onChange);
+      return () => mq.removeListener(onChange);
+    }
+  }, []);
+
+  const renderItem = (
+    game: typeof games[0],
+    index: number,
+    opts: { forceActive?: boolean; noInteraction?: boolean; pokeballSize?: string } = {},
+  ) => {
+    const isActive = opts.forceActive ?? activeIndex === index;
+    const isOak = (game as any).isOak;
+    const size = opts.pokeballSize ?? lgPokeballSize;
+    return (
+      <div
+        key={index}
+        className="flex flex-col items-center gap-3 cursor-pointer select-none"
+        onMouseEnter={opts.noInteraction ? undefined : () => setHoveredIndex(index)}
+        onClick={opts.noInteraction ? undefined : () => handlePokeballClick(index)}
+        role="button"
+        aria-label={`Choisir ${game.title}`}
+      >
+        {/* Pointer au-dessus */}
+        <div
+          className="flex items-end justify-center"
+          style={isOak ? { marginBottom: oakBottomOffset } : undefined}
+        >
+          <AnimatePresence>
+            {isActive && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: [0, -6, 0] }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{
+                  opacity: { duration: 0.15 },
+                  y: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
+                }}
+              >
+                <img
+                  src={pointerImg}
+                  alt={`${game.title} pointer`}
+                  className="rotate-205"
+                  style={{
+                    width: pointerSize,
+                    height: pointerSize,
+                    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.45))",
+                  }}
+                  draggable={false}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Pokéball/Oak + Sol */}
+        <div
+          className="relative transition-transform duration-150"
+          style={{ width: size, height: size, transform: `scale(${isActive ? 1.1 : 0.9})` }}
+        >
+          <img
+            src={solHerbes}
+            alt={`${game.title} sol`}
+            className="absolute left-0 right-0 w-full h-full object-contain pointer-events-none"
+            style={{ bottom: "-35%", zIndex: 0 }}
+            draggable={false}
+          />
+          {isOak ? (
+            <img
+              src={oakImg}
+              alt={game.title}
+              className="absolute z-10 left-0 right-0 w-full h-full object-contain transition-all duration-150 pointer-events-none"
+              style={{ bottom: oakBottomOffset }}
+              draggable={false}
+            />
+          ) : (
+            <img
+              src={isActive ? pokeballShaking : pokeballFace}
+              alt={game.title}
+              className={`relative z-10 w-full h-full object-contain transition-filter duration-150 ${!isActive ? "grayscale-[0.4]" : ""}`}
+              draggable={false}
+            />
+          )}
+        </div>
+
+        {/* Nom du jeu */}
+        <span
+          className="font-display text-white transition-all duration-150 mt-2"
+          style={{
+            fontSize: isActive ? `calc(${textSize} * 1.15)` : textSize,
+            opacity: isActive ? 1 : 0.55,
+          }}
+        >
+          {game.title}
+        </span>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-8">
       {/* Zone interactive : pokéballs + card — mouseleave sur le wrapper global */}
       <div onMouseLeave={() => setHoveredIndex(null)}>
 
-        {/* Rangée des pokéballs et Oak */}
-        <div className="flex items-end justify-center gap-10 md:gap-20 lg:gap-32 py-6">
-          {games.map((game, index) => {
-            const isActive = activeIndex === index;
-            const isOak = (game as any).isOak;
-            return (
-              <div
-                key={index}
-                className="flex flex-col items-center gap-3 cursor-pointer select-none"
-                onMouseEnter={() => setHoveredIndex(index)}
-                onClick={() => handlePokeballClick(index)}
-                role="button"
-                aria-label={`Choisir ${game.title}`}
-              >
-                {/* Indicative pointer image above the pokéball/Oak */}
-                <div
-                  className="h-7 flex items-end justify-center"
-                  style={isOak ? { marginBottom: oakBottomOffset } : undefined}
-                >
-                  <AnimatePresence>
-                    {isActive && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: [0, -6, 0] }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{
-                          opacity: { duration: 0.15 },
-                          y: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
-                        }}
-                      >
-                        <img
-                          src={pointerImg}
-                          alt={`${game.title} pointer`}
-                          className="rotate-205"
-                          style={{
-                            width: "32px",
-                            height: "32px",
-                            filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.45))",
-                          }}
-                          draggable={false}
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+        {/* ≥1024px : ligne unique, tous les éléments alignés en bas */}
+        <div className="hidden lg:flex items-end justify-center py-6" style={{ gap: lgGapSize }}>
+          {games.map((game, index) => renderItem(game, index, { pokeballSize: lgPokeballSize }))}
+        </div>
 
-                {/* Pokéball/Oak + Sol group — sol positionné derrière et rapproché */}
-                <div className={`relative w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 transition-transform duration-150 ${isActive ? "scale-110" : "scale-90"}`}>
-                  <img
-                    src={solHerbes}
-                    alt={`${game.title} sol`}
-                    className="absolute left-0 right-0 w-full h-full object-contain pointer-events-none"
-                    style={{ bottom: "-35%", zIndex: 0 }}
-                    draggable={false}
-                  />
+        {/* 640px–1023px : quinconce — Oak+PokéDesc en haut/bas, Types+Dézoom en bas/haut */}
+        <div
+          className="hidden sm:flex lg:hidden items-stretch justify-center py-6"
+          style={{ gap: mdGapSize, minHeight: `calc(${mdPokeballSize} * 2.4)` }}
+        >
+          {games.map((game, index) => (
+            <div key={index} style={{ alignSelf: index % 2 === 0 ? "flex-start" : "flex-end" }}>
+              {renderItem(game, index, { pokeballSize: mdPokeballSize })}
+            </div>
+          ))}
+        </div>
 
-                  {/* Oak rendered with its own absolute positioning so its offset can be tweaked independently */}
-                  {isOak ? (
-                    <img
-                      src={oakImg}
-                      alt={game.title}
-                      className="absolute z-10 left-0 right-0 w-full h-full object-contain transition-all duration-150 pointer-events-none"
-                      style={{ bottom: oakBottomOffset }}
-                      draggable={false}
-                    />
-                  ) : (
-                    <img
-                      src={isActive ? pokeballShaking : pokeballFace}
-                      alt={game.title}
-                      className={`relative z-10 w-full h-full object-contain transition-filter duration-150 ${!isActive ? "grayscale-[0.4]" : ""}`}
-                      draggable={false}
-                    />
-                  )}
-                </div>
-
-                {/* Nom du jeu */}
-                <span
-                  className={`font-display text-base md:text-lg mt-2 text-white transition-all duration-150 ${isActive ? "text-lg md:text-xl" : ""}`}
-                  style={{ opacity: isActive ? 1 : 0.55 }}
-                >
-                  {game.title}
-                </span>
-              </div>
-            );
-          })}
+        {/* <640px : carousel — une pokéball à la fois avec flèches de navigation */}
+        <div className="sm:hidden flex flex-col items-center py-4 gap-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleCarouselPrev}
+              aria-label="Pokéball précédente"
+              className="text-white/60 active:text-white text-5xl font-light transition-colors select-none leading-none px-2"
+            >
+              ‹
+            </button>
+            {renderItem(games[carouselIndex], carouselIndex, { forceActive: true, noInteraction: true, pokeballSize: smPokeballSize })}
+            <button
+              onClick={handleCarouselNext}
+              aria-label="Pokéball suivante"
+              className="text-white/60 active:text-white text-5xl font-light transition-colors select-none leading-none px-2"
+            >
+              ›
+            </button>
+          </div>
+          {/* Dots de navigation */}
+          <div className="flex gap-3">
+            {games.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => { setCarouselIndex(i); setSelectedIndex(i); }}
+                className={`w-2 h-2 rounded-full transition-all duration-200 ${i === carouselIndex ? "bg-white scale-125" : "bg-white/30"}`}
+                aria-label={`Aller à ${games[i].title}`}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Message d'invite quand aucune pokéball n'est active */}
@@ -187,7 +288,8 @@ export default function HomePage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.25 }}
-                className="text-white/50 text-sm italic"
+                className="text-white/50 italic"
+                style={{ fontSize: "clamp(0.75rem, 1vw, 0.875rem)" }}
               >
                 Survole ou appuie sur une Pokéball pour découvrir le jeu
               </motion.p>
@@ -196,7 +298,7 @@ export default function HomePage() {
         </div>
 
         {/* GameCard révélée sous les pokéballs */}
-        <div className="mt-4">
+        <div className="mt-4 flex justify-center w-full">
           <AnimatePresence mode="wait">
             {activeIndex !== null && (
               <motion.div
@@ -205,6 +307,11 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
                 transition={{ duration: 0.28, ease: "easeOut" }}
+                // Application des tailles fluides ici :
+                style={{ 
+                  width: cardWidth, 
+                  minHeight: cardMinHeight 
+                }}
               >
                 <GameCard
                   title={games[activeIndex].title}
