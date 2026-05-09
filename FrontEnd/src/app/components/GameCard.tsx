@@ -46,8 +46,8 @@ export default function GameCard({
 
   return (
     <button
-      onClick={() => onClick ? onClick() : navigate(to)}
-      className="relative w-full text-left cursor-pointer flex items-stretch gamecard-container"
+      onClick={() => (onClick ? onClick() : navigate(to))}
+      className="relative w-full text-left cursor-pointer flex items-stretch gamecard-container group"
     >
       <style>{`
         .gamecard-container { container-type: inline-size; }
@@ -58,56 +58,77 @@ export default function GameCard({
           .gamecard-gap { display: block; }
         }
       `}</style>
-      {/* PARTIE GAUCHE — Image ou icône */}
+      
+      {/* ======================================================== */}
+      {/* PARTIE GAUCHE — Wrapper Extérieur (Bordure)                */}
+      {/* ======================================================== */}
       <div
-        className="gamecard-left items-center justify-center shrink-0 drop-shadow-[6px_6px_0px_rgba(0,0,0,0.8)] hover:drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)] hover:translate-x-1 hover:translate-y-1 active:drop-shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-none w-40 md:w-52"
+        className="gamecard-left flex-col shrink-0 drop-shadow-[6px_6px_0px_rgba(0,0,0,0.8)] hover:drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)] hover:translate-x-1 hover:translate-y-1 active:drop-shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-none w-40 md:w-52 p-[4px]"
         style={{
-          backgroundColor: color,
-          border: `4px solid ${secondColor || "black"}`,
+          backgroundColor: secondColor || "black",
           clipPath: pixelClipPath,
         }}
       >
-        {image ? (
-          <img 
-            src={image} 
-            alt={title} 
-            style={{ imageRendering: "pixelated" }}
-            className="w-32 md:w-40 h-auto object-contain" 
-          />
-        ) : (
-          <span className="text-5xl md:text-6xl">{icon}</span>
-        )}
+        {/* Contenu GAUCHE — Fond interne */}
+        <div
+          className="flex-1 flex items-center justify-center w-full h-full"
+          style={{
+            backgroundColor: color,
+            clipPath: pixelClipPath,
+          }}
+        >
+          {image ? (
+            <img
+              src={image}
+              alt={title}
+              style={{ imageRendering: "pixelated" }}
+              className="w-32 md:w-40 h-auto object-contain"
+            />
+          ) : (
+            <span className="text-5xl md:text-6xl">{icon}</span>
+          )}
+        </div>
       </div>
 
       {/* GAP VIDE — 1% de la largeur (desktop seulement) */}
       <div className="gamecard-gap" style={{ width: gapSize, flexShrink: 0 }} />
 
-      {/* PARTIE DROITE — Texte */}
+      {/* ======================================================== */}
+      {/* PARTIE DROITE — Wrapper Extérieur (Bordure)                */}
+      {/* ======================================================== */}
       <div
-        className="font-heading flex flex-col justify-center flex-1 p-6 md:p-8 overflow-hidden relative drop-shadow-[6px_6px_0px_rgba(0,0,0,0.8)] hover:drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)] hover:translate-x-1 hover:translate-y-1 active:drop-shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-none"
+        className="flex flex-col flex-1 drop-shadow-[6px_6px_0px_rgba(0,0,0,0.8)] hover:drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)] hover:translate-x-1 hover:translate-y-1 active:drop-shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-none p-[4px]"
         style={{
-          backgroundColor: color,
-          border: `4px solid ${secondColor || "black"}`,
+          backgroundColor: secondColor || "black",
           clipPath: pixelClipPath,
         }}
       >
-        <PokeballDecor
-          size={130}
-          opacity={0.15}
-          className="absolute top-1/2 right-6 -translate-y-1/2"
-        />
-        <h2
-          className="font-display uppercase font-bold text-2xl tracking-wide mb-3 drop-shadow-[2px_2px_0px_rgba(0,0,0,0.6)]"
-          style={{ color: text_color }}
+        {/* Contenu DROIT — Fond interne */}
+        <div
+          className="flex-1 font-heading flex flex-col justify-center p-5 md:p-7 overflow-hidden relative"
+          style={{
+            backgroundColor: color,
+            clipPath: pixelClipPath,
+          }}
         >
-          {title}
-        </h2>
-        <p
-          className="font-body text-base md:text-lg leading-relaxed drop-shadow-[1px_1px_0px_rgba(0,0,0,0.4)]"
-          style={{ color: text_color, opacity: 0.9 }}
-        >
-          {description}
-        </p>
+          <PokeballDecor
+            size={130}
+            opacity={0.15}
+            className="absolute top-1/2 right-6 -translate-y-1/2"
+          />
+          <h2
+            className="font-display uppercase font-bold text-2xl tracking-wide mb-3 drop-shadow-[2px_2px_0px_rgba(0,0,0,0.6)]"
+            style={{ color: text_color }}
+          >
+            {title}
+          </h2>
+          <p
+            className="font-body text-base md:text-lg leading-relaxed drop-shadow-[1px_1px_0px_rgba(0,0,0,0.4)]"
+            style={{ color: text_color, opacity: 0.9 }}
+          >
+            {description}
+          </p>
+        </div>
       </div>
     </button>
   );
