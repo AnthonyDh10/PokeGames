@@ -1,9 +1,10 @@
+import type { ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { PokeballDecor } from "./Pokeball";
 
 interface GameCardProps {
   title: string;
-  description: string;
+  description: ReactNode;
   /** Couleur de fond de la carte — utiliser `colors.brand.xxx` depuis design/colors.ts */
   color: string;
   /** Couleur claire pour l'effet de relief (bordures Haut et Gauche) */

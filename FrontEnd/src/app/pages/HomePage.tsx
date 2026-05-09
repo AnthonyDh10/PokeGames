@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import GameCard from "../components/GameCard";
@@ -17,7 +17,7 @@ import rulesIconImg from "../components/images/rules-icon.png";
 
 interface Game {
   title: string;
-  description: string;
+  description: ReactNode;
   color: string;
   secondColor: string;
   colorLight: string;
@@ -32,7 +32,13 @@ interface Game {
 const games: Game[] = [
   {
     title: "PROF. CHEN",
-    description: "Bienvenue dresseur ! Relève les défis du Professeur pour tester tes connaissances sur les pokémon ! Chaque pokéball renferme un défi différent, survole les pour les découvrir ! Prends connaissance de leurs règles en cliquant sur le livre !",
+    description: (
+      <>
+        Bienvenue dresseur ! Relève les défis du Professeur pour tester tes connaissances sur les pokémon ! Chaque pokéball renferme un défi différent, survole les pour les découvrir ! Prends connaissance de leurs règles en cliquant sur le {" "}
+        <img src={rulesIconImg} alt="règles" className="inline-block align-middle w-5 h-5" style={{ verticalAlign: "middle" }} />
+        {" "}!
+      </>
+    ),
     color: colors.ui.grayMid,
     secondColor: colors.ui.grayBorderDark,
     colorLight: colors.ui.grayLight,
