@@ -114,12 +114,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={`
-        fixed md:static top-0 left-0 h-full md:h-auto md:self-stretch
+        fixed md:relative top-0 left-0 h-full md:h-auto md:self-stretch
         flex flex-col items-center py-6 gap-4 z-50
         transition-transform duration-300
         ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
       `}
-        style={{ backgroundColor: colors.brand.red, width: sidebarWidth }}
+        style={{
+          backgroundColor: colors.brand.red,
+          width: sidebarWidth,
+        }}
       >
         {/* Placeholder for TopBar pokéball (mobile) */}
         <div
@@ -179,6 +182,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </NavButton>
           );
         })}
+
+        {/* Bordure droite : redDark (6px) → redDeep (2px), depuis la sidebar vers la page */}
+        <div
+          className="absolute top-0 h-full pointer-events-none"
+          style={{
+            right: "-8px",
+            width: "8px",
+            background: `linear-gradient(to right, ${colors.brand.redDark} 0px, ${colors.brand.redDark} 6px, ${colors.brand.redDeep} 6px, ${colors.brand.redDeep} 8px)`,
+            zIndex: 60,
+          }}
+        />
       </aside>
     </>
   );

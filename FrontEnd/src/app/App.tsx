@@ -80,37 +80,48 @@ export default function App() {
         />
       </div>
 
-      <div style={{ position: "relative", zIndex: 100001 }}>
-        <TopBar
-          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        />
-      </div>
+      <div
+        style={{
+          position: "relative",
+          zIndex: 100001,
+          borderTop: `6px solid ${colors.brand.redLight}`,
+          borderLeft: `6px solid ${colors.brand.redLight}`,
+        }}
+        className="flex-1 flex flex-col"
+      >
+        
+        <div>
+          <TopBar
+            onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          />
+        </div>
 
-      <div style={{ position: "relative", zIndex: 1 }} className="flex-1 flex overflow-hidden">
-        <Sidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
+        <div style={{ position: "relative", zIndex: 1 }} className="flex-1 flex overflow-hidden">
+          <Sidebar
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
 
-        <div className="flex-1 flex flex-col">
-          <main className="flex-1 p-4 md:p-8 overflow-auto">
-            <AnimatePresence mode="wait" initial={false}>
-              <Routes location={location} key={location.pathname}>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/home" element={<HomePage />} />
-                <Route path="/pokedesc" element={<LobbyPokedescPage />} />
-                <Route path="/pokedesc/:partieId" element={<PokeDescPage />} />
-                <Route path="/types" element={<LobbyTypesPage />} />
-                <Route path="/types/:partieId" element={<TypesGamePage />} />
-                <Route path="/dezoom" element={<LobbyDeZoomPage />} />
-                <Route path="/dezoom/:partieId" element={<DeZoomGamePage />} />
-                <Route path="/regles" element={<ReglesPage />} />
-                <Route path="/resultats/:partieId" element={<ResultatsPage />} />
-                <Route path="/resultats-types/:partieId" element={<ResultatsTypesPage />} />
-                <Route path="/resultats-dezoom/:partieId" element={<ResultatsDeZoomPage />} />
-              </Routes>
-            </AnimatePresence>
-          </main>
+          <div className="flex-1 flex flex-col">
+            <main className="flex-1 p-4 md:p-8 overflow-auto">
+              <AnimatePresence mode="wait" initial={false}>
+                <Routes location={location} key={location.pathname}>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/home" element={<HomePage />} />
+                  <Route path="/pokedesc" element={<LobbyPokedescPage />} />
+                  <Route path="/pokedesc/:partieId" element={<PokeDescPage />} />
+                  <Route path="/types" element={<LobbyTypesPage />} />
+                  <Route path="/types/:partieId" element={<TypesGamePage />} />
+                  <Route path="/dezoom" element={<LobbyDeZoomPage />} />
+                  <Route path="/dezoom/:partieId" element={<DeZoomGamePage />} />
+                  <Route path="/regles" element={<ReglesPage />} />
+                  <Route path="/resultats/:partieId" element={<ResultatsPage />} />
+                  <Route path="/resultats-types/:partieId" element={<ResultatsTypesPage />} />
+                  <Route path="/resultats-dezoom/:partieId" element={<ResultatsDeZoomPage />} />
+                </Routes>
+              </AnimatePresence>
+            </main>
+          </div>
         </div>
       </div>
 

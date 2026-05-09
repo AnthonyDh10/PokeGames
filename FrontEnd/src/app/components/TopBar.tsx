@@ -1,28 +1,15 @@
-import { useMemo } from "react";
 import { useNavigate } from "react-router";
 import Pokeball from "../components/images/pokéball_face.png";
 import { colors } from "../design/colors";
 
 interface TopBarProps {
   onToggleSidebar: () => void;
-  /** Nombre de marches pour l'escalier (ex: 8, 10) */
-  steps?: number;
-  /** Position centrale de la séparation en pourcentage (default 50) */
-  split?: number;
-  /** Décalage total en pourcentage entre le point haut et bas (ex: 8 => +/-4%) */
-  diagonalOffset?: number;
 }
 
-export default function TopBar({
-  onToggleSidebar,
-  steps = 30,
-  split = 70,
-  diagonalOffset = 12,
-}: TopBarProps) {
+export default function TopBar({ onToggleSidebar }: TopBarProps) {
   const navigate = useNavigate();
 
   const handlePokeballClick = () => {
-    // Utilisation de la largeur standard des breakpoints Tailwind (md = 768px)
     if (window.innerWidth < 768) {
       onToggleSidebar();
     } else {
@@ -35,56 +22,22 @@ export default function TopBar({
   const pokeballSize = "clamp(2.25rem, 8vw, 4.8rem)";
   const topbarHeight = "clamp(2.8rem, 10vh, 6rem)";
 
-  // Génération du clip-path polygon (forme d'escalier gauche)
-  const leftClip = useMemo(() => {
-    const topX = split + diagonalOffset / 2;
-    const bottomX = split - diagonalOffset / 2;
-    const dx = bottomX - topX;
-
-    const leftPoints: string[] = ["0% 0%", `${topX}% 0%`];
-
-    for (let i = 0; i < steps; i++) {
-      const y = ((i + 1) / steps) * 100;
-      const xPrev = topX + (i / steps) * dx;
-      const xNext = topX + ((i + 1) / steps) * dx;
-      leftPoints.push(`${xPrev}% ${y}%`, `${xNext}% ${y}%`);
-    }
-
-    leftPoints.push("0% 100%");
-    return `polygon(${leftPoints.join(",")})`;
-  }, [steps, split, diagonalOffset]);
-
   return (
     <header 
-      className="relative w-full flex items-center justify-between px-2 sm:px-4 md:px-6 lg:px-8 z-[100]"
-      style={{ height: topbarHeight }}
+      className="relative w-full flex items-center px-2 sm:px-4 md:px-6 lg:px-8 z-[100]"
+      style={{ height: topbarHeight, backgroundColor: colors.brand.red }}
     >
-      {/* Fine barre rouge en arrière-plan (visible sur la partie droite transparente) */}
-      <div
-        className="absolute left-0 right-0 top-0 z-0"
-        style={{ height: "clamp(2.8rem, 10vh, 3rem)", backgroundColor: colors.brand.red }}
-      />
-
-      {/* Zone de gauche : Fond rouge coupé en escalier + Titre */}
-      <div
-        className="absolute inset-0 z-10 flex items-center"
+      {/* Titre */}
+      <h2 
+        className="font-display tracking-wide text-white uppercase"
         style={{
-          backgroundColor: colors.brand.red,
-          clipPath: leftClip,
-          WebkitClipPath: leftClip,
+          fontSize: "clamp(0.9rem, 3vw, 1.875rem)",
+          // Décalage pour laisser la place à la Pokéball
+          marginLeft: `calc(${sidebarWidth} + clamp(0.5rem, 1vw, 2rem))`
         }}
       >
-        <h2 
-          className="font-display tracking-wide text-white uppercase"
-          style={{
-            fontSize: "clamp(0.9rem, 3vw, 1.875rem)",
-            // Décalage calculé pour laisser la place à la Pokéball et son espacement
-            marginLeft: `calc(${sidebarWidth} + clamp(0.5rem, 1vw, 2rem))`
-          }}
-        >
-          PokéGames
-        </h2>
-      </div>
+        PokéGames
+      </h2>
 
       {/* Pokéball / Bouton d'action */}
       <button
@@ -105,6 +58,54 @@ export default function TopBar({
           draggable={false}
         />
       </button>
+
+      {/* ══ Angle de transition (Escalier en pixels) Sidebar / TopBar ══ */}
+      {/* Affiché uniquement sur desktop (md:block). Relie la bordure droite de la sidebar à la bordure basse de la topbar */}
+      <div
+        className="absolute z-30 hidden md:block"
+        style={{
+          left: sidebarWidth,
+          top: "100%",
+          width: "16px",
+          height: "16px",
+        }}
+      >
+        <svg 
+          width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"
+          style={{ shapeRendering: "crispEdges" }}
+        >
+          {/* Couche d'ombre (redDark - 6px) */}
+          <path d="M0 0 H 16 V 6 H 14 V 8 H 12 V 10 H 10 V 12 H 8 V 14 H 6 V 16 H 0 Z" fill={colors.brand.redDark} />
+          {/* Couche interne pleine (red - fond) */}
+          <path d="M0 0 H 10 V 2 H 8 V 4 H 6 V 6 H 4 V 8 H 2 V 10 H 0 Z" fill={colors.brand.red} />
+          {/* Couche de contour extérieur (redDeep - 2px) */}
+          <path d="M14 6 H 16 V 8 H 14 V 10 H 12 V 12 H 10 V 14 H 8 V 16 H 6 V 14 H 8 V 12 H 10 V 10 H 12 V 8 H 14 Z" fill={colors.brand.redDeep} />
+        </svg>
+      </div>
+
+      {/* ══ Bordures bas (Adaptatives Desktop/Mobile) ══ */}
+      
+      {/* --- Version Desktop (md:block) --- */}
+      {/* Commence APRÈS le coin de transition SVG pour ne pas barrer la Sidebar */}
+      <div
+        className="absolute right-0 pointer-events-none z-20 hidden md:block"
+        style={{ left: `calc(${sidebarWidth} + 16px)`, top: "100%", height: "6px", backgroundColor: colors.brand.redDark }}
+      />
+      <div
+        className="absolute right-0 pointer-events-none z-20 hidden md:block"
+        style={{ left: `calc(${sidebarWidth} + 16px)`, top: "calc(100% + 6px)", height: "2px", backgroundColor: colors.brand.redDeep }}
+      />
+
+      {/* --- Version Mobile (md:hidden) --- */}
+      {/* Restent pleines largeurs car la Sidebar bascule en mode overlay/menu tiroir */}
+      <div
+        className="absolute left-0 right-0 pointer-events-none z-20 md:hidden"
+        style={{ top: "100%", height: "6px", backgroundColor: colors.brand.redDark }}
+      />
+      <div
+        className="absolute left-0 right-0 pointer-events-none z-20 md:hidden"
+        style={{ top: "calc(100% + 6px)", height: "2px", backgroundColor: colors.brand.redDeep }}
+      />
     </header>
   );
 }
