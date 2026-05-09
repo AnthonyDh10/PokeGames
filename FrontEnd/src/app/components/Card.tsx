@@ -15,13 +15,9 @@ interface CardProps {
   animation?: boolean
   cardSize?: { width?: number; height?: number }
   style?: React.CSSProperties
-  /** Optionnel : Couleur de la bordure pixélisée (ex: 'black' ou '#f3f4f6') */
   borderColor?: string
-  /** Affiche le header ou non (défaut: true) */
   showHeader?: boolean
-  /** Couleur du corps (défaut: 'white') */
   bodyColor?: string
-  /** Épaisseur de la bordure pixélisée (défaut: 'p-1.5') */
   borderThickness?: string
 }
 
@@ -49,7 +45,6 @@ export default function Card({
   bodyColor = 'white',
   borderThickness = 'p-1.5',
 }: CardProps) {
-  // Découpe générant 5 marches symétriques pour l'effet pixel
   const pixelClipPath = `polygon(
     28px 0px, calc(100% - 28px) 0px, 
     calc(100% - 28px) 4px, calc(100% - 20px) 4px, calc(100% - 20px) 8px, calc(100% - 12px) 8px, calc(100% - 12px) 12px, calc(100% - 8px) 12px, calc(100% - 8px) 20px, calc(100% - 4px) 20px, calc(100% - 4px) 28px, 100% 28px, 
@@ -62,24 +57,22 @@ export default function Card({
   )`;
 
   const cardContent = (
-    // Conteneur externe : Gère l'ombre portée (drop-shadow) et la taille globale
     <div
-      className={`flex flex-col drop-shadow-[0_8px_24px_rgba(0,0,0,0.25)] gap-[1vh] md:gap-[1%] ${
+      // Ajout de h-full pour s'assurer que la carte remplisse l'espace de la grille parent
+      className={`flex flex-col h-full drop-shadow-[0_8px_24px_rgba(0,0,0,0.25)] gap-[1vh] md:gap-[1%] ${
         hoverable
           ? 'hover:drop-shadow-[0_12px_32px_rgba(0,0,0,0.35)] hover:-translate-y-1 transition-all duration-300'
           : ''
       }`}
-      style={cardSize ? {
-        width: cardSize.width ? `${cardSize.width}px` : undefined,
-        height: cardSize.height ? `${cardSize.height}px` : undefined,
-      } : style}
+      style={{
+        ...style,
+        ...(cardSize?.width ? { width: `${cardSize.width}px` } : {}),
+        ...(cardSize?.height ? { height: `${cardSize.height}px` } : {}),
+      }}
     >
-      {/* HEADER — Partie optionnelle avec sa propre bordure et ombre */}
+      {/* HEADER */}
       {showHeader && headerColor && (
-        <div
-          className="drop-shadow-[0_6px_16px_rgba(0,0,0,0.2)] hover:drop-shadow-[0_8px_20px_rgba(0,0,0,0.3)]"
-        >
-          {/* Enveloppe bordure (secondColor) */}
+        <div className="drop-shadow-[0_6px_16px_rgba(0,0,0,0.2)] hover:drop-shadow-[0_8px_20px_rgba(0,0,0,0.3)]">
           <div
             className={borderThickness}
             style={{
@@ -87,7 +80,6 @@ export default function Card({
               clipPath: pixelClipPath,
             }}
           >
-            {/* Contenu header */}
             <div
               className={`relative flex flex-col items-center justify-center px-8 overflow-hidden ${headerClassName}`}
               style={{
@@ -101,23 +93,26 @@ export default function Card({
         </div>
       )}
 
-      {/* BODY — Partie principale avec sa propre bordure et ombre */}
+      {/* BODY */}
       <div
-        className="drop-shadow-[0_6px_16px_rgba(0,0,0,0.2)] hover:drop-shadow-[0_8px_20px_rgba(0,0,0,0.3)] flex-1"
+        // Ajout de flex et flex-col ici
+        className="drop-shadow-[0_6px_16px_rgba(0,0,0,0.2)] hover:drop-shadow-[0_8px_20px_rgba(0,0,0,0.3)] flex-1 flex flex-col"
       >
-        {/* Enveloppe bordure (secondColor) */}
+        {/* Enveloppe bordure */}
         <div
-          className={borderThickness}
+          // Ajout de flex-1 flex flex-col pour propager la hauteur
+          className={`${borderThickness} flex-1 flex flex-col`}
           style={{
             backgroundColor: borderColor || 'transparent',
             clipPath: pixelClipPath,
           }}
         >
-          {/* Conteneur principal : Contenu de la carte avec fond color */}
+          {/* Conteneur principal (Fond de la carte) */}
           <div
+            // Ajout de flex-1 flex flex-col pour propager la hauteur jusqu'au contenu
             className={`${
               overflowVisible ? 'overflow-visible' : 'overflow-hidden'
-            } ${className}`}
+            } ${className} flex-1 flex flex-col`}
             style={{
               backgroundColor: bodyColor,
               clipPath: pixelClipPath,
@@ -149,6 +144,7 @@ export default function Card({
       initial="initial"
       animate="animate"
       variants={cardAnimationVariants}
+      className="h-full" // Ajout de h-full pour que l'animation wrapper ne casse pas la hauteur en grille
     >
       {cardContent}
     </motion.div>
