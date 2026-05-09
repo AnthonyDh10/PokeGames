@@ -1,6 +1,6 @@
-import { useMemo } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { colors } from "../design/colors";
+import PixelButton, { pixelClipPathLg } from "./PixelButton";
 import Pokeball from "../components/images/pokéball_face.png";
 import pokedescLogo from "../components/images/pokedesc-logo.png";
 import typeLogo from "../components/images/type-logo.png";
@@ -12,17 +12,7 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-// Découpe pixélisée adaptée aux petits boutons (marches de 3px, total 9px par coin)
-const miniPixelClipPath = `polygon(
-  9px 0px, calc(100% - 9px) 0px, 
-  calc(100% - 9px) 3px, calc(100% - 6px) 3px, calc(100% - 6px) 6px, calc(100% - 3px) 6px, calc(100% - 3px) 9px, 100% 9px, 
-  100% calc(100% - 9px), 
-  calc(100% - 3px) calc(100% - 9px), calc(100% - 3px) calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) calc(100% - 3px), calc(100% - 9px) calc(100% - 3px), calc(100% - 9px) 100%, 
-  9px 100%, 
-  9px calc(100% - 3px), 6px calc(100% - 3px), 6px calc(100% - 6px), 3px calc(100% - 6px), 3px calc(100% - 9px), 0px calc(100% - 9px), 
-  0px 9px, 
-  3px 9px, 3px 6px, 6px 6px, 6px 3px, 9px 3px
-)`;
+
 
 // Sous-composant gérant les états Actif/Inactif et les 3 couches de bordure (Ombre / Lumière / Fond)
 interface NavButtonProps {
@@ -34,53 +24,23 @@ interface NavButtonProps {
 }
 
 function NavButton({ onClick, isActive, title, size, children }: NavButtonProps) {
-  // Couleurs conditionnelles basées sur l'état de la route
   const color = isActive ? colors.ui.grayDark : colors.ui.grayMid;
   const colorLight = isActive ? colors.ui.grayDark : colors.ui.grayLight;
   const colorDark = isActive ? colors.ui.grayLight : colors.ui.grayDark;
-  const borderColor = colors.ui.grayBorderDark;
 
   return (
-    <button
+    <PixelButton
       onClick={onClick}
       title={title}
-      className="relative block cursor-pointer group drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)] hover:drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)] hover:translate-x-[2px] hover:translate-y-[2px] active:drop-shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-none p-[3px] shrink-0"
-      style={{
-        width: size,
-        height: size,
-        backgroundColor: borderColor,
-        clipPath: miniPixelClipPath,
-      }}
+      style={{ width: size, height: size }}
+      colorBorder={colors.ui.grayBorderDark}
+      colorLight={colorLight}
+      colorDark={colorDark}
+      color={color}
+      clipPath={pixelClipPathLg}
     >
-      {/* Bordure Lumière (Haut & Gauche) */}
-      <div
-        className="flex flex-col w-full h-full pt-[3px] pl-[3px]"
-        style={{
-          backgroundColor: colorLight,
-          clipPath: miniPixelClipPath,
-        }}
-      >
-        {/* Bordure Ombre (Bas & Droite) */}
-        <div
-          className="flex flex-col w-full h-full pr-[3px] pb-[3px]"
-          style={{
-            backgroundColor: colorDark,
-            clipPath: miniPixelClipPath,
-          }}
-        >
-          {/* Fond Interne */}
-          <div
-            className="flex-1 flex items-center justify-center w-full h-full"
-            style={{
-              backgroundColor: color,
-              clipPath: miniPixelClipPath,
-            }}
-          >
-            {children}
-          </div>
-        </div>
-      </div>
-    </button>
+      {children}
+    </PixelButton>
   );
 }
 
