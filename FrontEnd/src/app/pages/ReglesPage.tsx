@@ -399,27 +399,36 @@ export default function ReglesPage() {
           exit="exit"
         >
           <GameCard
-            title="PokéDesc"
+            title="POKÉDESC"
             description="Découvre les règles ici !"
             color={colors.brand.blue}
+            secondColor={colors.brand.blueDeep}
+            colorLight={colors.brand.blueLight}
+            colorDark={colors.brand.blueDark}
             image={pokedescLogo}
             to="/pokedesc"
             onClick={() => handleOpenModal("pokedesc")}
           />
 
           <GameCard
-            title="Quel est ce type ?"
+            title="TYPUZZLE"
             description="Découvre les règles ici !"
             color={colors.brand.yellow}
+            secondColor={colors.brand.yellowDark}
+            colorLight={colors.brand.yellowLight}
+            colorDark={colors.brand.yellowWarm}
             image={typeLogo}
             to="/types"
             onClick={() => handleOpenModal("types")}
           />
 
           <GameCard
-            title="Dézoom"
+            title="DEX-ZOOM"
             description="Découvre les règles ici !"
             color={colors.brand.red}
+            secondColor={colors.brand.redDeep}
+            colorLight={colors.brand.redLight}
+            colorDark={colors.brand.redDark}
             image={dezoomLogo}
             to="/dezoom"
             onClick={() => handleOpenModal("dezoom")}
