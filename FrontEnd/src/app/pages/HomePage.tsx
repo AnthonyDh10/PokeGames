@@ -20,6 +20,8 @@ interface Game {
   description: string;
   color: string;
   secondColor: string;
+  colorLight: string;
+  colorDark: string;
   image?: string;
   icon?: string;
   to: string;
@@ -31,8 +33,10 @@ const games: Game[] = [
   {
     title: "PROF. CHEN",
     description: "Bienvenue dresseur ! Relève les défis du Professeur pour tester tes connaissances sur les pokémon ! Chaque pokéball renferme un défi différent, survole les pour les découvrir ! Prends connaissance de leurs règles en cliquant sur le livre !",
-    color: colors.ui.grayBorderLight,
+    color: colors.ui.grayMid,
     secondColor: colors.ui.grayBorderDark,
+    colorLight: colors.ui.grayLight,
+    colorDark: colors.ui.grayDark,
     image: rulesIconImg,
     to: "/regles",
     isOak: true,
@@ -42,15 +46,19 @@ const games: Game[] = [
     title: "POKÉDESC",
     description: "Connais-tu ton pokédex sur le bout des doigts ? Devine le pokémon à partir d'une description et d'autres indices !",
     color: colors.brand.blue,
-    secondColor: colors.brand.blueDark,
+    secondColor: colors.brand.blueDeep,
     image: pokedescLogo,
     to: "/pokedesc",
+    colorLight: colors.brand.blueLight,
+    colorDark: colors.brand.blueDark,
   },
   {
     title: "TYPUZZLE",
     description: "J'espère que tu connais ta table de types ! Devine les types à partir de leurs forces, faiblesses et immunités !",
     color: colors.brand.yellow,
-    secondColor: colors.brand.yellowWarm,
+    secondColor: colors.brand.yellowDark,
+    colorLight: colors.brand.yellowLight,
+    colorDark: colors.brand.yellowWarm,
     image: typeLogo,
     to: "/types",
   },
@@ -58,7 +66,9 @@ const games: Game[] = [
     title: "DEX-ZOOM",
     description: "Penses-tu reconnaître un pokémon du premier coup d'œil ? Devine le pokémon à partir d'une partie de son corps !",
     color: colors.brand.red,
-    secondColor: colors.brand.redDark,
+    secondColor: colors.brand.redDeep,
+    colorLight: colors.brand.redLight,
+    colorDark: colors.brand.redDark,
     image: dezoomLogo,
     to: "/dezoom",
   },
@@ -380,6 +390,8 @@ export default function HomePage() {
                   color={games[activeIndex].color}
                   text_color={games[activeIndex].text_color}
                   secondColor={games[activeIndex].secondColor}
+                  colorLight={games[activeIndex].colorLight}
+                  colorDark={games[activeIndex].colorDark}
                   image={games[activeIndex].image}
                   icon={games[activeIndex].icon}
                   to={games[activeIndex].to}

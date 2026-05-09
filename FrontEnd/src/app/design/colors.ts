@@ -28,7 +28,9 @@ export const colors = {
     /** Rouge foncé (fond sidebar, boutons nav inactifs) */
     redDark:  "#A30000",
     /** Rouge très foncé (hover buttons, ombre portée) */
-    redDeep:  "#A30000",
+    redDeep:  "#750000",
+
+    redLight: "#FF2E2E",
 
     /** Jaune Pokémon (accent, highlights, badges) */
     yellow:   "#FFCF1A",
@@ -37,12 +39,16 @@ export const colors = {
 
     yellowLight: "#FFE32E",
 
+    yellowDark: "#CC9A00",
+
     /** Bleu Pokédex (carte PokéDesc, éléments secondaires) */
     blue:     "#3B4CCA",
     /** Bleu foncé — hover ou ombre du bleu Pokédex */
     blueDark: "#2D3BA4",
     /** Bleu clair — pour les éléments décoratifs ou les fonds secondaires (ex. diagonal stripe) */
     blueLight: "#5B69D2",
+
+    blueDeep: "#19215C",
   },
 
   // ─── Interface utilisateur ─────────────────────────────────────────────────
@@ -87,8 +93,9 @@ export const colors = {
     /** Décoration semi-transparente (Pokéball sur GameCard) */
     decorOverlay: "rgba(0,0,0,0.1)",
     /** Gris rétro pour UI (ajoutés pour la sidebar rétro) */
-    grayLight:   "#C0C0C0",
+    grayLight:   "#DBDBDB",
     grayMid:     "#CBCBCB",
+    grayDark:    "#ADADAD",
     grayBorderLight: "#DFDFDF",
     grayBorderDark:  "#585858",
     grayShadow:  "#303030",

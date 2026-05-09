@@ -6,6 +6,10 @@ interface GameCardProps {
   description: string;
   /** Couleur de fond de la carte — utiliser `colors.brand.xxx` depuis design/colors.ts */
   color: string;
+  /** Couleur claire pour l'effet de relief (bordures Haut et Gauche) */
+  colorLight: string;
+  /** Couleur sombre pour l'effet de relief (bordures Bas et Droite) */
+  colorDark: string;
   /** Couleur du texte (ex: '#ffffff' ou 'white') — défaut: blanc */
   text_color?: string;
   icon?: string;
@@ -21,6 +25,8 @@ export default function GameCard({
   title,
   description,
   color,
+  colorLight,
+  colorDark,
   icon,
   to,
   image,
@@ -60,7 +66,7 @@ export default function GameCard({
       `}</style>
       
       {/* ======================================================== */}
-      {/* PARTIE GAUCHE — Wrapper Extérieur (Bordure)                */}
+      {/* PARTIE GAUCHE — Image ou icône                             */}
       {/* ======================================================== */}
       <div
         className="gamecard-left flex-col shrink-0 drop-shadow-[6px_6px_0px_rgba(0,0,0,0.8)] hover:drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)] hover:translate-x-1 hover:translate-y-1 active:drop-shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-none w-40 md:w-52 p-[4px]"
@@ -69,24 +75,42 @@ export default function GameCard({
           clipPath: pixelClipPath,
         }}
       >
-        {/* Contenu GAUCHE — Fond interne */}
+        {/* Bordure Lumière (Haut & Gauche) */}
         <div
-          className="flex-1 flex items-center justify-center w-full h-full"
+          className="flex flex-col flex-1 pt-[4px] pl-[4px]"
           style={{
-            backgroundColor: color,
+            backgroundColor: colorLight,
             clipPath: pixelClipPath,
           }}
         >
-          {image ? (
-            <img
-              src={image}
-              alt={title}
-              style={{ imageRendering: "pixelated" }}
-              className="w-32 md:w-40 h-auto object-contain"
-            />
-          ) : (
-            <span className="text-5xl md:text-6xl">{icon}</span>
-          )}
+          {/* Bordure Ombre (Bas & Droite) */}
+          <div
+            className="flex flex-col flex-1 pr-[4px] pb-[4px]"
+            style={{
+              backgroundColor: colorDark,
+              clipPath: pixelClipPath,
+            }}
+          >
+            {/* Contenu GAUCHE — Fond interne */}
+            <div
+              className="flex-1 flex items-center justify-center w-full h-full"
+              style={{
+                backgroundColor: color,
+                clipPath: pixelClipPath,
+              }}
+            >
+              {image ? (
+                <img
+                  src={image}
+                  alt={title}
+                  style={{ imageRendering: "pixelated" }}
+                  className="w-32 md:w-40 h-auto object-contain"
+                />
+              ) : (
+                <span className="text-5xl md:text-6xl">{icon}</span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -94,7 +118,7 @@ export default function GameCard({
       <div className="gamecard-gap" style={{ width: gapSize, flexShrink: 0 }} />
 
       {/* ======================================================== */}
-      {/* PARTIE DROITE — Wrapper Extérieur (Bordure)                */}
+      {/* PARTIE DROITE — Texte                                      */}
       {/* ======================================================== */}
       <div
         className="flex flex-col flex-1 drop-shadow-[6px_6px_0px_rgba(0,0,0,0.8)] hover:drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)] hover:translate-x-1 hover:translate-y-1 active:drop-shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-none p-[4px]"
@@ -103,31 +127,49 @@ export default function GameCard({
           clipPath: pixelClipPath,
         }}
       >
-        {/* Contenu DROIT — Fond interne */}
+        {/* Bordure Lumière (Haut & Gauche) */}
         <div
-          className="flex-1 font-heading flex flex-col justify-center p-5 md:p-7 overflow-hidden relative"
+          className="flex flex-col flex-1 pt-[4px] pl-[4px]"
           style={{
-            backgroundColor: color,
+            backgroundColor: colorLight,
             clipPath: pixelClipPath,
           }}
         >
-          <PokeballDecor
-            size={130}
-            opacity={0.15}
-            className="absolute top-1/2 right-6 -translate-y-1/2"
-          />
-          <h2
-            className="font-display uppercase font-bold text-2xl tracking-wide mb-3 drop-shadow-[2px_2px_0px_rgba(0,0,0,0.6)]"
-            style={{ color: text_color }}
+          {/* Bordure Ombre (Bas & Droite) */}
+          <div
+            className="flex flex-col flex-1 pr-[4px] pb-[4px]"
+            style={{
+              backgroundColor: colorDark,
+              clipPath: pixelClipPath,
+            }}
           >
-            {title}
-          </h2>
-          <p
-            className="font-body text-base md:text-lg leading-relaxed drop-shadow-[1px_1px_0px_rgba(0,0,0,0.4)]"
-            style={{ color: text_color, opacity: 0.9 }}
-          >
-            {description}
-          </p>
+            {/* Contenu DROIT — Fond interne */}
+            <div
+              className="flex-1 font-heading flex flex-col justify-center p-4 md:p-6 overflow-hidden relative"
+              style={{
+                backgroundColor: color,
+                clipPath: pixelClipPath,
+              }}
+            >
+              <PokeballDecor
+                size={130}
+                opacity={0.15}
+                className="absolute top-1/2 right-6 -translate-y-1/2"
+              />
+              <h2
+                className="font-display uppercase font-bold text-2xl tracking-wide mb-3 drop-shadow-[2px_2px_0px_rgba(0,0,0,0.6)]"
+                style={{ color: text_color }}
+              >
+                {title}
+              </h2>
+              <p
+                className="font-body text-base md:text-lg leading-relaxed drop-shadow-[1px_1px_0px_rgba(0,0,0,0.4)]"
+                style={{ color: text_color, opacity: 0.9 }}
+              >
+                {description}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </button>
