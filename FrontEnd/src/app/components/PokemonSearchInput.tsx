@@ -90,7 +90,7 @@ export default function PokemonSearchInput<T extends SearchableItem>({
             top: `${dropdownPos.top}px`,
             left: `${dropdownPos.left}px`,
             width: `${dropdownPos.width}px`,
-            zIndex: 9999,
+            zIndex: 2000,
             borderColor: colors.brand.blue,
           }}
         >

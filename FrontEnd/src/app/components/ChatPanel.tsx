@@ -69,7 +69,7 @@ export default function ChatPanel() {
       <button
         onClick={toggleOpen}
         aria-label={isOpen ? 'Fermer le chat' : 'Ouvrir le chat'}
-        className="fixed right-0 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center justify-center gap-1 py-4 px-1.5 rounded-l-xl shadow-lg transition-all duration-200"
+        className="fixed right-0 top-1/2 -translate-y-1/2 flex flex-col items-center justify-center gap-1 py-4 px-1.5 rounded-l-xl shadow-lg transition-all duration-200"
         style={{
           backgroundColor: colors.brand.red,
           color: '#fff',
@@ -91,7 +91,7 @@ export default function ChatPanel() {
 
       {/* Drawer panel */}
       <div
-        className="fixed top-0 right-0 h-full z-[9999] flex flex-col shadow-2xl transition-transform duration-300"
+        className="fixed top-0 right-0 h-full flex flex-col shadow-2xl transition-transform duration-300"
         style={{
           width: '320px',
           transform: isOpen ? 'translateX(0)' : 'translateX(100%)',

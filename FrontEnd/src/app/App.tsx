@@ -83,7 +83,7 @@ export default function App() {
       <div
         style={{
           position: "relative",
-          zIndex: 100001,
+          zIndex: 1001,
           borderTop: `6px solid ${colors.brand.redLight}`,
           borderLeft: `6px solid ${colors.brand.redLight}`,
         }}
@@ -125,7 +125,7 @@ export default function App() {
         </div>
       </div>
 
-      <div style={{ position: "relative", zIndex: 1 }}>
+      <div style={{ position: "relative", zIndex: 2002 }}>
         <Footer />
         <ChatPanel />
       </div>
