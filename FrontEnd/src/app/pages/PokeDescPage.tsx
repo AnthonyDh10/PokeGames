@@ -640,56 +640,54 @@ export default function PokeDescPage() {
             <h3 className="font-heading text-center text-xl tracking-wide mb-4" style={{ color: colors.brand.blue }}>INDICES DISPONIBLES</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {HINTS_CONFIG.map(({ key, icon, imgIcon, label }) => {
-              const used = usedHints.includes(key)
-              const locked = isHintLocked(key)
-              const penalty = HINT_PENALTIES[key]
-              const animation = hintAnimations[key]
-              const revealedKey = label as keyof RevealedHints
-              const revealedValue = revealedHints[revealedKey]
-
-              return (
-                <button
-                  key={key}
-                  onClick={() => handleRequestHint(key)}
-                  disabled={used || locked}
-                  title={locked ? `Temps insuffisant — il reste ${timeRemaining.toFixed(1)}s, cet indice coûte ${penalty}s` : ''}
-                  className={`font-body relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border-2 font-medium min-h-24 transition
-                    ${!used ? 'bg-white border-gray-200' : ''}
-                    ${!used && !locked ? 'hover:bg-blue-50 hover:border-blue-400 hover:-translate-y-0.5 hover:shadow-px-sm cursor-pointer' : ''}
-                    ${locked || used ? 'cursor-not-allowed' : ''}`}
-                  style={used ? { backgroundColor: colors.brand.blue + '18', borderColor: colors.brand.blue } : {}}
-                >
-                  {animation !== undefined && partie?.timerDurationSeconds !== -1 && (
-                    <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-red-500 font-bold text-lg pointer-events-none z-20 bg-white/95 px-2 py-0.5 rounded-md border-2 border-red-500 animate-[hintFloatUp_1.5s_ease-out_forwards]">
-                      -{animation}s
-                    </span>
-                  )}
-
-                  {used && revealedValue ? (
-                    <>
-                      {key === 'Sprite' ? (
-                        <img src={revealedValue} alt="Silhouette" className="max-w-full h-auto" style={{ imageRendering: 'pixelated', filter: 'brightness(0)' }} />
-                      ) : (
-                        <span className={`font-body font-semibold text-center leading-tight px-1 ${key === 'Stats' ? 'text-xs' : 'text-sm'}`} style={{ color: colors.brand.blue }}>
-                          {revealedValue}
-                        </span>
-                      )}
-                      <span className="absolute top-1.5 right-1.5 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs" style={{ backgroundColor: colors.game.success }}>✓</span>
-                    </>
-                  ) : (
-                    <>
-                      {imgIcon ? (
-                        <img src={imgIcon} alt={label} className="w-8 h-8 grayscale opacity-70 object-contain" />
-                      ) : (
-                        <span className="text-2xl grayscale opacity-70">{icon}</span>
-                      )}
-                      <span className="text-sm text-gray-700">{label}</span>
-                      {locked && (
-                        <span className="absolute top-1.5 right-1.5 bg-gray-400 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">🔒</span>
-                      )}
-                    </>
-                  )}
-                </button>
+              const used = usedHints.includes(key)
+              const locked = isHintLocked(key)
+              const penalty = HINT_PENALTIES[key]
+              const animation = hintAnimations[key]
+              const revealedKey = label as keyof RevealedHints
+              const revealedValue = revealedHints[revealedKey]              
+              return (
+                <button
+                  key={key}
+                  onClick={() => handleRequestHint(key)}
+                  disabled={used || locked}
+                  title={locked ? `Temps insuffisant — il reste ${timeRemaining.toFixed(1)}s, cet indice coûte ${penalty}s` : ''}
+                  className={`font-body relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border-2 font-medium min-h-24 transition
+                    ${!used ? 'bg-white border-gray-200' : ''}
+                    ${!used && !locked ? 'hover:bg-blue-50 hover:border-blue-400 hover:-translate-y-0.5 hover:shadow-px-sm cursor-pointer' : ''}
+                    ${locked || used ? 'cursor-not-allowed' : ''}`}
+                  style={used ? { backgroundColor: colors.brand.blue + '18', borderColor: colors.brand.blue } : {}}
+                >
+                  {animation !== undefined && partie?.timerDurationSeconds !== -1 && (
+                    <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-red-500 font-bold text-lg pointer-events-none z-20 bg-white/95 px-2 py-0.5 rounded-md border-2 border-red-500 animate-[hintFloatUp_1.5s_ease-out_forwards]">
+                      -{animation}s
+                    </span>
+                  )}              
+                  {used && revealedValue ? (
+                    <>
+                      {key === 'Sprite' ? (
+                        <img src={revealedValue} alt="Silhouette" className="max-w-full h-auto" style={{ imageRendering: 'pixelated', filter: 'brightness(0)' }} />
+                      ) : (
+                        <span className={`font-body font-semibold text-center leading-tight px-1 ${key === 'Stats' ? 'text-xs' : 'text-sm'}`} style={{ color: colors.brand.blue }}>
+                          {revealedValue}
+                        </span>
+                      )}
+                      <span className="absolute top-1.5 right-1.5 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs" style={{ backgroundColor: colors.game.success }}>✓</span>
+                    </>
+                  ) : (
+                    <>
+                      {imgIcon ? (
+                        <img src={imgIcon} alt={label} className="w-8 h-8 grayscale opacity-70 object-contain" />
+                      ) : (
+                        <span className="text-2xl grayscale opacity-70">{icon}</span>
+                      )}
+                      <span className="text-sm text-gray-700">{label}</span>
+                      {locked && (
+                        <span className="absolute top-1.5 right-1.5 bg-gray-400 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">🔒</span>
+                      )}
+                    </>
+                  )}
+                </button>
               )
             })}
           </div>
