@@ -368,9 +368,7 @@ export default function ReglesPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <SectionTitle>Règles des jeux</SectionTitle>
-
+    <div className="space-y-6 py-10 px-4 sm:px-6 lg:px-8">
       <div className="flex items-stretch min-h-screen gap-8">
         {/* Gauche — Chen */}
         <motion.div

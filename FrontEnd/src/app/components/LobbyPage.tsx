@@ -456,9 +456,7 @@ export default function LobbyPage({
 
   // --- Options create/join ---
   return (
-    <div className="space-y-6">
-      <SectionTitle>Débuter une partie — {playerName}</SectionTitle>
-
+    <div className="space-y-6 py-10 px-4 sm:px-6 lg:px-8">
       {errorMessage && (
         <div
           className="max-w-xl mx-auto font-body border px-4 py-3 rounded-xl font-medium text-center"
