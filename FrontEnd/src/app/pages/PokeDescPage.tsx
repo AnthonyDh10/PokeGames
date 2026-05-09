@@ -7,6 +7,7 @@ import { colors } from '../design/colors'
 import Card from '../components/Card'
 import PokemonSearchInput from '../components/PokemonSearchInput'
 import Timer from '../components/Timer'
+import indiceTypeIcon from '../components/images/indice_type.png'
 import { getAllPokemons, getCensoredDescription, getHints } from '../services/pokemonService'
 import { getPartie, submitGuess, useHint, getTimer, resetTimer } from '../services/partieService'
 import type { PokemonDto, PokemonHintsDto } from '../types/pokemon'
@@ -63,8 +64,8 @@ const HINT_PENALTIES: Record<string, number> = {
 }
 
 const HINTS_CONFIG = [
-  { key: 'Type1', icon: '🔷', label: 'Type 1' },
-  { key: 'Type2', icon: '🔶', label: 'Type 2' },
+  { key: 'Type1', imgIcon: indiceTypeIcon, label: 'Type 1' },
+  { key: 'Type2', imgIcon: indiceTypeIcon, label: 'Type 2' },
   { key: 'Generation', icon: '📅', label: 'Génération' },
   { key: 'Category', icon: '🏷️', label: 'Catégorie' },
   { key: 'Stats', icon: '📊', label: 'Statistiques' },
@@ -502,7 +503,7 @@ export default function PokeDescPage() {
           headerClassName="py-4"
           header={
             <div className="flex flex-col md:flex-row md:items-center md:gap-3">
-              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textOnColor }}>
+              <h1 className="font-display text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textOnColor }}>
                 Devine le Pokémon !
               </h1>
               {partie?.selectedGenerations && (
@@ -547,15 +548,14 @@ export default function PokeDescPage() {
         <div className="relative z-10 flex flex-col gap-4">
           {/* Description */}
           <Card
-            headerColor={colors.brand.blueLight}
-            headerClassName="py-4"
             pokeballColor={colors.brand.blueLight}
-            pokeballOpacity={0}
-            header={<h2 className="font-heading text-xl tracking-wide text-white">Description du Pokédex</h2>}
+            pokeballOpacity={.1}
+            showHeader={false}
           >
             <div className="p-4 md:p-6 flex flex-col pb-6 min-h-[160px] md:min-h-[220px]">
+              <h3 className="font-heading text-center text-xl tracking-wide" style={{ color: colors.brand.blue }}>DESCRIPTION</h3>
                 <div className="flex-1">
-                  <div className="font-body bg-blue-50 border-l-4 p-4 text-base leading-relaxed h-full" style={{ borderColor: colors.brand.blue }}>
+                  <div className="font-body text-justify p-8 text-base leading-relaxed h-full">
                     {descriptions[descriptionIndex] || <span className="text-gray-400 italic">Chargement de la description...</span>}
                   </div>
                 </div>
@@ -563,18 +563,18 @@ export default function PokeDescPage() {
                   <div className="flex items-center justify-center gap-4 mt-auto">
                     <button
                       onClick={() => setDescriptionIndex(i => (i - 1 + descriptions.length) % descriptions.length)}
-                      className="w-9 h-9 flex items-center justify-center rounded-full border-2 font-bold text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
+                      className="w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
                       style={{ borderColor: colors.brand.blue, color: colors.brand.blue }}
                     >
-                      ‹
+                      <strong>‹‹</strong>
                     </button>
                     <span className="font-body text-sm text-gray-500 tabular-nums">{descriptionIndex + 1} / {descriptions.length}</span>
                     <button
                       onClick={() => setDescriptionIndex(i => (i + 1) % descriptions.length)}
-                      className="w-9 h-9 flex items-center justify-center rounded-full border-2 font-bold text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
+                      className="w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
                       style={{ borderColor: colors.brand.blue, color: colors.brand.blue }}
                     >
-                      ›
+                      <strong>››</strong>
                     </button>
                   </div>
                 )}
@@ -583,14 +583,13 @@ export default function PokeDescPage() {
 
           {/* Réponse */}
           <Card
-            headerColor={colors.brand.blueDark}
-            headerClassName="py-4 z-50"
             pokeballColor={colors.brand.white}
             pokeballOpacity={0}
-            header={<h3 className="font-heading text-xl tracking-wide text-white">Ta réponse</h3>}
+            showHeader={true}
             overflowVisible
           >
             <div className="p-4 md:p-6">
+              <h3 className="font-heading text-center text-xl tracking-wide mb-4" style={{ color: colors.brand.blue }}>RÉPONSE</h3>
             <div className="mb-3">
               <PokemonSearchInput
                 items={filteredPokemons}
@@ -633,67 +632,64 @@ export default function PokeDescPage() {
 
         {/* Colonne droite — Indices */}
         <Card
-          headerColor={colors.brand.blueLight}
-          headerClassName="py-4"
           pokeballColor={colors.brand.blueLight}
           pokeballSize={300}
-          header={
-            <>
-              <h3 className="font-heading text-xl tracking-wide text-white">Indices disponibles</h3>
-              <p className="font-body text-sm mt-1" style={{ color: colors.ui.textOnColorSoft }}>{partie?.timerDurationSeconds === -1 ? 'Les indices coûtent des points !' : 'Chaque indice coûte du temps !'}</p>
-            </>
-          
-          }
+          showHeader={false}
         >
           <div className="p-4 md:p-6">
+            <h3 className="font-heading text-center text-xl tracking-wide mb-4" style={{ color: colors.brand.blue }}>INDICES DISPONIBLES</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {HINTS_CONFIG.map(({ key, icon, label }) => {
-              const used = usedHints.includes(key)
-              const locked = isHintLocked(key)
-              const penalty = HINT_PENALTIES[key]
-              const animation = hintAnimations[key]
-              const revealedKey = label as keyof RevealedHints
-              const revealedValue = revealedHints[revealedKey]
+            {HINTS_CONFIG.map(({ key, icon, imgIcon, label }) => {
+              const used = usedHints.includes(key)
+              const locked = isHintLocked(key)
+              const penalty = HINT_PENALTIES[key]
+              const animation = hintAnimations[key]
+              const revealedKey = label as keyof RevealedHints
+              const revealedValue = revealedHints[revealedKey]
 
-              return (
-                <button
-                  key={key}
-                  onClick={() => handleRequestHint(key)}
-                  disabled={used || locked}
-                  title={locked ? `Temps insuffisant — il reste ${timeRemaining.toFixed(1)}s, cet indice coûte ${penalty}s` : ''}
-                  className={`font-body relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border-2 font-medium min-h-24 transition
-                    ${!used ? 'bg-white border-gray-200' : ''}
-                    ${!used && !locked ? 'hover:bg-blue-50 hover:border-blue-400 hover:-translate-y-0.5 hover:shadow-px-sm cursor-pointer' : ''}
-                    ${locked || used ? 'cursor-not-allowed' : ''}`}
-                  style={used ? { backgroundColor: colors.brand.blue + '18', borderColor: colors.brand.blue } : {}}
-                >
-                  {animation !== undefined && partie?.timerDurationSeconds !== -1 && (
-                    <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-red-500 font-bold text-lg pointer-events-none z-20 bg-white/95 px-2 py-0.5 rounded-md border-2 border-red-500 animate-[hintFloatUp_1.5s_ease-out_forwards]">
-                      -{animation}s
-                    </span>
-                  )}
+              return (
+                <button
+                  key={key}
+                  onClick={() => handleRequestHint(key)}
+                  disabled={used || locked}
+                  title={locked ? `Temps insuffisant — il reste ${timeRemaining.toFixed(1)}s, cet indice coûte ${penalty}s` : ''}
+                  className={`font-body relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border-2 font-medium min-h-24 transition
+                    ${!used ? 'bg-white border-gray-200' : ''}
+                    ${!used && !locked ? 'hover:bg-blue-50 hover:border-blue-400 hover:-translate-y-0.5 hover:shadow-px-sm cursor-pointer' : ''}
+                    ${locked || used ? 'cursor-not-allowed' : ''}`}
+                  style={used ? { backgroundColor: colors.brand.blue + '18', borderColor: colors.brand.blue } : {}}
+                >
+                  {animation !== undefined && partie?.timerDurationSeconds !== -1 && (
+                    <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-red-500 font-bold text-lg pointer-events-none z-20 bg-white/95 px-2 py-0.5 rounded-md border-2 border-red-500 animate-[hintFloatUp_1.5s_ease-out_forwards]">
+                      -{animation}s
+                    </span>
+                  )}
 
-                  {used && revealedValue ? (
-                    <>
-                      {key === 'Sprite' ? (
-                        <img src={revealedValue} alt="Silhouette" className="max-w-full h-auto" style={{ imageRendering: 'pixelated', filter: 'brightness(0)' }} />
-                      ) : (
-                        <span className={`font-body font-semibold text-center leading-tight px-1 ${key === 'Stats' ? 'text-xs' : 'text-sm'}`} style={{ color: colors.brand.blue }}>
-                          {revealedValue}
-                        </span>
-                      )}
-                      <span className="absolute top-1.5 right-1.5 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs" style={{ backgroundColor: colors.game.success }}>✓</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-2xl grayscale opacity-70">{icon}</span>
-                      <span className="text-sm text-gray-700">{label}</span>
-                      {locked && (
-                        <span className="absolute top-1.5 right-1.5 bg-gray-400 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">🔒</span>
-                      )}
-                    </>
-                  )}
-                </button>
+                  {used && revealedValue ? (
+                    <>
+                      {key === 'Sprite' ? (
+                        <img src={revealedValue} alt="Silhouette" className="max-w-full h-auto" style={{ imageRendering: 'pixelated', filter: 'brightness(0)' }} />
+                      ) : (
+                        <span className={`font-body font-semibold text-center leading-tight px-1 ${key === 'Stats' ? 'text-xs' : 'text-sm'}`} style={{ color: colors.brand.blue }}>
+                          {revealedValue}
+                        </span>
+                      )}
+                      <span className="absolute top-1.5 right-1.5 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs" style={{ backgroundColor: colors.game.success }}>✓</span>
+                    </>
+                  ) : (
+                    <>
+                      {imgIcon ? (
+                        <img src={imgIcon} alt={label} className="w-8 h-8 grayscale opacity-70 object-contain" />
+                      ) : (
+                        <span className="text-2xl grayscale opacity-70">{icon}</span>
+                      )}
+                      <span className="text-sm text-gray-700">{label}</span>
+                      {locked && (
+                        <span className="absolute top-1.5 right-1.5 bg-gray-400 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">🔒</span>
+                      )}
+                    </>
+                  )}
+                </button>
               )
             })}
           </div>
