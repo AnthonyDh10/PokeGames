@@ -324,7 +324,7 @@ public class PartieService : IPartieService
                     IsCorrect = false,
                     IsTurnFinished = true,
                     PointsEarned = 0,
-                    Message = $"Dommage, c'était {targetPokemon.NameFr}. Vous passez au suivant.",
+                    Message = $"Dommage, c'était {targetPokemon.NameFr}. Tu passes au suivant.",
                     UpdatedGame = partie,
                     IsGameFinished = CheckIfGameFinished(partie, isJ1)
                 };
@@ -337,7 +337,7 @@ public class PartieService : IPartieService
                     IsCorrect = false,
                     IsTurnFinished = false,
                     PointsEarned = 0,
-                    Message = $"Ce n'est pas ça. Il vous reste {MaxAttempts - attemptsUsed} essais.",
+                    Message = $"Mauvaise réponse. Il te reste {MaxAttempts - attemptsUsed} essais.",
                     UpdatedGame = partie
                 };
             }

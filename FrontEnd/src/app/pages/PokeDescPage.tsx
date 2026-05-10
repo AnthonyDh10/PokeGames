@@ -5,11 +5,13 @@ import { useBackgroundStore } from '../store/backgroundStore'
 import { useChatStore } from '../store/chatStore'
 import { colors } from '../design/colors'
 import Card from '../components/Card'
+import SubCard from '../components/SubCard'
 import PixelButton, { pixelClipPathSm } from '../components/PixelButton'
 import PokemonSearchInput from '../components/PokemonSearchInput'
 import { normalizeString } from '../components/PokemonSearchInput'
 import Timer from '../components/Timer'
 import indiceTypeIcon from '../components/images/indice_type.png'
+import oakChibi from '../components/images/oak-chibi.png'
 import { getAllPokemons, getCensoredDescription, getHints } from '../services/pokemonService'
 import { getPartie, submitGuess, useHint, getTimer, resetTimer } from '../services/partieService'
 import type { PokemonDto, PokemonHintsDto } from '../types/pokemon'
@@ -589,57 +591,125 @@ export default function PokeDescPage() {
               </div>
           </Card>
 
-          {/* Réponse */}
-          <Card
-            pokeballColor={colors.brand.white}
-            pokeballOpacity={0}
-            showHeader={true}
-            overflowVisible
-          >
-            <div className="p-4 md:p-6">
-              <h3 className="font-heading text-center text-xl tracking-wide mb-4" style={{ color: colors.brand.blue }}>RÉPONSE</h3>
-            <div className="mb-3">
-              <PokemonSearchInput
-                items={filteredPokemons}
-                value={searchTerm}
-                onChange={setSearchTerm}
-                onSelect={(p) => { setSelectedPokemonName(p.nameFr); setSearchTerm(p.nameFr) }}
-                disabled={isSubmitting}
-              />
-            </div>
+          <div className="relative">
+            
+            {guessResultMessage && !lastGuessCorrect && (
+              //* On met le positionnement, la taille et le drop-shadow sur un conteneur parent */
+              <div className="absolute top-1/2 -translate-y-1/2 right-full mr-6 w-64 md:w-72 z-50 animate-fade-in drop-shadow-xl">
+                
+                <div className="absolute top-1/2 -translate-y-1/2 -right-[12px] w-0 h-0 border-y-[8px] border-y-transparent border-l-[8px] border-l-[#1f2937]" />
+                <div className="absolute top-1/2 -translate-y-1/2 -right-[6px] w-0 h-0 border-y-[6px] border-y-transparent border-l-[6px] border-l-white z-10" />
 
-            {selectedPokemonName && (
-              <div className="font-body font-medium px-3 py-2.5 bg-blue-50 border rounded-xl mb-3" style={{ color: colors.brand.blue, borderColor: colors.brand.blue + '66' }}>
-                Pokémon sélectionné : {selectedPokemonName}
+                <SubCard 
+                  bodyColor="#ffffff" 
+                  borderColor="#1f2937" /* Correspond à tailwind gray-800 */
+                  borderThickness="p-[4px]"
+                  className="p-4 flex gap-3 items-start"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-12 h-12 shrink-0 flex items-center justify-center">
+                      <img src={oakChibi} alt="Prof. Chen" className="max-w-full max-h-full" style={{ imageRendering: 'pixelated' }} />
+                    </div>
+                    <p className="font-display font-bold text-xs text-gray-500 tracking-wider">
+                      PROF. CHEN
+                    </p>
+                  </div>
+                  <div>
+
+                    <p className="font-heading text-sm text-gray-800 leading-snug">
+                      {guessResultMessage}
+                    </p>
+                  </div>
+                </SubCard>
               </div>
             )}
 
-            <PixelButton
-              onClick={handleSubmitGuess}
-              disabled={!selectedPokemonName || isSubmitting}
-              className="font-heading font-semibold w-full h-12 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:translate-y-0"
-              color={colors.brand.blue}
-              colorLight={colors.brand.blueLight}
-              colorDark={colors.brand.blueDark}
-              colorBorder={colors.brand.blueDeep}
+            <Card
+              pokeballColor={colors.brand.white}
+              pokeballOpacity={0}
+              showHeader={true}
+              overflowVisible
             >
-              {isSubmitting ? 'Envoi...' : 'Valider la réponse'}
-            </PixelButton>
+              <div className="p-4 md:p-6">
+                <h3 
+                  className="font-heading text-center text-xl tracking-wide mb-6" 
+                  style={{ color: colors.brand.blue }}
+                >
+                  RÉPONSE
+                </h3>
 
-            {guessResultMessage && (
-              <div
-                className="font-body font-medium mt-3 px-4 py-3 rounded-xl text-center border"
-                style={lastGuessCorrect
-                  ? { backgroundColor: colors.game.success + '22', color: colors.game.success, borderColor: colors.game.success + '88' }
-                  : { backgroundColor: colors.game.error + '15', color: colors.game.error, borderColor: colors.game.error + '55' }
-                }
-              >
-                {guessResultMessage}
+                {/* --- ZONE DE SAISIE / SÉLECTION --- */}
+                {/* On fixe la hauteur à h-12 ici pour que le h-full de la SubCard s'adapte */}
+                <div className="mb-6 relative h-12">
+                  {!selectedPokemonName ? (
+                    <PokemonSearchInput
+                      items={filteredPokemons}
+                      value={searchTerm}
+                      onChange={setSearchTerm}
+                      onSelect={(p) => { 
+                        setSelectedPokemonName(p.nameFr); 
+                        setSearchTerm(p.nameFr); 
+                      }}
+                      disabled={isSubmitting}
+                    />
+                  ) : (
+                  <SubCard
+                    bodyColor="#f9fafb" /* Correspond à tailwind gray-50 */
+                    borderColor={colors.brand.blue}
+                    borderThickness="p-[2px]"
+                    className="shadow-inner"
+                  >
+                    {/* On ajoute un conteneur flex-row (ligne) qui prend toute la hauteur/largeur */}
+                    <div className="flex flex-row items-center justify-between w-full h-full px-4">
+                      <span className="font-heading font-medium text-gray-800 truncate">
+                        ▶ Pokémon choisi : {selectedPokemonName}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setSelectedPokemonName('');
+                          setSearchTerm('');
+                        }}
+                        disabled={isSubmitting}
+                        className="text-gray-400 hover:text-red-500 transition-colors ml-2 disabled:opacity-50 shrink-0"
+                        title="Changer de Pokémon"
+                      >
+                        ✖
+                      </button>
+                    </div>
+                  </SubCard>
+                  )}
+                </div>
+
+                <PixelButton
+                  onClick={handleSubmitGuess}
+                  disabled={!selectedPokemonName || isSubmitting}
+                  className="font-heading font-semibold w-full h-12 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:translate-y-0"
+                  color={colors.brand.blue}
+                  colorLight={colors.brand.blueLight}
+                  colorDark={colors.brand.blueDark}
+                  colorBorder={colors.brand.blueDeep}
+                >
+                  {isSubmitting ? 'Envoi...' : 'Valider la réponse'}
+                </PixelButton>
+
+                {/* --- MESSAGE DE SUCCÈS --- */}
+                {guessResultMessage && lastGuessCorrect && (
+                  <div
+                    className="font-heading font-medium mt-4 px-4 py-3 rounded-xl text-center border"
+                    style={{ 
+                      backgroundColor: colors.game.success + '22', 
+                      color: colors.game.success, 
+                      borderColor: colors.game.success + '88' 
+                    }}
+                  >
+                    {guessResultMessage}
+                  </div>
+                )}
               </div>
-            )}
+            </Card>
           </div>
-          </Card>
         </div>
+
 
         {/* Colonne droite — Indices */}
         <Card
@@ -765,7 +835,6 @@ export default function PokeDescPage() {
             <Card
               showHeader={true}
               headerColor={colors.game.error}
-              borderColor={colors.game.error}
               pokeballColor={colors.game.error}
               pokeballOpacity={0.05}
               animation={true}
@@ -776,14 +845,13 @@ export default function PokeDescPage() {
               }
             >
               <div className="p-6 text-center flex flex-col items-center">
-                <span className="text-5xl grayscale opacity-70 block mb-3">{isTimeout ? '⏱️' : '😔'}</span>
                 <p className="font-body font-bold text-lg mb-2" style={{ color: colors.ui.textMuted }}>
                   C'était :
                 </p>
                 <img
                   src={revealedPokemonSprite}
                   alt="Pokémon à deviner"
-                  className="max-w-48 h-auto mb-2 animate-[spriteReveal_0.8s_ease-out]"
+                  className="w-64 h-64 animate-[spriteReveal_0.8s_ease-out]"
                   style={{ imageRendering: 'pixelated' }}
                 />
                 <p className="font-body font-bold text-2xl mb-6" style={{ color: colors.game.error }}>
