@@ -367,72 +367,78 @@ export default function ReglesPage() {
     }
   };
 
-  return (
-    <div className="space-y-6 py-10 px-4 sm:px-6 lg:px-8">
-      <div className="flex items-stretch min-h-screen gap-8">
-        {/* Gauche — Chen */}
-        <motion.div
-          className="hidden md:flex flex-col flex-1 items-center justify-start h-screen pt-8"
-          custom={direction}
-          variants={chenVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-        >
-          <img
-            src={oak}
-            alt="Professeur Chen"
-            className="w-128 h-128 object-contain"
-          />
+return (
+  /* Augmentation des marges latérales (px-12 et lg:px-24) */
+  <div className="space-y-6 py-10 px-8 sm:px-12 lg:px-24">
+    {/* gap-4 pour réduire l'espace entre Chen et les cartes */}
+    <div className="flex items-stretch min-h-screen gap-4">
+      
+      {/* Gauche — Chen (35%) */}
+      <motion.div
+        /* w-[35%] fixe la largeur, flex-shrink-0 empêche la compression */
+        className="hidden md:flex flex-col w-[35%] flex-shrink-0 items-center justify-start h-screen pt-8"
+        custom={direction}
+        variants={chenVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        <img
+          src={oak}
+          alt="Professeur Chen"
+          /* w-full pour qu'il occupe bien l'espace des 35% */
+          className="w-full max-w-sm h-auto object-contain"
+        />
+      </motion.div>
 
-        </motion.div>
+      {/* Droite — GameCards (65%) */}
+      <motion.div
+        /* w-[65%] fixe la largeur */
+        className="w-[65%] space-y-6 mt-10"
+        custom={direction}
+        variants={cardsVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        <GameCard
+          title="POKÉDESC"
+          description="Découvre les règles ici !"
+          color={colors.brand.blue}
+          secondColor={colors.brand.blueDeep}
+          colorLight={colors.brand.blueLight}
+          colorDark={colors.brand.blueDark}
+          image={pokedescLogo}
+          to="/pokedesc"
+          onClick={() => handleOpenModal("pokedesc")}
+        />
 
-        {/* Droite — GameCards */}
-        <motion.div
-          className="flex-1 space-y-6"
-          custom={direction}
-          variants={cardsVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-        >
-          <GameCard
-            title="POKÉDESC"
-            description="Découvre les règles ici !"
-            color={colors.brand.blue}
-            secondColor={colors.brand.blueDeep}
-            colorLight={colors.brand.blueLight}
-            colorDark={colors.brand.blueDark}
-            image={pokedescLogo}
-            to="/pokedesc"
-            onClick={() => handleOpenModal("pokedesc")}
-          />
+        <GameCard
+          title="TYPUZZLE"
+          description="Découvre les règles ici !"
+          color={colors.brand.yellow}
+          secondColor={colors.brand.yellowDark}
+          colorLight={colors.brand.yellowLight}
+          colorDark={colors.brand.yellowWarm}
+          image={typeLogo}
+          to="/types"
+          onClick={() => handleOpenModal("types")}
+        />
 
-          <GameCard
-            title="TYPUZZLE"
-            description="Découvre les règles ici !"
-            color={colors.brand.yellow}
-            secondColor={colors.brand.yellowDark}
-            colorLight={colors.brand.yellowLight}
-            colorDark={colors.brand.yellowWarm}
-            image={typeLogo}
-            to="/types"
-            onClick={() => handleOpenModal("types")}
-          />
-
-          <GameCard
-            title="DEX-ZOOM"
-            description="Découvre les règles ici !"
-            color={colors.brand.red}
-            secondColor={colors.brand.redDeep}
-            colorLight={colors.brand.redLight}
-            colorDark={colors.brand.redDark}
-            image={dezoomLogo}
-            to="/dezoom"
-            onClick={() => handleOpenModal("dezoom")}
-          />
-        </motion.div>
-      </div>
+        <GameCard
+          title="DEX-ZOOM"
+          description="Découvre les règles ici !"
+          color={colors.brand.red}
+          secondColor={colors.brand.redDeep}
+          colorLight={colors.brand.redLight}
+          colorDark={colors.brand.redDark}
+          image={dezoomLogo}
+          to="/dezoom"
+          onClick={() => handleOpenModal("dezoom")}
+        />
+      </motion.div>
+    </div>
+  
 
 {/* Modal des règles */}
       <Dialog open={openModal !== null} onOpenChange={(open) => { if (!open) handleCloseModal(); }}>
