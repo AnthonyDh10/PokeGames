@@ -12,4 +12,9 @@ public class GuessResult
     public string Message { get; set; } = string.Empty;
     public int PointsEarned { get; set; }
     public Partie UpdatedGame { get; set; } = null!;
+
+    public bool HasOneTypeInCommon { get; set; }
+    public bool HasPerfectTypeMatch { get; set; } // Vrai si 2 types communs, OU si 1 seul type unique commun
+    public bool HasSameGeneration { get; set; }
+    public bool IsInSameEvolutionChain { get; set; }
 }

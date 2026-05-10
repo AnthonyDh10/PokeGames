@@ -131,6 +131,13 @@ export default function PokeDescPage() {
   const [guessResultMessage, setGuessResultMessage] = useState('')
   const [lastGuessCorrect, setLastGuessCorrect] = useState(false)
 
+  const [proximityResult, setProximityResult] = useState<{
+    hasOneTypeInCommon?: boolean;
+    hasPerfectTypeMatch?: boolean;
+    hasSameGeneration?: boolean;
+    isInSameEvolutionChain?: boolean;
+  }>({})
+
   // Modals
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showFailureModal, setShowFailureModal] = useState(false)
@@ -413,6 +420,13 @@ export default function PokeDescPage() {
       setGuessResultMessage(result.message)
       setCurrentScore(result.pointsEarned)
 
+      setProximityResult({
+        hasOneTypeInCommon: result.hasOneTypeInCommon,
+        hasPerfectTypeMatch: result.hasPerfectTypeMatch,
+        hasSameGeneration: result.hasSameGeneration,
+        isInSameEvolutionChain: result.isInSameEvolutionChain
+      })
+
       if (result.isCorrect) {
         clearInterval(timerRef.current!)
         setRevealedPokemonSprite(currentPokemonSprite)
@@ -470,6 +484,7 @@ export default function PokeDescPage() {
     setSearchTerm('')
     setSelectedPokemonName('')
     setGuessResultMessage('')
+    setProximityResult({})
     setDescriptionIndex(0)
   }
 
@@ -594,7 +609,6 @@ export default function PokeDescPage() {
           <div className="relative">
             
             {guessResultMessage && !lastGuessCorrect && (
-              //* On met le positionnement, la taille et le drop-shadow sur un conteneur parent */
               <div className="absolute top-1/2 -translate-y-1/2 right-full mr-6 w-64 md:w-72 z-50 animate-fade-in drop-shadow-xl">
                 
                 <div className="absolute top-1/2 -translate-y-1/2 -right-[12px] w-0 h-0 border-y-[8px] border-y-transparent border-l-[8px] border-l-[#1f2937]" />
@@ -602,23 +616,49 @@ export default function PokeDescPage() {
 
                 <SubCard 
                   bodyColor="#ffffff" 
-                  borderColor="#1f2937" /* Correspond à tailwind gray-800 */
+                  borderColor="#1f2937" 
                   borderThickness="p-[4px]"
                   className="p-4 flex gap-3 items-start"
                 >
-                  <div className="flex items-center gap-2">
-                    <div className="w-12 h-12 shrink-0 flex items-center justify-center">
+                  <div className="flex flex-row items-center gap-2 shrink-0">
+                    <div className="w-10 h-10 flex items-center justify-center">
                       <img src={oakChibi} alt="Prof. Chen" className="max-w-full max-h-full" style={{ imageRendering: 'pixelated' }} />
                     </div>
-                    <p className="font-display font-bold text-xs text-gray-500 tracking-wider">
+                    <p className="font-display font-bold text-[10px] text-gray-500 tracking-wider">
                       PROF. CHEN
                     </p>
                   </div>
-                  <div>
-
-                    <p className="font-heading text-sm text-gray-800 leading-snug">
+                  <div className="flex flex-col justify-center">
+                    <p className="font-body text-sm text-gray-800 leading-snug">
                       {guessResultMessage}
                     </p>
+                    
+                    {/* --- NOUVEAU : Badges de proximité --- */}
+                    {(proximityResult.hasOneTypeInCommon || proximityResult.hasPerfectTypeMatch || proximityResult.hasSameGeneration || proximityResult.isInSameEvolutionChain) && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {proximityResult.hasPerfectTypeMatch ? (
+                          <span className="inline-flex items-center bg-green-100 text-green-800 text-[10px] px-1.5 py-0.5 rounded border border-green-200 font-bold uppercase tracking-wide">
+                            ✨ Types exacts
+                          </span>
+                        ) : proximityResult.hasOneTypeInCommon ? (
+                          <span className="inline-flex items-center bg-blue-100 text-blue-800 text-[10px] px-1.5 py-0.5 rounded border border-blue-200 font-bold uppercase tracking-wide">
+                            🔮 1 Type en commun
+                          </span>
+                        ) : null}
+
+                        {proximityResult.hasSameGeneration && (
+                          <span className="inline-flex items-center bg-yellow-100 text-yellow-800 text-[10px] px-1.5 py-0.5 rounded border border-yellow-200 font-bold uppercase tracking-wide">
+                            📅 Même Génération
+                          </span>
+                        )}
+
+                        {proximityResult.isInSameEvolutionChain && (
+                          <span className="inline-flex items-center bg-purple-100 text-purple-800 text-[10px] px-1.5 py-0.5 rounded border border-purple-200 font-bold uppercase tracking-wide">
+                            🧬 Même Famille
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </SubCard>
               </div>

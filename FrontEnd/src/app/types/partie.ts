@@ -41,6 +41,10 @@ export interface GuessResultDto {
   isTimeout: boolean
   message: string
   pointsEarned: number
+  hasOneTypeInCommon?: boolean;
+  hasPerfectTypeMatch?: boolean;
+  hasSameGeneration?: boolean;
+  isInSameEvolutionChain?: boolean;
 }
 
 export interface TimerResponse {

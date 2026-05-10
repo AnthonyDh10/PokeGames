@@ -254,13 +254,11 @@ public class PartieService : IPartieService
         var partie = await GetGameAsync(partieId);
         bool isJ1 = dresseurId == partie.Dresseur1Id;
         
-        // Si c'est le marqueur de timeout du frontend, gérer le timeout
         if (pokemonName == "__TIMEOUT__")
         {
             return await HandleTimeout(partie, isJ1);
         }
         
-        // Vérifier si le temps est écoulé
         bool isTimedOut = CheckTimeout(partie, isJ1);
         if (isTimedOut)
         {
@@ -270,28 +268,56 @@ public class PartieService : IPartieService
         int currentIndex = isJ1 ? partie.CurrentIndexJ1 : partie.CurrentIndexJ2;
         var pokemonsList = partie.PokemonsToGuess;
         
-        // Vérifier si la partie est finie pour ce joueur
         if (currentIndex >= pokemonsList.Count)
         {
             return new GuessResult { IsGameFinished = true, Message = "Partie déjà terminée.", UpdatedGame = partie };
         }
 
         var targetPokemon = pokemonsList[currentIndex];
-        
-        // Normalisation pour la comparaison (minuscule, trim)
         bool isCorrect = string.Equals(targetPokemon.NameFr, pokemonName, StringComparison.OrdinalIgnoreCase);
+
+        // --- LOGIQUE DE PROXIMITÉ ---
+        bool hasOneTypeInCommon = false;
+        bool hasPerfectTypeMatch = false;
+        bool hasSameGeneration = false;
+        bool isInSameEvolutionChain = false;
+
+        // On ne calcule la proximité que si la réponse est fausse pour optimiser, 
+        // mais si tu en as besoin tout le temps, tu peux sortir ce bloc du if(!isCorrect).
+        if (!isCorrect)
+        {
+            var guessedPokemon = await _pokemonService.GetPokemonByNameAsync(pokemonName);
+            
+            // Si le joueur a tapé un vrai nom de Pokémon existant
+            if (guessedPokemon != null)
+            {
+                // 1 & 2. Comparaison des Types
+                var targetTypes = targetPokemon.Types?.Select(t => t.Name).ToList() ?? new List<string>();
+                var guessTypes = guessedPokemon.Types?.Select(t => t.Name).ToList() ?? new List<string>();
+                
+                int commonTypesCount = targetTypes.Intersect(guessTypes, StringComparer.OrdinalIgnoreCase).Count();
+                
+                hasOneTypeInCommon = commonTypesCount >= 1;
+                hasPerfectTypeMatch = (targetTypes.Count == guessTypes.Count && commonTypesCount == targetTypes.Count);
+
+                // 3. Comparaison de la Génération
+                hasSameGeneration = targetPokemon.Generation?.NameEn == guessedPokemon.Generation?.NameEn 
+                                    && !string.IsNullOrEmpty(targetPokemon.Generation?.NameEn);
+
+                // 4. Comparaison de la Chaîne d'évolution
+                isInSameEvolutionChain = targetPokemon.EvolutionChain?.BasePokemon == guessedPokemon.EvolutionChain?.BasePokemon 
+                                        && !string.IsNullOrEmpty(targetPokemon.EvolutionChain?.BasePokemon);
+            }
+        }
 
         if (isCorrect)
         {
-            // Calcul du score
             int points = CalculateScore(isJ1 ? partie.UsedHintsJ1 : partie.UsedHintsJ2);
             
             if (isJ1) partie.ScoreJ1 += points;
             else partie.ScoreJ2 += points;
 
-            // Enregistrer le Pokémon complété
             RecordCompletedPokemon(partie, isJ1, targetPokemon, true, points);
-
             AdvanceToNextPokemon(partie, isJ1);
 
             return new GuessResult
@@ -301,12 +327,16 @@ public class PartieService : IPartieService
                 PointsEarned = points,
                 Message = $"Bravo ! C'était bien {targetPokemon.NameFr}.",
                 UpdatedGame = partie,
-                IsGameFinished = CheckIfGameFinished(partie, isJ1)
+                IsGameFinished = CheckIfGameFinished(partie, isJ1),
+                // Si c'est correct, toutes les proximités sont techniquement vraies
+                HasOneTypeInCommon = true,
+                HasPerfectTypeMatch = true,
+                HasSameGeneration = true,
+                IsInSameEvolutionChain = true
             };
         }
         else
         {
-            // Mauvaise réponse
             if (isJ1) partie.AttemptsUsedJ1++;
             else partie.AttemptsUsedJ2++;
 
@@ -314,9 +344,7 @@ public class PartieService : IPartieService
 
             if (attemptsUsed >= MaxAttempts)
             {
-                // Perdu pour ce Pokémon
                 RecordCompletedPokemon(partie, isJ1, targetPokemon, false, 0);
-                
                 AdvanceToNextPokemon(partie, isJ1);
                 
                 return new GuessResult
@@ -326,19 +354,26 @@ public class PartieService : IPartieService
                     PointsEarned = 0,
                     Message = $"Dommage, c'était {targetPokemon.NameFr}. Tu passes au suivant.",
                     UpdatedGame = partie,
-                    IsGameFinished = CheckIfGameFinished(partie, isJ1)
+                    IsGameFinished = CheckIfGameFinished(partie, isJ1),
+                    HasOneTypeInCommon = hasOneTypeInCommon,
+                    HasPerfectTypeMatch = hasPerfectTypeMatch,
+                    HasSameGeneration = hasSameGeneration,
+                    IsInSameEvolutionChain = isInSameEvolutionChain
                 };
             }
             else
             {
-                // Encore des essais
                 return new GuessResult
                 {
                     IsCorrect = false,
                     IsTurnFinished = false,
                     PointsEarned = 0,
                     Message = $"Mauvaise réponse. Il te reste {MaxAttempts - attemptsUsed} essais.",
-                    UpdatedGame = partie
+                    UpdatedGame = partie,
+                    HasOneTypeInCommon = hasOneTypeInCommon,
+                    HasPerfectTypeMatch = hasPerfectTypeMatch,
+                    HasSameGeneration = hasSameGeneration,
+                    IsInSameEvolutionChain = isInSameEvolutionChain
                 };
             }
         }

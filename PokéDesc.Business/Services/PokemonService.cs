@@ -141,4 +141,13 @@ public class PokemonService : IPokemonService
         var pokemon = await GetPokemonByIdAsync(id);
         return pokemon.NameFr;
     }
+
+    public async Task<Pokemon?> GetPokemonByNameAsync(string nameFr)
+    {
+    var allPokemons = await _repository.GetAllAsync();
+    // Recherche insensible à la casse et aux espaces superflus
+    return allPokemons.FirstOrDefault(p => 
+        string.Equals(p.NameFr?.Trim(), nameFr?.Trim(), StringComparison.OrdinalIgnoreCase));
+    }
 }
+

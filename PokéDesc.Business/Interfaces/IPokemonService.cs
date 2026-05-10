@@ -18,4 +18,5 @@ public interface IPokemonService
     Task<List<string>> GetCensoredDescriptionAsync(string id);
     Task<string> GetPokemonNameFrAsync(string id);
     Task<PokemonHints> GetPokemonHintsAsync(string id);
+    Task<Pokemon?> GetPokemonByNameAsync(string nameFr);
 }
