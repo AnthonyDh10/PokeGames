@@ -33,11 +33,11 @@ const games: Game[] = [
   {
     title: "PROF. CHEN",
     description: (
-      <>
+      <span className="font-heading">
         Bienvenue dresseur ! Relève les défis du Professeur pour tester tes connaissances sur les pokémon ! Chaque pokéball renferme un défi différent, survole les pour les découvrir ! Prends connaissance de leurs règles en cliquant sur le {" "}
         <img src={rulesIconImg} alt="règles" className="inline-block align-middle w-5 h-5" style={{ verticalAlign: "middle" }} />
         {" "}!
-      </>
+      </span>
     ),
     color: colors.ui.grayMid,
     secondColor: colors.ui.grayBorderDark,
@@ -50,7 +50,7 @@ const games: Game[] = [
   },
   {
     title: "POKÉDESC",
-    description: "Connais-tu ton pokédex sur le bout des doigts ? Devine le pokémon à partir d'une description et d'autres indices !",
+    description: <span className="font-heading">Connais-tu ton pokédex sur le bout des doigts ? Devine le pokémon à partir d'une description et d'autres indices !</span>,
     color: colors.brand.blue,
     secondColor: colors.brand.blueDeep,
     image: pokedescLogo,
@@ -60,7 +60,7 @@ const games: Game[] = [
   },
   {
     title: "TYPUZZLE",
-    description: "J'espère que tu connais ta table de types ! Devine les types à partir de leurs forces, faiblesses et immunités !",
+    description: <span className="font-heading">J'espère que tu connais ta table de types ! Devine les types à partir de leurs forces, faiblesses et immunités !</span>,
     color: colors.brand.yellow,
     secondColor: colors.brand.yellowDark,
     colorLight: colors.brand.yellowLight,
@@ -70,7 +70,7 @@ const games: Game[] = [
   },
   {
     title: "DEX-ZOOM",
-    description: "Penses-tu reconnaître un pokémon du premier coup d'œil ? Devine le pokémon à partir d'une partie de son corps !",
+    description: <span className="font-heading">Penses-tu reconnaître un pokémon du premier coup d'œil ? Devine le pokémon à partir d'une partie de son corps !</span>,
     color: colors.brand.red,
     secondColor: colors.brand.redDeep,
     colorLight: colors.brand.redLight,

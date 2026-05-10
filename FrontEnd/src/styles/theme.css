@@ -1,3 +1,11 @@
+/* Font-heading (Silkscreen) custom size and spacing */
+.font-heading {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  letter-spacing: 0.001em;
+  line-height: 1;
+  font-weight: 400;
+}
 @custom-variant dark (&:is(.dark *));
 
 @theme {
@@ -10,7 +18,7 @@
 
   /* Polices */
   --font-display: "Press Start 2P", monospace;
-  --font-heading: "Pixelify Sans", sans-serif;
+  --font-heading: "Silkscreen", sans-serif;
   --font-body: "Nunito", sans-serif;
 }
 
@@ -174,7 +182,7 @@
   /**
   * Hiérarchie typographique PokéGames :
   *  h1          → Press Start 2P (display) — titres principaux, logo
-  *  h2, h3      → Pixelify Sans (heading) — sous-titres, titres de carte
+  *  h2, h3      → Silkscreen (heading) — sous-titres, titres de carte
   *  h4          → Nunito (body) — labels de section mineurs
   */
 

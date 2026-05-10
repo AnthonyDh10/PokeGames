@@ -5,14 +5,14 @@
  *
  * Hiérarchie :
  *  - h1 / display  → Press Start 2P  → logo, titres principaux, codes de session
- *  - h2 / heading  → Pixelify Sans   → titres de carte, section headers, sous-titres
- *  - h3            → Pixelify Sans   → sous-sections, labels de carte
+ *  - h2 / heading  → Silkscreen   → titres de carte, section headers, sous-titres
+ *  - h3            → Silkscreen   → sous-sections, labels de carte
  *  - body / p      → Nunito Regular  → descriptions, paragraphes
  *  - ui / small    → Nunito Medium   → boutons, labels, inputs, badges
  *
  * Classes Tailwind disponibles (définies dans theme.css) :
  *  font-display  → Press Start 2P
- *  font-heading  → Pixelify Sans
+ *  font-heading  → Silkscreen 
  *  font-body     → Nunito (default sur <body>)
  *
  * Ombres pixel (définie dans theme.css @layer utilities) :
@@ -21,7 +21,7 @@
  *  text-shadow-px / text-shadow-px-sm                       → text-shadow
  *
  * Usage dans un composant :
- *  import { typography } from "../design/typography";
+ *  import { typography } from "../design/typography";Pre
  *
  *  // Classe Tailwind (usage habituel)
  *  <h1 className="font-display text-xl tracking-wide">PokéGames</h1>
@@ -36,8 +36,8 @@ export const typography = {
   fonts: {
     /** Press Start 2P — logo, titres principaux, codes de session */
     display: '"Press Start 2P", monospace',
-    /** Pixelify Sans — titres de carte, section headers, sous-titres */
-    heading: '"Pixelify Sans", sans-serif',
+    /** Silkscreen — titres de carte, section headers, sous-titres */
+    heading: '"Silkscreen", sans-serif',
     /** Nunito — tout le reste : corps, boutons, labels */
     body: '"Nunito", sans-serif',
   },
@@ -57,7 +57,7 @@ export const typography = {
 
   tracking: {
     display: '0.05em',  // Press Start 2P — un peu d'air pour la lisibilité
-    heading: '0.01em',  // Pixelify Sans — légère aération
+    heading: '0.01em',  // Silkscreen — légère aération
     body:    '0em',     // Normal
     ui:      '0.01em',  // Boutons / labels — micro-aération
   },

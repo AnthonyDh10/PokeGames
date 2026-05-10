@@ -84,9 +84,9 @@ export default function LobbyPokedescPage() {
 
             {/* Nombre de Pokémon */}
             <div className="mb-6">
-              <label className="font-body block text-sm font-medium mb-3" style={{ color: colors.ui.textMuted }}>
+              <label className="font-heading block text-sm font-medium mb-3" style={{ color: colors.ui.textMuted }}>
                 Nombre de Pokémon à deviner :{' '}
-                <span className="font-bold" style={{ color: colors.brand.blue }}>{displayNb}</span>
+                <span className="font-bold font-heading" style={{ color: colors.brand.blue }}>{displayNb}</span>
               </label>
               <div className="flex gap-2">
                 {[1, 2, 3, 4, 5, 6].map((n) => {
@@ -116,7 +116,7 @@ export default function LobbyPokedescPage() {
 
             {/* Durée du timer */}
             <div className="mb-6">
-              <label className="font-body block text-sm font-medium mb-3" style={{ color: colors.ui.textMuted }}>
+              <label className="font-heading block text-sm font-medium mb-3" style={{ color: colors.ui.textMuted }}>
                 Durée du timer :{' '}
                 <span className="font-bold" style={{ color: colors.brand.blue }}>
                   {displayTimer === -1 ? '∞' : `${displayTimer}s`}
@@ -151,7 +151,7 @@ export default function LobbyPokedescPage() {
             {/* Générations */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <label className="font-body text-sm font-medium" style={{ color: colors.ui.textMuted }}>Générations</label>
+                <label className="font-heading text-sm font-medium" style={{ color: colors.ui.textMuted }}>Générations</label>
                 {isPlayer1 && (
                   <div className="flex gap-2">
                     <button
