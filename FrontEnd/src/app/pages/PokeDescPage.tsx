@@ -301,8 +301,8 @@ export default function PokeDescPage() {
     if (used.includes('Stats') && hints.stats) {
       const s = hints.stats
       revealed['Statistiques'] =
-        `PV: ${s.PV?.value ?? '?'}, Att: ${s.Attaque?.value ?? '?'}, Déf: ${s['Défense']?.value ?? '?'}, ` +
-        `Att Spé: ${s['Attaque Spé.']?.value ?? '?'}, Déf Spé: ${s['Défense Spé.']?.value ?? '?'}, Vit: ${s.Vitesse?.value ?? '?'}`
+        `PV: ${s.PV?.value ?? '?'}, Atk: ${s.Attaque?.value ?? '?'}, Déf: ${s['Défense']?.value ?? '?'}, ` +
+        `SpA: ${s['Attaque Spé.']?.value ?? '?'}, SpD: ${s['Défense Spé.']?.value ?? '?'}, Spe: ${s.Vitesse?.value ?? '?'}`
     }
     if (used.includes('Height') && hints.physical) {
       revealed['Taille'] = `${hints.physical.heightM}m`
@@ -507,7 +507,7 @@ export default function PokeDescPage() {
           <p className="text-red-600 font-medium mb-4">Erreur : {errorMessage}</p>
           <button
             onClick={() => navigate('/pokedesc')}
-            className="font-body font-semibold px-6 py-2.5 text-white rounded hover:-translate-y-0.5 transition"
+            className="font-heading font-semibold px-6 py-2.5 text-white rounded hover:-translate-y-0.5 transition"
             style={{ backgroundColor: colors.brand.blue }}
           >
             Retour au menu
@@ -552,8 +552,8 @@ export default function PokeDescPage() {
               )}
             </div>
             <div className="flex flex-wrap gap-6 justify-center text-base">
-              <span className="font-body font-semibold" style={{ color: colors.brand.blue }}><span className="grayscale opacity-60">⭐</span> Score : {currentScore}</span>
-              <span className="font-body font-semibold text-orange-500"><span className="grayscale opacity-60">🎲</span> Tentatives : {attemptsUsed} / 3</span>
+              <span className="font-heading font-semibold" style={{ color: colors.brand.blue }}><span className="grayscale opacity-60">⭐</span> Score : {currentScore}</span>
+              <span className="font-heading font-semibold text-orange-500"><span className="grayscale opacity-60">🎲</span> Tentatives : {attemptsUsed} / 3</span>
               <Timer
                 value={timeRemaining}
                 mode={partie?.timerDurationSeconds === -1 ? 'stopwatch' : 'countdown'}
@@ -578,9 +578,9 @@ export default function PokeDescPage() {
             showHeader={false}
           >
             <div className="p-4 md:p-6 flex flex-col pb-6 min-h-[160px] md:min-h-[220px]">
-              <h3 className="font-heading text-center text-xl tracking-wide" style={{ color: colors.brand.blue }}>DESCRIPTION</h3>
+              <h3 className="font-heading text-center text-xl tracking-wide" style={{ color: colors.brand.blue, fontSize: '1.25rem' }}>DESCRIPTION</h3>
                 <div className="flex-1">
-                  <div className="font-body text-justify p-8 text-base leading-relaxed h-full">
+                  <div className="font-heading text-justify p-8 text-base leading-relaxed h-full">
                     {descriptions[descriptionIndex] || <span className="text-gray-400 italic">Chargement de la description...</span>}
                   </div>
                 </div>
@@ -588,16 +588,16 @@ export default function PokeDescPage() {
                   <div className="flex items-center justify-center gap-4 mt-auto">
                     <button
                       onClick={() => setDescriptionIndex(i => (i - 1 + descriptions.length) % descriptions.length)}
-                      className="w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
-                      style={{ borderColor: colors.brand.blue, color: colors.brand.blue }}
+                      className=" font-heading w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
+                      style={{ borderColor: colors.brand.blue, color: colors.brand.blue, fontSize: '1.5rem' }}
                     >
                       <strong>‹‹</strong>
                     </button>
-                    <span className="font-body text-sm text-gray-500 tabular-nums">{descriptionIndex + 1} / {descriptions.length}</span>
+                    <span className="font-heading text-sm text-gray-500 tabular-nums">{descriptionIndex + 1} / {descriptions.length}</span>
                     <button
                       onClick={() => setDescriptionIndex(i => (i + 1) % descriptions.length)}
-                      className="w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
-                      style={{ borderColor: colors.brand.blue, color: colors.brand.blue }}
+                      className=" font-heading w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
+                      style={{ borderColor: colors.brand.blue, color: colors.brand.blue, fontSize: '1.5rem' }}
                     >
                       <strong>››</strong>
                     </button>
@@ -615,8 +615,8 @@ export default function PokeDescPage() {
                 <div className="absolute top-1/2 -translate-y-1/2 -right-[6px] w-0 h-0 border-y-[6px] border-y-transparent border-l-[6px] border-l-white z-10" />
 
                 <SubCard 
-                  bodyColor="#ffffff" 
-                  borderColor="#1f2937" 
+                  bodyColor={colors.brand.white}
+                  borderColor={colors.brand.blueDeep} 
                   borderThickness="p-[4px]"
                   className="p-4 flex gap-3 items-start"
                 >
@@ -624,12 +624,12 @@ export default function PokeDescPage() {
                     <div className="w-10 h-10 flex items-center justify-center">
                       <img src={oakChibi} alt="Prof. Chen" className="max-w-full max-h-full" style={{ imageRendering: 'pixelated' }} />
                     </div>
-                    <p className="font-display font-bold text-[10px] text-gray-500 tracking-wider">
+                    <p className="font-display font-bold tracking-wider" style={{fontSize: '1rem', color: colors.ui.grayBorderDark}}>
                       PROF. CHEN
                     </p>
                   </div>
                   <div className="flex flex-col justify-center">
-                    <p className="font-body text-sm text-gray-800 leading-snug">
+                    <p className="font-heading text-sm text-gray-800 leading-snug" style={{color: colors.brand.red}}>
                       {guessResultMessage}
                     </p>
                     
@@ -778,7 +778,7 @@ export default function PokeDescPage() {
                   onClick={() => handleRequestHint(key)}
                   disabled={used || locked}
                   title={locked ? `Temps insuffisant — il reste ${timeRemaining.toFixed(1)}s, cet indice coûte ${penalty}s` : ''}
-                  className="font-body w-full min-h-24"
+                  className="font-heading w-full min-h-24"
                   innerClassName="flex-1 flex flex-col items-center justify-center w-full h-full p-2 gap-1.5 relative"
                   colorBorder={btnBorderColor}
                   colorLight={btnColorLight}
@@ -797,7 +797,7 @@ export default function PokeDescPage() {
                       {key === 'Sprite' ? (
                         <img src={revealedValue} alt="Silhouette" className="max-w-full h-auto" style={{ imageRendering: 'pixelated', filter: 'brightness(0)' }} />
                       ) : (
-                        <span className={`font-body font-semibold text-center leading-tight px-1 ${key === 'Stats' ? 'text-xs' : 'text-sm'}`} style={{ color: colors.brand.white }}>
+                        <span className={`font-heading font-semibold text-center leading-tight px-1 ${key === 'Stats' ? 'text-xs' : 'text-sm'}`} style={{ color: colors.brand.white }}>
                           {revealedValue}
                         </span>
                       )}
@@ -840,7 +840,7 @@ export default function PokeDescPage() {
               }
             >
               <div className="p-6 text-center flex flex-col items-center">
-                <p className="font-body font-bold text-lg mb-2" style={{ color: colors.ui.textMuted }}>
+                <p className="font-heading font-bold text-lg mb-2" style={{ color: colors.ui.textMuted }}>
                   C'était bien :
                 </p>
                 <img
@@ -849,7 +849,7 @@ export default function PokeDescPage() {
                   className="w-64 h-64 animate-[spriteReveal_0.8s_ease-out]"
                   style={{ imageRendering: 'pixelated' }}
                 />
-                <p className="font-body font-bold text-2xl mb-6" style={{ color: colors.game.success }}>
+                <p className="font-heading font-bold mb-6" style={{ color: colors.game.success, fontSize: '1.5rem' }}>
                   {selectedPokemonName}
                 </p>
                 <PixelButton
@@ -885,7 +885,7 @@ export default function PokeDescPage() {
               }
             >
               <div className="p-6 text-center flex flex-col items-center">
-                <p className="font-body font-bold text-lg mb-2" style={{ color: colors.ui.textMuted }}>
+                <p className="font-heading font-bold text-lg mb-2" style={{ color: colors.ui.textMuted }}>
                   C'était :
                 </p>
                 <img
@@ -894,7 +894,7 @@ export default function PokeDescPage() {
                   className="w-64 h-64 animate-[spriteReveal_0.8s_ease-out]"
                   style={{ imageRendering: 'pixelated' }}
                 />
-                <p className="font-body font-bold text-2xl mb-6" style={{ color: colors.game.error }}>
+                <p className="font-heading font-bold mb-6" style={{ color: colors.game.error, fontSize: '1.5rem' }}>
                   {allPokemons.find((p) => p.id === currentPokemonId)?.nameFr ?? 'Pokémon inconnu'}
                 </p>
                 <PixelButton

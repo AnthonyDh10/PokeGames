@@ -273,10 +273,10 @@ export default function LobbyPage({
           pokeballColor={theme.primaryDark}
           header={
             <>
-              <h1 className="font-heading text-2xl tracking-wide mb-1" style={{ color: theme.textOnColor }}>
+              <h1 className="font-display text-2xl tracking-wide mb-1" style={{ color: theme.textOnColor }}>
                 Bienvenue !
               </h1>
-              <p className="font-body text-center" style={{ color: theme.textOnColor, opacity: 0.8 }}>
+              <p className="font-heading text-center" style={{ color: theme.textOnColor, opacity: 0.8 }}>
                 Choisissez un pseudo pour jouer
               </p>
             </>
@@ -295,13 +295,13 @@ export default function LobbyPage({
                   onChange={(e) => setPseudoInput(e.target.value)}
                   placeholder="Votre pseudo..."
                   maxLength={20}
-                  className="font-body w-full px-4 py-3 text-base focus:outline-none bg-transparent"
+                  className="font-heading w-full px-4 py-3 text-base focus:outline-none bg-transparent"
                 />
               </SubCard>
               <PixelButton
                 type="submit"
                 disabled={!pseudoInput.trim()}
-                className="font-body w-full"
+                className="font-heading w-full"
                 innerClassName="flex items-center justify-center w-full h-full px-4 py-3"
                 colorBorder={theme.primaryDark}
                 colorLight={theme.primaryDark}
@@ -325,9 +325,9 @@ export default function LobbyPage({
         pokeballOpacity={0}
         header={
           <>
-            <h2 className="font-heading text-2xl text-center tracking-wide mb-4" style={{ color: theme.textOnColor }}>
-              Salle d'attente - {gameTitle}<br/>
-              <p className="text-sm mt-0.5" style={{ color: theme.textOnColor, opacity: 0.8 }}>
+            <h2 className="font-display text-2xl text-center tracking-wide mb-4" style={{ color: theme.textOnColor, fontSize: '1.5rem' }}>
+              Salle d'attente <br/> {gameTitle}
+              <p className="font-heading text-sm mt-3" style={{ color: theme.textOnColor, opacity: 0.8, fontSize: '0.85rem' }}>
                 Partage ce code pour inviter ton ami ou démarre en solo !
               </p>            
             </h2>
@@ -511,7 +511,7 @@ export default function LobbyPage({
             borderColor="#dc262633" 
             bodyColor="transparent" 
             borderThickness="p-[2px]" 
-            className="font-body px-4 py-3 font-medium text-center text-red-600"
+            className="font-heading px-4 py-3 font-medium text-center text-red-600"
           >
             {errorMessage}
           </SubCard>
@@ -530,14 +530,14 @@ export default function LobbyPage({
 
           header={
             <div className="text-center flex flex-col flex-1">
-              <h3 className="font-heading text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
+              <h3 className="font-display text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
                 {gameTitle}
               </h3>
             </div>
           }
         >
           <div className="p-6 text-center flex flex-col flex-1">
-            <p className="font-body text-lg md:text-xl mb-5 text-gray-500">
+            <p className="font-heading text-lg md:text-xl mb-5 text-gray-500">
               {explanationText}
             </p>
           </div>
@@ -552,7 +552,7 @@ export default function LobbyPage({
           cardSize={{ height: 380 }}
           header={
             <div className="text-center flex flex-col flex-1">
-              <h3 className="font-heading text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
+              <h3 className="font-display text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
                 Créer une partie
               </h3>
             </div>
@@ -560,7 +560,7 @@ export default function LobbyPage({
           
         >
           <div className="p-6 text-center flex flex-col flex-1">
-            <p className="font-body text-lg md:text-xl mb-5 text-gray-500">
+            <p className="font-heading text-lg md:text-xl mb-5 text-gray-500" style={{ fontSize: '1.25rem' }}>
               Joue seul ou défie un ami en partageant le code de session !
             </p>
             <div className="flex-1" />
@@ -574,7 +574,7 @@ export default function LobbyPage({
               colorDark={theme.primaryDark}
               color={theme.primary}
             >
-              <span style={{ color: theme.textOnColor }} className="font-semibold">{isLoading ? 'Chargement...' : 'Créer une nouvelle partie'}</span>
+              <span style={{ color: theme.textOnColor }} className="font-semibold font-heading">{isLoading ? 'Chargement...' : 'Créer une nouvelle partie'}</span>
             </PixelButton>
           </div>
         </Card>
@@ -588,14 +588,14 @@ export default function LobbyPage({
           cardSize={{ height: 380 }}
           header={
             <div className="text-center flex flex-col flex-1">
-              <h3 className="font-heading text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
+              <h3 className="font-display text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
                 Rejoindre une partie
               </h3>
             </div>
           }
         >
           <div className="p-6 text-center flex flex-col flex-1">
-            <p className="font-body text-lg md:text-xl mb-4 text-gray-500">
+            <p className="font-heading text-lg md:text-xl mb-4 text-gray-500 " style={{ fontSize: '1.25rem' }}>
               Entre le code de session fourni par ton ami
             </p>
             <div className="mb-3 text-left">
@@ -610,12 +610,12 @@ export default function LobbyPage({
                     value={codeSession}
                     onChange={(e) => setCodeSession(e.target.value)}
                     placeholder="Code de session"
-                    className="font-body text-lg w-full px-3 py-2.5 text-base focus:outline-none bg-transparent"
+                    className="font-heading text-lg w-full px-3 py-2.5 text-base focus:outline-none bg-transparent"
                   />
                 </SubCard>
               </div>
               {joinErrorMessage && (
-                <p className="font-body text-sm text-red-500">{joinErrorMessage}</p>
+                <p className="font-heading text-sm text-red-500">{joinErrorMessage}</p>
               )}
             </div>
             <div className="flex-1" />
@@ -629,7 +629,7 @@ export default function LobbyPage({
               colorDark={theme.primaryDark}
               color={theme.primaryLight}
             >
-              <span style={{ color: theme.textOnColor }} className="font-semibold">{isLoading ? 'Chargement...' : 'Rejoindre la partie'}</span>
+              <span style={{ color: theme.textOnColor }} className="font-semibold font-heading">{isLoading ? 'Chargement...' : 'Rejoindre la partie'}</span>
             </PixelButton>
           </div>
         </Card>

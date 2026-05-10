@@ -92,7 +92,7 @@ export default function PokemonSearchInput<T extends SearchableItem>({
           onFocus={() => setShowDropdown(true)}
           placeholder={placeholder}
           disabled={disabled}
-          className="font-body w-full px-3 py-2.5 text-base focus:outline-none bg-transparent disabled:opacity-50 transition-colors"
+          className="font-heading w-full px-3 py-2.5 text-base focus:outline-none bg-transparent disabled:opacity-50 transition-colors"
         />
       </SubCard>
 
@@ -122,9 +122,9 @@ export default function PokemonSearchInput<T extends SearchableItem>({
                 className="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors"
               >
                 {item.pokedexNumber !== undefined && (
-                  <span className="text-gray-400 font-body text-sm min-w-[48px]">#{item.pokedexNumber}</span>
+                  <span className="text-gray-400 font-heading text-sm min-w-[48px]">#{item.pokedexNumber}</span>
                 )}
-                <span className="font-body font-medium text-gray-900">{item.nameFr}</span>
+                <span className="font-heading font-medium text-gray-900">{item.nameFr}</span>
               </div>
             ))}
           </SubCard>

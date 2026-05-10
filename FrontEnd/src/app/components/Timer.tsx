@@ -43,7 +43,7 @@ export default function Timer({
   return (
     <>
       <span
-        className={`font-body font-semibold relative ${shake ? 'animate-[shake_0.5s_ease-in-out]' : ''} ${flash ? 'animate-[flashRed_0.3s_ease-in-out]' : ''}`}
+        className={`font-heading font-semibold relative ${shake ? 'animate-[shake_0.5s_ease-in-out]' : ''} ${flash ? 'animate-[flashRed_0.3s_ease-in-out]' : ''}`}
         style={{ color }}
       >
         <span className="grayscale opacity-60">⏱️</span> Temps : {display}

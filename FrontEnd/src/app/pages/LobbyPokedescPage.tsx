@@ -50,10 +50,10 @@ export default function LobbyPokedescPage() {
       gameRoute="/pokedesc"
       theme={THEME}
       explanationText={
-        <>
+        <div style={{ fontSize: '1.25rem' }}>
           Face à toi, une description d'un pokémon s'affiche. Devine de quel pokémon il s'agit !{' '}
           <br /> Tu as le droit à 3 essais et des indices pour t'aider !
-        </>
+        </div>
       }
       settingsPanel={(isPlayer1, partie: PartieDto | null) => {
         const displayNb = isPlayer1 ? settings.nbPokemons : (partie?.nbPokemons ?? settings.nbPokemons)
@@ -65,7 +65,7 @@ export default function LobbyPokedescPage() {
           <div className="p-6">
             <div className="flex items-center gap-3 mb-6">
               <span className="text-xl">⚙️</span>
-              <h3 className="font-heading text-xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
+              <h3 className="font-heading text-xl tracking-wide" style={{ color: colors.ui.textPrimary, fontSize: '1.25rem' }}>
                 Paramètres de la partie
               </h3>
               {!isPlayer1 && (
@@ -74,7 +74,8 @@ export default function LobbyPokedescPage() {
                     bodyColor="#f3f4f6"
                     borderColor="#d1d5db"
                     borderThickness="p-[2px]"
-                    className="font-body text-xs text-gray-400 px-2 py-1 flex items-center justify-center"
+                    className="font-heading text-xs text-gray-400 px-2 py-1 flex items-center justify-center"
+                    style={{ fontSize: '0.6rem' }}
                   >
                     Lecture seule
                   </SubCard>
@@ -104,7 +105,7 @@ export default function LobbyPokedescPage() {
                         borderThickness="p-[2px]"
                         className="py-2 flex items-center justify-center w-full"
                       >
-                        <span className="font-body font-semibold text-sm" style={{ color: active ? '#ffffff' : colors.ui.textMuted }}>
+                        <span className="font-heading font-semibold text-sm" style={{ color: active ? '#ffffff' : colors.ui.textMuted }}>
                           {n}
                         </span>
                       </SubCard>
@@ -138,7 +139,7 @@ export default function LobbyPokedescPage() {
                         borderThickness="p-[2px]"
                         className="py-2 flex items-center justify-center w-full"
                       >
-                        <span className="font-body font-semibold text-sm" style={{ color: active ? '#ffffff' : colors.ui.textMuted }}>
+                        <span className="font-heading font-semibold text-sm" style={{ color: active ? '#ffffff' : colors.ui.textMuted }}>
                           {duration === -1 ? '♾️' : `${duration}s`}
                         </span>
                       </SubCard>
@@ -156,15 +157,16 @@ export default function LobbyPokedescPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setSettings((prev) => ({ ...prev, generations: [...ALL_GENERATIONS] }))}
-                      className="font-body text-xs hover:underline"
-                      style={{ color: colors.brand.blue }}
+                      className="font-heading text-xs hover:underline"
+                      style={{ color: colors.brand.blue, fontSize: '0.6rem' }}
                     >
                       Tout sélectionner
                     </button>
                     <span className="text-gray-300">|</span>
                     <button
                       onClick={() => setSettings((prev) => ({ ...prev, generations: [prev.generations[0]] }))}
-                      className="font-body text-xs text-gray-500 hover:underline"
+                      className="font-heading text-xs text-gray-500 hover:underline"
+                      style={{ fontSize: '0.6rem' }}
                     >
                       Tout désélectionner
                     </button>
@@ -187,7 +189,7 @@ export default function LobbyPokedescPage() {
                         borderThickness="p-[2px]"
                         className="px-3 py-1.5 flex items-center justify-center w-full"
                       >
-                        <span className="font-body text-sm font-semibold" style={{ color: active ? '#ffffff' : colors.ui.textMuted }}>
+                        <span className="font-heading text-sm font-semibold" style={{ color: active ? '#ffffff' : colors.ui.textMuted }}>
                           Gén. {gen}
                         </span>
                       </SubCard>
@@ -196,7 +198,7 @@ export default function LobbyPokedescPage() {
                 })}
               </div>
               {displayGens.length < ALL_GENERATIONS.length && (
-                <p className="font-body text-xs mt-2" style={{ color: colors.ui.textMuted }}>
+                <p className="font-heading text-xs mt-2" style={{ color: colors.ui.textMuted }}>
                   {displayGens.length} génération{displayGens.length > 1 ? 's' : ''} sélectionnée{displayGens.length > 1 ? 's' : ''}
                 </p>
               )}

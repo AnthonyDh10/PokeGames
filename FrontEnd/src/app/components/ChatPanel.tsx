@@ -117,7 +117,7 @@ export default function ChatPanel() {
         {/* Solo invite section */}
         {isSolo && sessionCode && (
           <div className="px-4 py-4 border-b border-gray-100 shrink-0">
-            <p className="font-body text-sm text-gray-500 mb-2">
+            <p className="font-heading text-sm text-gray-500 mb-2">
               Tu es seul pour l'instant. Invite un ami avec ce code :
             </p>
             <div className="flex items-center gap-2">
@@ -129,13 +129,13 @@ export default function ChatPanel() {
               </span>
               <button
                 onClick={handleCopyCode}
-                className="px-3 py-2 rounded-lg font-body text-sm font-semibold transition shrink-0"
+                className="px-3 py-2 rounded-lg font-heading text-sm font-semibold transition shrink-0"
                 style={{
                   backgroundColor: copied ? '#22c55e' : colors.brand.red,
                   color: '#fff',
                 }}
               >
-                {copied ? '✓ Copié' : 'Copier'}
+                {copied ? '✓ Copié' : '📋'}
               </button>
             </div>
           </div>
@@ -145,7 +145,7 @@ export default function ChatPanel() {
         <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-2">
           {messages.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
-              <p className="font-body text-sm text-gray-400 text-center px-4">
+              <p className="font-heading text-sm text-gray-400 text-center px-4">
                 {isSolo
                   ? 'Le chat sera disponible quand un adversaire rejoindra la partie.'
                   : "Aucun message pour l\u2019instant. Dites bonjour ! 👋"}
@@ -158,10 +158,10 @@ export default function ChatPanel() {
                 className={`flex flex-col max-w-[85%] ${msg.isOwn ? 'self-end items-end' : 'self-start items-start'}`}
               >
                 {!msg.isOwn && (
-                  <span className="font-body text-xs text-gray-400 mb-0.5 ml-1">{msg.senderName}</span>
+                  <span className="font-heading text-xs text-gray-400 mb-0.5 ml-1">{msg.senderName}</span>
                 )}
                 <div
-                  className="px-3 py-1.5 rounded-2xl font-body text-sm leading-snug break-words"
+                  className="px-3 py-1.5 rounded-2xl font-heading text-sm leading-snug break-words"
                   style={
                     msg.isOwn
                       ? { backgroundColor: colors.brand.red, color: '#fff', borderBottomRightRadius: '4px' }
@@ -170,7 +170,7 @@ export default function ChatPanel() {
                 >
                   {msg.text}
                 </div>
-                <span className="font-body text-[10px] text-gray-400 mt-0.5 mx-1">{msg.timestamp}</span>
+                <span className="font-heading text-[10px] text-gray-400 mt-0.5 mx-1">{msg.timestamp}</span>
               </div>
             ))
           )}
@@ -190,13 +190,13 @@ export default function ChatPanel() {
               onChange={(e) => setInputText(e.target.value)}
               placeholder="Écrire un message…"
               maxLength={500}
-              className="flex-1 rounded-xl border border-gray-200 px-3 py-2 font-body text-sm outline-none focus:ring-2 transition"
+              className="flex-1 rounded-xl border border-gray-200 px-3 py-2 font-heading text-sm outline-none focus:ring-2 transition"
               style={{ '--tw-ring-color': colors.brand.red } as React.CSSProperties}
             />
             <button
               type="submit"
               disabled={!inputText.trim()}
-              className="px-3 py-2 rounded-xl font-body text-sm font-semibold transition disabled:opacity-40"
+              className="px-3 py-2 rounded-xl font-heading text-sm font-semibold transition disabled:opacity-40"
               style={{ backgroundColor: colors.brand.red, color: '#fff' }}
             >
               ➤
