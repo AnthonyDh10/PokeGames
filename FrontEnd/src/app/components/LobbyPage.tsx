@@ -13,6 +13,7 @@ import type { GameSettings } from '../pages/LobbyPokedescPage'
 import { colors } from '../design/colors'
 import redGif from './images/red-gif.gif'
 import dittoGif from './images/ditto-gif.gif'
+import SubCard from './SubCard'
 
 export interface LobbyTheme {
   primary: string
@@ -143,7 +144,9 @@ export default function LobbyPage({
 
   function startAutoRefresh(partieId: string) {
     if (autoRefreshRef.current) clearInterval(autoRefreshRef.current)
-    autoRefreshRef.current = setInterval(async () => {
+    
+    // Fonction pour mettre à jour la partie
+    const refreshPartie = async () => {
       try {
         const updated = await getPartie(partieId)
         setPartie((prev) => {
@@ -161,7 +164,13 @@ export default function LobbyPage({
       } catch {
         // silent
       }
-    }, 2000)
+    }
+
+    // Appel immédiat pour détecter les changements rapides
+    refreshPartie()
+
+    // Puis polling toutes les 2 secondes
+    autoRefreshRef.current = setInterval(refreshPartie, 2000)
   }
 
   function stopAutoRefresh() {
@@ -287,7 +296,7 @@ export default function LobbyPage({
                 type="submit"
                 disabled={!pseudoInput.trim()}
                 className="font-body w-full"
-                innerClassName="flex items-center justify-center w-full h-full px-4 py-3 rounded"
+                innerClassName="flex items-center justify-center w-full h-full px-4 py-3"
                 colorBorder={theme.primaryDark}
                 colorLight={theme.primaryDark}
                 colorDark={theme.primary}
@@ -319,10 +328,7 @@ export default function LobbyPage({
             
 
             <div className="inline-flex items-center gap-3 border" style={{ borderColor: colors.brand.white, backgroundColor: colors.brand.blueLight, padding: '0.5rem 1rem'}}>
-              <span className="font-body text-sm" style={{ color: theme.textOnColor, opacity: 0.8 }}>
-                Code :
-              </span>
-              <span className="font-display text-xs tracking-widest" style={{ color: theme.textOnColor }}>
+              <span className="font-display text-lg tracking-widest" style={{ color: theme.textOnColor }}>
                 {partie.codeSession}
               </span>
               <PixelButton
@@ -391,20 +397,16 @@ export default function LobbyPage({
           <div className="relative z-10 text-center space-y-3">
             {partie.statut === 'Prêt' && (
               <>
-                <div className="font-body flex items-center justify-center gap-2 bg-green-50 text-green-700 border border-green-200 px-4 py-3 rounded-xl mb-3">
-                  <span>✅</span>
-                  <span className="font-medium">Les deux joueurs sont connectés !</span>
-                </div>
                 {isPlayer1 ? (
                   <PixelButton
                     onClick={() => handleStart(false)}
                     disabled={isLoading}
                     className="inline-flex items-center gap-2"
                     innerClassName="inline-flex items-center gap-2 px-6 py-2.5 rounded"
-                    colorBorder={'#16a34a'}
-                    colorLight={'#16a34a'}
-                    colorDark={'#16a34a'}
-                    color={'#16a34a'}
+                    colorBorder={colors.brand.greenDeep}
+                    colorLight={colors.brand.greenLight}
+                    colorDark={colors.brand.greenDark}
+                    color={colors.brand.green}
                   >
                     <span style={{ color: '#ffffff' }} className="font-semibold">Démarrer la partie</span>
                   </PixelButton>
@@ -520,6 +522,7 @@ export default function LobbyPage({
               </h3>
             </div>
           }
+          
         >
           <div className="p-6 text-center flex flex-col flex-1">
             <p className="font-body text-lg md:text-xl mb-5 text-gray-500">

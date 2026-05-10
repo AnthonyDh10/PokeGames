@@ -49,6 +49,12 @@ export const colors = {
     blueLight: "#5B69D2",
 
     blueDeep: "#19215C",
+
+    green: '#2A8C2D',
+    greenDark: '#1B5A1D',
+    greenLight: '#30A134',
+    greenDeep: '#103712',
+
   },
 
   // ─── Interface utilisateur ─────────────────────────────────────────────────
@@ -132,7 +138,7 @@ export const colors = {
 
   game: {
     /** Bonne réponse */
-    success: "#4CAF50",
+    success: "#30A134",
     /** Mauvaise réponse */
     error:   "#DC0A2D",
     /** Indice / neutre */
