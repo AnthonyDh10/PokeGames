@@ -3,12 +3,16 @@ import { useNavigate, useLocation } from 'react-router'
 import SectionTitle from './SectionTitle'
 import { PokeballDecor } from './Pokeball'
 import Card from './Card'
+import PixelButton, { pixelClipPathSm, pixelClipPathLg } from './PixelButton'
 import { useSessionStore } from '../store/sessionStore'
 import { useBackgroundStore } from '../store/backgroundStore'
 import { useChatStore } from '../store/chatStore'
 import { createPartie, joinPartie, getPartie, startPartie, updateGameSettings } from '../services/partieService'
 import type { PartieDto } from '../types/partie'
 import type { GameSettings } from '../pages/LobbyPokedescPage'
+import { colors } from '../design/colors'
+import redGif from './images/red-gif.gif'
+import dittoGif from './images/ditto-gif.gif'
 
 export interface LobbyTheme {
   primary: string
@@ -279,14 +283,18 @@ export default function LobbyPage({
                 maxLength={20}
                 className="font-body w-full px-4 py-3 border border-gray-300 rounded text-base focus:outline-none transition"
               />
-              <button
+              <PixelButton
                 type="submit"
                 disabled={!pseudoInput.trim()}
-                className="font-body font-semibold w-full py-3 rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0"
-                style={{ backgroundColor: theme.primaryDark, color: theme.textOnColor }}
+                className="font-body w-full"
+                innerClassName="flex items-center justify-center w-full h-full px-4 py-3 rounded"
+                colorBorder={theme.primaryDark}
+                colorLight={theme.primaryDark}
+                colorDark={theme.primary}
+                color={theme.primaryDark}
               >
-                Continuer
-              </button>
+                <span style={{ color: theme.textOnColor }} className="font-semibold">Continuer</span>
+              </PixelButton>
             </form>
           </div>
         </Card>
@@ -302,24 +310,34 @@ export default function LobbyPage({
         pokeballOpacity={0}
         header={
           <>
-            <h2 className="font-heading text-2xl tracking-wide mb-4" style={{ color: theme.textOnColor }}>
-              Salle d'attente
+            <h2 className="font-heading text-2xl text-center tracking-wide mb-4" style={{ color: theme.textOnColor }}>
+              Salle d'attente - {gameTitle}<br/>
+                    <p className="text-sm mt-0.5" style={{ color: theme.textOnColor, opacity: 0.8 }}>
+                      Partage ce code pour inviter ton ami ou démarre en solo !
+                    </p>            
             </h2>
-            <div className="inline-flex items-center gap-3 bg-white/20 px-4 py-2 rounded-full">
+            
+
+            <div className="inline-flex items-center gap-3 border" style={{ borderColor: colors.brand.white, backgroundColor: colors.brand.blueLight, padding: '0.5rem 1rem'}}>
               <span className="font-body text-sm" style={{ color: theme.textOnColor, opacity: 0.8 }}>
                 Code :
               </span>
               <span className="font-display text-xs tracking-widest" style={{ color: theme.textOnColor }}>
                 {partie.codeSession}
               </span>
-              <button
+              <PixelButton
                 onClick={handleCopyCode}
-                className="font-body p-1.5 rounded-md hover:bg-white/20 transition"
-                style={{ color: theme.textOnColor, opacity: 0.8 }}
+                className="p-0"
+                innerClassName="flex items-center justify-center w-full h-full p-1.5"
+                colorBorder={'transparent'}
+                colorLight={'transparent'}
+                colorDark={'transparent'}
+                color={'transparent'}
+                clipPath={pixelClipPathSm}
                 title="Copier"
               >
-                📋
-              </button>
+                <span style={{ color: theme.textOnColor, opacity: 0.8 }}>📋</span>
+              </PixelButton>
             </div>
           </>
         }
@@ -338,18 +356,10 @@ export default function LobbyPage({
               className={`flex-1 max-w-48 text-center p-4 rounded-xl border-2 relative transition ${isPlayer1 ? '' : 'border-gray-200'}`}
               style={isPlayer1 ? { borderColor: theme.primary } : {}}
             >
-              <div className="text-4xl mb-1">👤</div>
+              <img src={redGif} alt="Joueur 1" className="w-12 h-12 mx-auto mb-1" />
               <div className="font-body font-semibold text-gray-800">
                 {isPlayer1 ? playerName : 'Joueur 1'}
               </div>
-              {isPlayer1 && (
-                <span
-                  className="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full font-body font-semibold"
-                  style={{ backgroundColor: theme.primary, color: theme.textOnColor }}
-                >
-                  Vous
-                </span>
-              )}
             </div>
 
             <div className="font-heading text-2xl tracking-wide" style={{ color: theme.primaryDark }}>VS</div>
@@ -358,7 +368,11 @@ export default function LobbyPage({
               className={`flex-1 max-w-48 text-center p-4 rounded-xl border-2 relative transition ${!isPlayer1 ? '' : 'border-gray-200'}`}
               style={!isPlayer1 ? { borderColor: theme.primary } : {}}
             >
-              <div className="text-4xl mb-1">👤</div>
+              {partie.dresseur2Id ? (
+                <img src={redGif} alt="Joueur 2" className="w-12 h-12 mx-auto mb-1" />
+              ) : (
+                <img src={dittoGif} alt="Joueur 2" className="w-12 h-12 mx-auto mb-1" />
+              )}
               <div className="font-body font-semibold text-gray-800">
                 {!isPlayer1 ? playerName : partie.dresseur2Id ? 'Adversaire' : 'En attente...'}
               </div>
@@ -382,14 +396,18 @@ export default function LobbyPage({
                   <span className="font-medium">Les deux joueurs sont connectés !</span>
                 </div>
                 {isPlayer1 ? (
-                  <button
+                  <PixelButton
                     onClick={() => handleStart(false)}
                     disabled={isLoading}
-                    className="font-body font-semibold inline-flex items-center gap-2 px-6 py-2.5 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50"
-                    style={{ backgroundColor: '#16a34a' }}
+                    className="inline-flex items-center gap-2"
+                    innerClassName="inline-flex items-center gap-2 px-6 py-2.5 rounded"
+                    colorBorder={'#16a34a'}
+                    colorLight={'#16a34a'}
+                    colorDark={'#16a34a'}
+                    color={'#16a34a'}
                   >
-                    Démarrer la partie
-                  </button>
+                    <span style={{ color: '#ffffff' }} className="font-semibold">Démarrer la partie</span>
+                  </PixelButton>
                 ) : (
                   <div className="font-body inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-gray-600 bg-gray-100 border border-gray-300">
                     ⏳ Attente de l'hôte...
@@ -399,27 +417,20 @@ export default function LobbyPage({
             )}
             {partie.statut === 'EnAttente' && (
               <>
-                <div
-                  className="font-body flex items-start gap-2 px-4 py-3 rounded-xl mb-3 text-left border"
-                  style={{ borderColor: theme.primary + '44' }}
-                >
-                  <span className="text-xl">⏳</span>
-                  <div>
-                    <p className="font-medium text-gray-700">En attente du second joueur...</p>
-                    <p className="text-sm mt-0.5 text-gray-500">
-                      Partagez le code <strong>{partie.codeSession}</strong> avec votre ami
-                    </p>
-                  </div>
-                </div>
+
                 {!partie.dresseur2Id && (
-                  <button
+                  <PixelButton
                     onClick={() => handleStart(true)}
                     disabled={isLoading}
-                    className="font-body font-semibold inline-flex items-center gap-2 px-6 py-2.5 rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 mx-4"
-                    style={{ backgroundColor: theme.primaryLight, color: theme.textOnColor }}
+                    className="inline-flex items-center gap-2 mx-4"
+                    innerClassName="inline-flex items-center gap-2 px-6 py-2.5 rounded"
+                    colorBorder={colors.brand.blueDeep}
+                    colorLight={theme.primaryLight}
+                    colorDark={theme.primaryDark}
+                    color={theme.primary}
                   >
-                    Jouer en solo
-                  </button>
+                    <span style={{ color: theme.textOnColor }} className="font-semibold">Jouer en solo</span>
+                  </PixelButton>
                 )}
               </>
             )}
@@ -430,13 +441,17 @@ export default function LobbyPage({
               </div>
             )}
 
-            <button
+            <PixelButton
               onClick={handleCancel}
-              className="font-body font-semibold inline-flex items-center gap-2 px-6 py-2.5 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition mx-4"
-              style={{ backgroundColor: '#dc2626' }}
+              className="inline-flex items-center gap-2 mx-4"
+              innerClassName="inline-flex items-center gap-2 px-6 py-2.5 rounded"
+              colorBorder={colors.brand.redDeep}
+              colorLight={colors.brand.redLight}
+              colorDark={colors.brand.redDark}
+              color={colors.brand.red}
             >
-              Annuler
-            </button>
+              <span style={{ color: '#ffffff' }} className="font-semibold">Annuler</span>
+            </PixelButton>
           </div>
         </div>
       </Card>
@@ -510,14 +525,18 @@ export default function LobbyPage({
             <p className="font-body text-lg md:text-xl mb-5 text-gray-500">
               Joue seul ou défie un ami en partageant le code de session !
             </p>
-            <button
+            <PixelButton
               onClick={handleCreate}
               disabled={isLoading}
-              className="font-body font-semibold w-full py-2.5 rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:translate-y-0 mt-auto"
-              style={{ backgroundColor: theme.primary, color: theme.textOnColor }}
+              className="w-full"
+              innerClassName="flex items-center justify-center w-full h-full px-4 py-2.5 rounded mt-auto"
+              colorBorder={colors.brand.blueDeep}
+              colorLight={theme.primaryLight}
+              colorDark={theme.primaryDark}
+              color={theme.primary}
             >
-              {isLoading ? 'Chargement...' : 'Créer une nouvelle partie'}
-            </button>
+              <span style={{ color: theme.textOnColor }} className="font-semibold">{isLoading ? 'Chargement...' : 'Créer une nouvelle partie'}</span>
+            </PixelButton>
           </div>
         </Card>
 
@@ -552,14 +571,18 @@ export default function LobbyPage({
                 <p className="font-body text-sm text-red-500">{joinErrorMessage}</p>
               )}
             </div>
-            <button
+            <PixelButton
               onClick={handleJoin}
               disabled={isLoading}
-              className="font-body font-semibold w-full py-2.5 rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:translate-y-0 mt-auto"
-              style={{ backgroundColor: theme.primaryLight, color: theme.textOnColor }}
+              className="w-full"
+              innerClassName="flex items-center justify-center w-full h-full px-4 py-2.5 rounded mt-auto"
+              colorBorder={colors.brand.blueDeep}
+              colorLight={theme.primaryLight}
+              colorDark={theme.primaryDark}
+              color={theme.primaryLight}
             >
-              {isLoading ? 'Chargement...' : 'Rejoindre la partie'}
-            </button>
+              <span style={{ color: theme.textOnColor }} className="font-semibold">{isLoading ? 'Chargement...' : 'Rejoindre la partie'}</span>
+            </PixelButton>
           </div>
         </Card>
 

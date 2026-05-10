@@ -17,6 +17,8 @@ export const pixelClipPathSm = 'polygon(0 3px, 3px 3px, 3px 0, calc(100% - 3px) 
 
 interface PixelButtonProps {
   onClick?: () => void
+  /** HTML button `type` attribute (default: 'button') */
+  type?: 'button' | 'submit' | 'reset'
   disabled?: boolean
   title?: string
   /** Classes supplémentaires appliquées au bouton racine (ex: taille, font) */
@@ -36,6 +38,7 @@ interface PixelButtonProps {
 
 export default function PixelButton({
   onClick,
+  type = 'button',
   disabled = false,
   title,
   className = '',
@@ -54,6 +57,7 @@ export default function PixelButton({
 
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={disabled}
       title={title}
