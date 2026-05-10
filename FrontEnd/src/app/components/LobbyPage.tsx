@@ -375,7 +375,7 @@ export default function LobbyPage({
                 className="text-center p-4 relative transition"
               >
                 <img src={redGif} alt="Joueur 1" className="w-12 h-12 mx-auto mb-1" />
-                <div className="font-body font-semibold text-gray-800">
+                <div className="font-heading font-semibold text-gray-800">
                   {isPlayer1 ? playerName : 'Joueur 1'}
                 </div>
               </SubCard>
@@ -395,7 +395,7 @@ export default function LobbyPage({
                 ) : (
                   <img src={dittoGif} alt="Joueur 2" className="w-12 h-12 mx-auto mb-1" />
                 )}
-                <div className="font-body font-semibold text-gray-800">
+                <div className="font-heading font-semibold text-gray-800">
                   {!isPlayer1 ? playerName : partie.dresseur2Id ? 'Adversaire' : 'En attente...'}
                 </div>
                 {!isPlayer1 && (
@@ -404,7 +404,7 @@ export default function LobbyPage({
                       bodyColor={theme.primary} 
                       borderColor={theme.primaryDark} 
                       borderThickness="p-[2px]" 
-                      className="px-2 py-0.5 text-xs font-body font-semibold flex items-center justify-center" 
+                      className="px-2 py-0.5 text-xs font-heading font-semibold flex items-center justify-center" 
                       style={{ color: theme.textOnColor }}
                     >
                       Vous
@@ -437,7 +437,7 @@ export default function LobbyPage({
                     borderColor={colors.ui?.grayMid || '#d1d5db'} 
                     bodyColor="#f3f4f6" 
                     borderThickness="p-[2px]" 
-                    className="font-body inline-flex items-center justify-center gap-2 px-6 py-2.5 text-gray-600"
+                    className="font-heading inline-flex items-center justify-center gap-2 px-6 py-2.5 text-gray-600"
                   >
                     ⏳ Attente de l'hôte...
                   </SubCard>
@@ -457,7 +457,7 @@ export default function LobbyPage({
                     colorDark={theme.primaryDark}
                     color={theme.primary}
                   >
-                    <span style={{ color: theme.textOnColor }} className="font-semibold">Jouer en solo</span>
+                    <span style={{ color: theme.textOnColor }} className="font-semibold font-heading">Jouer en solo</span>
                   </PixelButton>
                 )}
               </>
@@ -468,7 +468,7 @@ export default function LobbyPage({
                 borderColor="#991b1b" 
                 bodyColor="#dc2626" 
                 borderThickness="p-[2px]" 
-                className="font-body px-4 py-3 font-medium text-white"
+                className="font-heading px-4 py-3 font-medium text-white"
               >
                 {errorMessage}
               </SubCard>
@@ -483,7 +483,7 @@ export default function LobbyPage({
               colorDark={colors.brand.redDark}
               color={colors.brand.red}
             >
-              <span style={{ color: '#ffffff' }} className="font-semibold">Annuler</span>
+              <span style={{ color: '#ffffff' }} className="font-semibold font-heading">Annuler</span>
             </PixelButton>
           </div>
         </div>
@@ -563,11 +563,12 @@ export default function LobbyPage({
             <p className="font-body text-lg md:text-xl mb-5 text-gray-500">
               Joue seul ou défie un ami en partageant le code de session !
             </p>
+            <div className="flex-1" />
             <PixelButton
               onClick={handleCreate}
               disabled={isLoading}
-              className="w-full"
-              innerClassName="flex items-center justify-center w-full h-full px-4 py-2.5 mt-auto"
+              className="w-full mt-auto mb-2"
+              innerClassName="flex items-center justify-center w-full h-full px-4 py-2.5"
               colorBorder={colors.brand.blueDeep}
               colorLight={theme.primaryLight}
               colorDark={theme.primaryDark}
@@ -617,11 +618,12 @@ export default function LobbyPage({
                 <p className="font-body text-sm text-red-500">{joinErrorMessage}</p>
               )}
             </div>
+            <div className="flex-1" />
             <PixelButton
               onClick={handleJoin}
               disabled={isLoading}
-              className="w-full"
-              innerClassName="flex items-center justify-center w-full h-full px-4 py-2.5 mt-auto"
+              className="w-full mt-auto mb-2"
+              innerClassName="flex items-center justify-center w-full h-full px-4 py-2.5"
               colorBorder={colors.brand.blueDeep}
               colorLight={theme.primaryLight}
               colorDark={theme.primaryDark}
