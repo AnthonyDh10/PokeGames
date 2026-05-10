@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocation } from 'react-router'
 import Card from '../components/Card'
+import SubCard from '../components/SubCard'
 import LobbyPage from '../components/LobbyPage'
 import { colors } from '../design/colors'
 import type { PartieDto } from '../types/partie'
@@ -58,6 +59,7 @@ export default function LobbyPokedescPage() {
         const displayNb = isPlayer1 ? settings.nbPokemons : (partie?.nbPokemons ?? settings.nbPokemons)
         const displayGens = isPlayer1 ? settings.generations : (partie?.selectedGenerations ?? settings.generations)
         const displayTimer = isPlayer1 ? settings.timerDuration : (partie?.timerDurationSeconds ?? settings.timerDuration)
+        
         return (
         <Card pokeballColor={colors.brand.blue}>
           <div className="p-6">
@@ -67,9 +69,16 @@ export default function LobbyPokedescPage() {
                 Paramètres de la partie
               </h3>
               {!isPlayer1 && (
-                <span className="ml-auto font-body text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
-                  Lecture seule
-                </span>
+                <div className="ml-auto">
+                  <SubCard
+                    bodyColor="#f3f4f6"
+                    borderColor="#d1d5db"
+                    borderThickness="p-[2px]"
+                    className="font-body text-xs text-gray-400 px-2 py-1 flex items-center justify-center"
+                  >
+                    Lecture seule
+                  </SubCard>
+                </div>
               )}
             </div>
 
@@ -80,21 +89,28 @@ export default function LobbyPokedescPage() {
                 <span className="font-bold" style={{ color: colors.brand.blue }}>{displayNb}</span>
               </label>
               <div className="flex gap-2">
-                {[1, 2, 3, 4, 5, 6].map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => isPlayer1 && setSettings((prev) => ({ ...prev, nbPokemons: n }))}
-                    disabled={!isPlayer1}
-                    className={`flex-1 py-2 rounded-xl font-body font-semibold text-sm border-2 transition ${!isPlayer1 ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
-                    style={
-                      displayNb === n
-                        ? { backgroundColor: colors.brand.blue, color: '#fff', borderColor: colors.brand.blue }
-                        : { backgroundColor: '#fff', color: colors.ui.textMuted, borderColor: '#e5e7eb' }
-                    }
-                  >
-                    {n}
-                  </button>
-                ))}
+                {[1, 2, 3, 4, 5, 6].map((n) => {
+                  const active = displayNb === n
+                  return (
+                    <button
+                      key={n}
+                      onClick={() => isPlayer1 && setSettings((prev) => ({ ...prev, nbPokemons: n }))}
+                      disabled={!isPlayer1}
+                      className={`flex-1 transition ${!isPlayer1 ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:-translate-y-0.5'}`}
+                    >
+                      <SubCard
+                        bodyColor={active ? colors.brand.blue : '#ffffff'}
+                        borderColor={active ? colors.brand.blueDark : '#e5e7eb'}
+                        borderThickness="p-[2px]"
+                        className="py-2 flex items-center justify-center w-full"
+                      >
+                        <span className="font-body font-semibold text-sm" style={{ color: active ? '#ffffff' : colors.ui.textMuted }}>
+                          {n}
+                        </span>
+                      </SubCard>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
@@ -107,21 +123,28 @@ export default function LobbyPokedescPage() {
                 </span>
               </label>
               <div className="flex gap-2">
-                {[30, 60, 120, -1].map((duration) => (
-                  <button
-                    key={duration}
-                    onClick={() => isPlayer1 && setSettings((prev) => ({ ...prev, timerDuration: duration }))}
-                    disabled={!isPlayer1}
-                    className={`flex-1 py-2 rounded-xl font-body font-semibold text-sm border-2 transition ${!isPlayer1 ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
-                    style={
-                      displayTimer === duration
-                        ? { backgroundColor: colors.brand.blue, color: '#fff', borderColor: colors.brand.blue }
-                        : { backgroundColor: '#fff', color: colors.ui.textMuted, borderColor: '#e5e7eb' }
-                    }
-                  >
-                    {duration === -1 ? '♾️' : `${duration}s`}
-                  </button>
-                ))}
+                {[30, 60, 120, -1].map((duration) => {
+                  const active = displayTimer === duration
+                  return (
+                    <button
+                      key={duration}
+                      onClick={() => isPlayer1 && setSettings((prev) => ({ ...prev, timerDuration: duration }))}
+                      disabled={!isPlayer1}
+                      className={`flex-1 transition ${!isPlayer1 ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:-translate-y-0.5'}`}
+                    >
+                      <SubCard
+                        bodyColor={active ? colors.brand.blue : '#ffffff'}
+                        borderColor={active ? colors.brand.blueDark : '#e5e7eb'}
+                        borderThickness="p-[2px]"
+                        className="py-2 flex items-center justify-center w-full"
+                      >
+                        <span className="font-body font-semibold text-sm" style={{ color: active ? '#ffffff' : colors.ui.textMuted }}>
+                          {duration === -1 ? '♾️' : `${duration}s`}
+                        </span>
+                      </SubCard>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
@@ -148,7 +171,7 @@ export default function LobbyPokedescPage() {
                   </div>
                 )}
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full">
                 {ALL_GENERATIONS.map((gen) => {
                   const active = displayGens.includes(gen)
                   return (
@@ -156,14 +179,18 @@ export default function LobbyPokedescPage() {
                       key={gen}
                       onClick={() => isPlayer1 && toggleGeneration(gen)}
                       disabled={!isPlayer1}
-                      className={`px-3 py-1.5 rounded-lg font-body text-sm font-semibold border-2 transition ${!isPlayer1 ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
-                      style={
-                        active
-                          ? { backgroundColor: colors.brand.blue, color: '#fff', borderColor: colors.brand.blue }
-                          : { backgroundColor: '#fff', color: colors.ui.textMuted, borderColor: '#e5e7eb' }
-                      }
+                      className={`transition ${!isPlayer1 ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:-translate-y-0.5'}`}
                     >
-                      Gén. {gen}
+                      <SubCard
+                        bodyColor={active ? colors.brand.blue : '#ffffff'}
+                        borderColor={active ? colors.brand.blueDark : '#e5e7eb'}
+                        borderThickness="p-[2px]"
+                        className="px-3 py-1.5 flex items-center justify-center w-full"
+                      >
+                        <span className="font-body text-sm font-semibold" style={{ color: active ? '#ffffff' : colors.ui.textMuted }}>
+                          Gén. {gen}
+                        </span>
+                      </SubCard>
                     </button>
                   )
                 })}

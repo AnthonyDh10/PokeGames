@@ -284,14 +284,20 @@ export default function LobbyPage({
         >
           <div className="p-8">
             <form onSubmit={handleSetPseudo} className="space-y-4">
-              <input
-                type="text"
-                value={pseudoInput}
-                onChange={(e) => setPseudoInput(e.target.value)}
-                placeholder="Votre pseudo..."
-                maxLength={20}
-                className="font-body w-full px-4 py-3 border border-gray-300 rounded text-base focus:outline-none transition"
-              />
+              <SubCard 
+                borderColor={colors.ui?.grayMid || '#d1d5db'} 
+                borderThickness="p-[2px]" 
+                bodyColor="white"
+              >
+                <input
+                  type="text"
+                  value={pseudoInput}
+                  onChange={(e) => setPseudoInput(e.target.value)}
+                  placeholder="Votre pseudo..."
+                  maxLength={20}
+                  className="font-body w-full px-4 py-3 text-base focus:outline-none bg-transparent"
+                />
+              </SubCard>
               <PixelButton
                 type="submit"
                 disabled={!pseudoInput.trim()}
@@ -321,29 +327,32 @@ export default function LobbyPage({
           <>
             <h2 className="font-heading text-2xl text-center tracking-wide mb-4" style={{ color: theme.textOnColor }}>
               Salle d'attente - {gameTitle}<br/>
-                    <p className="text-sm mt-0.5" style={{ color: theme.textOnColor, opacity: 0.8 }}>
-                      Partage ce code pour inviter ton ami ou démarre en solo !
-                    </p>            
+              <p className="text-sm mt-0.5" style={{ color: theme.textOnColor, opacity: 0.8 }}>
+                Partage ce code pour inviter ton ami ou démarre en solo !
+              </p>            
             </h2>
-            
 
-            <div className="inline-flex items-center gap-3 border" style={{ borderColor: colors.brand.white, backgroundColor: colors.brand.blueLight, padding: '0.5rem 1rem'}}>
-              <span className="font-display text-lg tracking-widest" style={{ color: theme.textOnColor }}>
-                {partie.codeSession}
-              </span>
-              <PixelButton
-                onClick={handleCopyCode}
-                className="p-0"
-                innerClassName="flex items-center justify-center w-full h-full p-1.5"
-                colorBorder={'transparent'}
-                colorLight={'transparent'}
-                colorDark={'transparent'}
-                color={'transparent'}
-                clipPath={pixelClipPathSm}
-                title="Copier"
+            {/* Ajout d'un conteneur inline-flex pour centrer la SubCard sans qu'elle prenne 100% de la largeur */}
+            <div className="inline-flex justify-center">
+              <SubCard 
+                borderColor={colors.brand.white} 
+                bodyColor={colors.brand.blueLight} 
+                borderThickness="p-[2px]"
               >
-                <span style={{ color: theme.textOnColor, opacity: 0.8 }}>📋</span>
-              </PixelButton>
+                {/* On force le flex-row ici pour s'assurer que le code et le bouton soient sur la même ligne */}
+                <div className="flex flex-row items-center gap-3 px-5 py-2">
+                  <span className="font-display text-xl tracking-widest" style={{ color: theme.textOnColor }}>
+                    {partie.codeSession}
+                  </span>
+                  <button
+                    onClick={handleCopyCode}
+                    className="hover:scale-110 active:scale-95 transition-transform cursor-pointer flex items-center justify-center p-1"
+                    title="Copier"
+                  >
+                    <span style={{ color: theme.textOnColor, opacity: 0.9 }} className="text-lg">📋</span>
+                  </button>
+                </div>
+              </SubCard>
             </div>
           </>
         }
@@ -358,38 +367,51 @@ export default function LobbyPage({
 
           {/* Joueurs */}
           <div className="relative z-10 flex items-center justify-center gap-6 mb-6">
-            <div
-              className={`flex-1 max-w-48 text-center p-4 rounded-xl border-2 relative transition ${isPlayer1 ? '' : 'border-gray-200'}`}
-              style={isPlayer1 ? { borderColor: theme.primary } : {}}
-            >
-              <img src={redGif} alt="Joueur 1" className="w-12 h-12 mx-auto mb-1" />
-              <div className="font-body font-semibold text-gray-800">
-                {isPlayer1 ? playerName : 'Joueur 1'}
-              </div>
+            <div className="flex-1 max-w-48">
+              <SubCard
+                borderColor={isPlayer1 ? theme.primary : (colors.ui?.grayMid || '#e5e7eb')}
+                borderThickness="p-[2px]"
+                bodyColor="white"
+                className="text-center p-4 relative transition"
+              >
+                <img src={redGif} alt="Joueur 1" className="w-12 h-12 mx-auto mb-1" />
+                <div className="font-body font-semibold text-gray-800">
+                  {isPlayer1 ? playerName : 'Joueur 1'}
+                </div>
+              </SubCard>
             </div>
 
             <div className="font-heading text-2xl tracking-wide" style={{ color: theme.primaryDark }}>VS</div>
 
-            <div
-              className={`flex-1 max-w-48 text-center p-4 rounded-xl border-2 relative transition ${!isPlayer1 ? '' : 'border-gray-200'}`}
-              style={!isPlayer1 ? { borderColor: theme.primary } : {}}
-            >
-              {partie.dresseur2Id ? (
-                <img src={redGif} alt="Joueur 2" className="w-12 h-12 mx-auto mb-1" />
-              ) : (
-                <img src={dittoGif} alt="Joueur 2" className="w-12 h-12 mx-auto mb-1" />
-              )}
-              <div className="font-body font-semibold text-gray-800">
-                {!isPlayer1 ? playerName : partie.dresseur2Id ? 'Adversaire' : 'En attente...'}
-              </div>
-              {!isPlayer1 && (
-                <span
-                  className="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full font-body font-semibold"
-                  style={{ backgroundColor: theme.primary, color: theme.textOnColor }}
-                >
-                  Vous
-                </span>
-              )}
+            <div className="flex-1 max-w-48 relative">
+              <SubCard
+                borderColor={!isPlayer1 ? theme.primary : (colors.ui?.grayMid || '#e5e7eb')}
+                borderThickness="p-[2px]"
+                bodyColor="white"
+                className="text-center p-4 relative transition"
+              >
+                {partie.dresseur2Id ? (
+                  <img src={redGif} alt="Joueur 2" className="w-12 h-12 mx-auto mb-1" />
+                ) : (
+                  <img src={dittoGif} alt="Joueur 2" className="w-12 h-12 mx-auto mb-1" />
+                )}
+                <div className="font-body font-semibold text-gray-800">
+                  {!isPlayer1 ? playerName : partie.dresseur2Id ? 'Adversaire' : 'En attente...'}
+                </div>
+                {!isPlayer1 && (
+                  <div className="absolute top-2 right-2">
+                    <SubCard 
+                      bodyColor={theme.primary} 
+                      borderColor={theme.primaryDark} 
+                      borderThickness="p-[2px]" 
+                      className="px-2 py-0.5 text-xs font-body font-semibold flex items-center justify-center" 
+                      style={{ color: theme.textOnColor }}
+                    >
+                      Vous
+                    </SubCard>
+                  </div>
+                )}
+              </SubCard>
             </div>
           </div>
 
@@ -402,7 +424,7 @@ export default function LobbyPage({
                     onClick={() => handleStart(false)}
                     disabled={isLoading}
                     className="inline-flex items-center gap-2"
-                    innerClassName="inline-flex items-center gap-2 px-6 py-2.5 rounded"
+                    innerClassName="inline-flex items-center gap-2 px-6 py-2.5"
                     colorBorder={colors.brand.greenDeep}
                     colorLight={colors.brand.greenLight}
                     colorDark={colors.brand.greenDark}
@@ -411,21 +433,25 @@ export default function LobbyPage({
                     <span style={{ color: '#ffffff' }} className="font-semibold">Démarrer la partie</span>
                   </PixelButton>
                 ) : (
-                  <div className="font-body inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-gray-600 bg-gray-100 border border-gray-300">
+                  <SubCard 
+                    borderColor={colors.ui?.grayMid || '#d1d5db'} 
+                    bodyColor="#f3f4f6" 
+                    borderThickness="p-[2px]" 
+                    className="font-body inline-flex items-center justify-center gap-2 px-6 py-2.5 text-gray-600"
+                  >
                     ⏳ Attente de l'hôte...
-                  </div>
+                  </SubCard>
                 )}
               </>
             )}
             {partie.statut === 'EnAttente' && (
               <>
-
                 {!partie.dresseur2Id && (
                   <PixelButton
                     onClick={() => handleStart(true)}
                     disabled={isLoading}
                     className="inline-flex items-center gap-2 mx-4"
-                    innerClassName="inline-flex items-center gap-2 px-6 py-2.5 rounded"
+                    innerClassName="inline-flex items-center gap-2 px-6 py-2.5"
                     colorBorder={colors.brand.blueDeep}
                     colorLight={theme.primaryLight}
                     colorDark={theme.primaryDark}
@@ -438,15 +464,20 @@ export default function LobbyPage({
             )}
 
             {errorMessage && (
-              <div className="font-body border px-4 py-3 rounded-xl font-medium text-white" style={{ backgroundColor: '#dc2626' }}>
+              <SubCard 
+                borderColor="#991b1b" 
+                bodyColor="#dc2626" 
+                borderThickness="p-[2px]" 
+                className="font-body px-4 py-3 font-medium text-white"
+              >
                 {errorMessage}
-              </div>
+              </SubCard>
             )}
 
             <PixelButton
               onClick={handleCancel}
               className="inline-flex items-center gap-2 mx-4"
-              innerClassName="inline-flex items-center gap-2 px-6 py-2.5 rounded"
+              innerClassName="inline-flex items-center gap-2 px-6 py-2.5"
               colorBorder={colors.brand.redDeep}
               colorLight={colors.brand.redLight}
               colorDark={colors.brand.redDark}
@@ -475,11 +506,15 @@ export default function LobbyPage({
   return (
     <div className="space-y-6 py-10 px-4 sm:px-6 lg:px-8">
       {errorMessage && (
-        <div
-          className="max-w-xl mx-auto font-body border px-4 py-3 rounded-xl font-medium text-center"
-          style={{ color: '#dc2626', borderColor: '#dc262633' }}
-        >
-          {errorMessage}
+        <div className="max-w-xl mx-auto">
+          <SubCard 
+            borderColor="#dc262633" 
+            bodyColor="transparent" 
+            borderThickness="p-[2px]" 
+            className="font-body px-4 py-3 font-medium text-center text-red-600"
+          >
+            {errorMessage}
+          </SubCard>
         </div>
       )}
 
@@ -532,7 +567,7 @@ export default function LobbyPage({
               onClick={handleCreate}
               disabled={isLoading}
               className="w-full"
-              innerClassName="flex items-center justify-center w-full h-full px-4 py-2.5 rounded mt-auto"
+              innerClassName="flex items-center justify-center w-full h-full px-4 py-2.5 mt-auto"
               colorBorder={colors.brand.blueDeep}
               colorLight={theme.primaryLight}
               colorDark={theme.primaryDark}
@@ -563,13 +598,21 @@ export default function LobbyPage({
               Entre le code de session fourni par ton ami
             </p>
             <div className="mb-3 text-left">
-              <input
-                type="text"
-                value={codeSession}
-                onChange={(e) => setCodeSession(e.target.value)}
-                placeholder="Code de session"
-                className={`font-body text-lg mb-4 w-full px-3 py-2.5 border rounded text-base focus:outline-none transition ${joinErrorMessage ? 'border-red-500' : 'border-gray-300'}`}
-              />
+              <div className="mb-4">
+                <SubCard 
+                  borderColor={joinErrorMessage ? '#ef4444' : (colors.ui?.grayMid || '#d1d5db')} 
+                  borderThickness="p-[2px]" 
+                  bodyColor="white"
+                >
+                  <input
+                    type="text"
+                    value={codeSession}
+                    onChange={(e) => setCodeSession(e.target.value)}
+                    placeholder="Code de session"
+                    className="font-body text-lg w-full px-3 py-2.5 text-base focus:outline-none bg-transparent"
+                  />
+                </SubCard>
+              </div>
               {joinErrorMessage && (
                 <p className="font-body text-sm text-red-500">{joinErrorMessage}</p>
               )}
@@ -578,7 +621,7 @@ export default function LobbyPage({
               onClick={handleJoin}
               disabled={isLoading}
               className="w-full"
-              innerClassName="flex items-center justify-center w-full h-full px-4 py-2.5 rounded mt-auto"
+              innerClassName="flex items-center justify-center w-full h-full px-4 py-2.5 mt-auto"
               colorBorder={colors.brand.blueDeep}
               colorLight={theme.primaryLight}
               colorDark={theme.primaryDark}
