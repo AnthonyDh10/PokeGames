@@ -124,10 +124,11 @@ export default function App() {
           </div>
         </div>
       </div>
-
       <div style={{ position: "relative", zIndex: 2002 }}>
-        <Footer />
         <ChatPanel />
+      </div>
+      <div style={{ position: "relative", zIndex: 60 }}>
+        <Footer />
       </div>
     </div>
   );

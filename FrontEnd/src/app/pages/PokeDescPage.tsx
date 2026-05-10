@@ -7,6 +7,7 @@ import { colors } from '../design/colors'
 import Card from '../components/Card'
 import PixelButton, { pixelClipPathSm } from '../components/PixelButton'
 import PokemonSearchInput from '../components/PokemonSearchInput'
+import { normalizeString } from '../components/PokemonSearchInput'
 import Timer from '../components/Timer'
 import indiceTypeIcon from '../components/images/indice_type.png'
 import { getAllPokemons, getCensoredDescription, getHints } from '../services/pokemonService'
@@ -174,14 +175,20 @@ export default function PokeDescPage() {
     return true
   })
 
-  // Filtered pokemons for search
-  const filteredPokemons = searchTerm.trim()
+  // 2. Préparation du terme de recherche
+  const cleanSearchTerm = searchTerm.trim()
+  const normalizedSearchTerm = normalizeString(cleanSearchTerm)
+
+  // 3. Filtered pokemons for search (mise à jour avec la normalisation)
+  const filteredPokemons = cleanSearchTerm
     ? hintFilteredPokemons
-        .filter(
-          (p) =>
-            p.nameFr.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.pokedexNumber.toString().includes(searchTerm)
-        )
+        .filter((p) => {
+          const normalizedName = normalizeString(p.nameFr)
+          return (
+            normalizedName.includes(normalizedSearchTerm) ||
+            p.pokedexNumber.toString().includes(cleanSearchTerm)
+          )
+        })
         .sort((a, b) => a.pokedexNumber - b.pokedexNumber)
         .slice(0, 10)
     : []
@@ -607,14 +614,17 @@ export default function PokeDescPage() {
               </div>
             )}
 
-            <button
+            <PixelButton
               onClick={handleSubmitGuess}
               disabled={!selectedPokemonName || isSubmitting}
-              className="font-body font-semibold w-full h-12 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:translate-y-0"
-              style={{ backgroundColor: colors.brand.blue }}
+              className="font-heading font-semibold w-full h-12 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:translate-y-0"
+              color={colors.brand.blue}
+              colorLight={colors.brand.blueLight}
+              colorDark={colors.brand.blueDark}
+              colorBorder={colors.brand.blueDeep}
             >
-              {isSubmitting ? 'Envoi...' : '✓ Valider la réponse'}
-            </button>
+              {isSubmitting ? 'Envoi...' : 'Valider la réponse'}
+            </PixelButton>
 
             {guessResultMessage && (
               <div
@@ -647,10 +657,10 @@ export default function PokeDescPage() {
               const revealedKey = label as keyof RevealedHints
               const revealedValue = revealedHints[revealedKey]
 
-              const btnBorderColor = used ? colors.brand.blueDeep : (locked ? '#9CA3AF' : '#1F2937')
-              const btnColorLight = used ? colors.brand.blueLight : (locked ? '#F3F4F6' : '#FFFFFF')
-              const btnColorDark = used ? colors.brand.blueDark : (locked ? '#D1D5DB' : '#E5E7EB')
-              const btnColor = used ? colors.brand.blue : (locked ? '#E5E7EB' : '#F9FAFB')
+              const btnBorderColor = used ? colors.brand.blueDeep : (locked ? '#9CA3AF' : colors.brand.blueDeep)
+              const btnColorLight = used ? colors.brand.blueLight : (locked ? '#F1F2F4' : '#FFFFFF')
+              const btnColorDark = used ? colors.brand.blueDark : (locked ? '#BEC3CB' : '#E7E7E7')
+              const btnColor = used ? colors.brand.blue : (locked ? '#D7DADF' : '#F9FAFB')
 
               return (
                 <PixelButton
@@ -705,57 +715,96 @@ export default function PokeDescPage() {
 
       {/* Modal succès */}
       {showSuccessModal && revealedPokemonSprite && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-          <div className="bg-white border-2 p-8 max-w-sm w-11/12 text-center shadow-px-lg animate-[fadeInScale_0.3s_ease-out]" style={{ borderColor: colors.game.success }}>
-            <span className="text-5xl grayscale opacity-70 block mb-3">🎉</span>
-            <h4 className="font-body font-bold text-xl mb-4" style={{ color: colors.ui.textPrimary }}>Bravo ! C'était bien :</h4>
-            <div>
-              <img
-                src={revealedPokemonSprite}
-                alt="Pokémon trouvé"
-                className="max-w-48 h-auto mx-auto mb-2 animate-[spriteReveal_0.8s_ease-out]"
-                style={{ imageRendering: 'pixelated' }}
-              />
-              <p className="font-body font-semibold text-lg" style={{ color: colors.ui.textPrimary }}>{selectedPokemonName}</p>
-            </div>
-            <button
-              onClick={proceedAfterModal}
-              className="font-body font-semibold mt-6 w-full py-3 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition"
-              style={{ backgroundColor: colors.brand.blue }}
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="max-w-sm w-full">
+            <Card
+              showHeader={true}
+              headerColor={colors.game.success}
+              pokeballColor={colors.game.success}
+              pokeballOpacity={0.05}
+              animation={true}
+              header={
+                <h4 className="font-display text-xl tracking-wide text-white text-center w-full">
+                  Bravo !
+                </h4>
+              }
             >
-              ➡️ {isFinalPokemon ? 'Terminer la partie' : 'Passer au Pokémon suivant'}
-            </button>
+              <div className="p-6 text-center flex flex-col items-center">
+                <p className="font-body font-bold text-lg mb-2" style={{ color: colors.ui.textMuted }}>
+                  C'était bien :
+                </p>
+                <img
+                  src={revealedPokemonSprite}
+                  alt="Pokémon trouvé"
+                  className="w-64 h-64 animate-[spriteReveal_0.8s_ease-out]"
+                  style={{ imageRendering: 'pixelated' }}
+                />
+                <p className="font-body font-bold text-2xl mb-6" style={{ color: colors.game.success }}>
+                  {selectedPokemonName}
+                </p>
+                <PixelButton
+                  onClick={proceedAfterModal}
+                  className="font-heading font-semibold w-full h-12 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:translate-y-0"
+                  color={colors.brand.blue}
+                  colorLight={colors.brand.blueLight}
+                  colorDark={colors.brand.blueDark}
+                  colorBorder={colors.brand.blueDeep}
+                >
+                  {isFinalPokemon ? 'Terminer la partie' : 'Pokémon suivant'}
+                </PixelButton>
+              </div>
+            </Card>
           </div>
         </div>
       )}
 
       {/* Modal échec */}
       {showFailureModal && revealedPokemonSprite && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-          <div className="bg-white border-2 p-8 max-w-sm w-11/12 text-center shadow-px-lg animate-[fadeInScale_0.3s_ease-out]" style={{ borderColor: colors.game.error }}>
-            <span className="text-5xl grayscale opacity-70 block mb-3">{isTimeout ? '⏱️' : '😔'}</span>
-            <h4 className="font-body font-bold text-xl mb-4" style={{ color: colors.game.error }}>{isTimeout ? "Temps écoulé ! C\u2019était :" : "Dommage ! C\u2019était :"}</h4>
-            <div>
-              <img
-                src={revealedPokemonSprite}
-                alt="Pokémon à deviner"
-                className="max-w-48 h-auto mx-auto mb-2 animate-[spriteReveal_0.8s_ease-out]"
-                style={{ imageRendering: 'pixelated' }}
-              />
-              <p className="font-body font-semibold text-lg" style={{ color: colors.ui.textPrimary }}>
-                {allPokemons.find((p) => p.id === currentPokemonId)?.nameFr ?? 'Pokémon inconnu'}
-              </p>
-            </div>
-            <button
-              onClick={proceedAfterModal}
-              className="font-body font-semibold mt-6 w-full py-3 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition"
-              style={{ backgroundColor: colors.brand.blue }}
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="max-w-sm w-full">
+            <Card
+              showHeader={true}
+              headerColor={colors.game.error}
+              borderColor={colors.game.error}
+              pokeballColor={colors.game.error}
+              pokeballOpacity={0.05}
+              animation={true}
+              header={
+                <h4 className="font-display text-xl tracking-wide text-white text-center w-full">
+                  {isTimeout ? "Temps écoulé !" : "Dommage !"}
+                </h4>
+              }
             >
-              ➡️ {isFinalPokemon ? 'Terminer la partie' : 'Passer au Pokémon suivant'}
-            </button>
+              <div className="p-6 text-center flex flex-col items-center">
+                <span className="text-5xl grayscale opacity-70 block mb-3">{isTimeout ? '⏱️' : '😔'}</span>
+                <p className="font-body font-bold text-lg mb-2" style={{ color: colors.ui.textMuted }}>
+                  C'était :
+                </p>
+                <img
+                  src={revealedPokemonSprite}
+                  alt="Pokémon à deviner"
+                  className="max-w-48 h-auto mb-2 animate-[spriteReveal_0.8s_ease-out]"
+                  style={{ imageRendering: 'pixelated' }}
+                />
+                <p className="font-body font-bold text-2xl mb-6" style={{ color: colors.game.error }}>
+                  {allPokemons.find((p) => p.id === currentPokemonId)?.nameFr ?? 'Pokémon inconnu'}
+                </p>
+                <PixelButton
+                  onClick={proceedAfterModal}
+                  className="font-heading font-semibold w-full h-12 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:translate-y-0"
+                  color={colors.brand.red}
+                  colorDark={colors.brand.redDark}
+                  colorLight={colors.brand.redLight}
+                  colorBorder={colors.brand.redDeep}
+                >
+                  {isFinalPokemon ? 'Terminer la partie' : 'Pokémon suivant'}
+                </PixelButton>
+              </div>
+            </Card>
           </div>
         </div>
       )}
+
 
       {/* Animations CSS */}
       <style>{`
