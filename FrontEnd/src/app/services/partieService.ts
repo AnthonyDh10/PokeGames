@@ -22,13 +22,27 @@ export async function startPartie(
   settings?: { nbPokemons: number; generations: number[]; timerDuration: number },
   mode: string = 'Standard'
 ): Promise<PartieDto> {
-  const { data } = await api.post<PartieDto>(`/api/partie/${partieId}/start`, {
-    mode,
-    isSolo,
-    nbPokemons: settings?.nbPokemons ?? 1,
-    generations: settings?.generations ?? [1, 2, 3, 4, 5, 6, 7, 8],
-    timerDuration: settings?.timerDuration ?? 60,
-  })
+  // Build payload conditionally: some game modes (eg. "Types") don't accept
+  // nbPokemons/generations parameters, so only include fields when relevant.
+  const payload: any = { mode, isSolo }
+
+  if (mode === 'Standard') {
+    payload.nbPokemons = settings?.nbPokemons ?? 1
+    payload.generations = settings?.generations ?? [1, 2, 3, 4, 5, 6, 7, 8]
+    payload.timerDuration = settings?.timerDuration ?? 60
+  } else if (mode === 'DeZoom') {
+    // DeZoom uses generations and may use a custom timerDuration
+    payload.generations = settings?.generations ?? [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    if (settings?.timerDuration !== undefined) payload.timerDuration = settings.timerDuration
+  } else {
+    // Other modes (eg. "Types") shouldn't send nbPokemons/generations by default.
+    // If callers explicitly passed settings with fields, include them.
+    if (settings?.nbPokemons !== undefined) payload.nbPokemons = settings.nbPokemons
+    if (settings?.generations !== undefined) payload.generations = settings.generations
+    if (settings?.timerDuration !== undefined) payload.timerDuration = settings.timerDuration
+  }
+
+  const { data } = await api.post<PartieDto>(`/api/partie/${partieId}/start`, payload)
   return data
 }
 

@@ -129,7 +129,8 @@ export default function ResultatsTypesPage() {
     setIsRelaunching(true)
     try {
       const newPartie = await createPartie(sessionId)
-      await startPartie(newPartie.id, true, { nbPokemons: 1, generations: [1, 2, 3, 4, 5, 6, 7, 8] }, 'Types')
+      // Types game does not accept nbPokemons/generations — start with mode only
+      await startPartie(newPartie.id, true, undefined, 'Types')
       navigate(`/types/${newPartie.id}`)
     } catch {
       setErrorMessage('Erreur lors du relancement de la partie.')

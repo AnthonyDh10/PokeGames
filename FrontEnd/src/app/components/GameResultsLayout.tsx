@@ -44,7 +44,7 @@ export default function GameResultsLayout({
 
       {details}
 
-      <div className="flex gap-3 justify-center flex-wrap pt-4 pb-8">
+      <div className="justify-center flex-wrap">
         {actions}
       </div>
 
