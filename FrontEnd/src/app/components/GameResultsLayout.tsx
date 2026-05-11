@@ -28,7 +28,7 @@ export default function GameResultsLayout({
       <Card headerClassName="py-4" pokeballColor={pokeballColor} pokeballSize={200}>
         <div className="p-6 text-center">
           <h1
-            className="font-heading text-2xl md:text-3xl tracking-wide"
+            className="font-display text-2xl md:text-3xl tracking-wide"
             style={{ color: colors.ui.textPrimary }}
           >
             <strong>{title}</strong>
