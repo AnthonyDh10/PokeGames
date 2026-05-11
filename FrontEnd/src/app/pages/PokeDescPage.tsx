@@ -591,7 +591,7 @@ export default function PokeDescPage() {
                       className=" font-heading w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
                       style={{ borderColor: colors.brand.blue, color: colors.brand.blue, fontSize: '1.5rem' }}
                     >
-                      <strong>‹‹</strong>
+                      ◀
                     </button>
                     <span className="font-heading text-sm text-gray-500 tabular-nums">{descriptionIndex + 1} / {descriptions.length}</span>
                     <button
@@ -599,7 +599,7 @@ export default function PokeDescPage() {
                       className=" font-heading w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
                       style={{ borderColor: colors.brand.blue, color: colors.brand.blue, fontSize: '1.5rem' }}
                     >
-                      <strong>››</strong>
+                      ▶
                     </button>
                   </div>
                 )}

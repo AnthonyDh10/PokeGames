@@ -94,7 +94,8 @@ const scoresSection = (
 
   return (
     <GameResultsLayout
-      title="Résultats de la partie"
+      title="Résultats"
+      bodyColor={colors.brand.blue}
       sessionCode={partie.codeSession}
       scores={scoresSection}
       details={
@@ -168,7 +169,7 @@ function PokemonCarouselSection({ partie, sprites, isSolo, player1Name, player2N
 
         {/* PARTIE CARROUSEL (HAUT) */}
         <div className="relative flex items-center justify-center min-h-[180px] mb-8 bg-white/50">
-           <button onClick={prev} className="absolute left-4 z-10 text-3xl hover:scale-125 transition-transform text-blue-600 select-none">◀</button>
+           <button onClick={prev} className="absolute left-4 z-10 text-3xl hover:scale-125 transition-transform select-none" style={{ color: colors.brand.blueDark }}>◀</button>
            
            <div className="relative w-64 h-40 flex items-center justify-center">
               {list.map((p: any, i: number) => {
@@ -198,7 +199,7 @@ function PokemonCarouselSection({ partie, sprites, isSolo, player1Name, player2N
                       style={{ imageRendering: 'pixelated' }} 
                     />
                     {isMain && (
-                      <div className="font-heading uppercase mt-2 text-lg tracking-widest text-blue-900">
+                      <div className="font-display uppercase mt-2 text-lg tracking-widest" style={{ color: colors.brand.blueDark }}>
                         {p.pokemonName}
                       </div>
                     )}
@@ -207,7 +208,7 @@ function PokemonCarouselSection({ partie, sprites, isSolo, player1Name, player2N
               })}
            </div>
            
-           <button onClick={next} className="absolute right-4 z-10 text-3xl hover:scale-125 transition-transform text-blue-600 select-none">▶</button>
+           <button onClick={next} className="absolute right-4 z-10 text-3xl hover:scale-125 transition-transform select-none" style={{ color: colors.brand.blueDark }}>▶</button>
         </div>
 
         {/* LIGNE DE SÉPARATION STYLE RPG */}
@@ -227,7 +228,7 @@ function PokemonCarouselSection({ partie, sprites, isSolo, player1Name, player2N
           {/* Stats Joueur 2 (si multi) */}
           {!isSolo && (
             <div className="flex flex-col space-y-3 border-l-2 border-slate-100 pl-6">
-              <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.yellowDark}}>
+              <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.yellowWarm}}>
                 {player2Name}
               </div>
               <StatDetails 
@@ -314,11 +315,12 @@ function FinalScoreBars({ partie, player1Name, player2Name, isSolo }: {
       pokeballOpacity={0}
     >
       <div className="p-6">
-        <h3 className="font-heading text-center text-xl mb-8 uppercase tracking-widest" style={{ color: colors.brand.blueDark }}>
-          — SCORES FINAUX —
+        <h3 className="font-heading text-center text-xl mb-10 uppercase tracking-widest" style={{ color: colors.brand.blueDark }}>
+          SCORES FINAUX
         </h3>
         
-        <div className="space-y-10 max-w-2xl mx-auto">
+        {/* Conteneur principal avec un grand GAP pour bien séparer les joueurs */}
+        <div className="flex flex-col gap-10 max-w-xl mx-auto">
           <HPBar 
             name={player1Name} 
             current={partie.scoreJ1} 
@@ -353,56 +355,54 @@ function HPBar({ name, current, max, isWinner }: { name: string, current: number
   const barColors = getBarColors()
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center gap-4">
-      {/* Label du joueur - Jaune si gagnant, sinon Slate-700 */}
-      <div 
-        className="font-heading md:w-40 truncate uppercase tracking-widest transition-all duration-500"
-        style={{ 
-          // Taille de base à 1rem, passe à 1.2rem pour le vainqueur
-          fontSize: isWinner ? '1.2rem' : '1rem',
-          // Gras uniquement pour le vainqueur
-          fontWeight: isWinner ? 'bold' : 'normal',
-          // Couleur dynamique
-          color: isWinner ? colors.brand.yellowWarm : colors.brand.blueDark 
-        }}
-      >
-        {name}
-      </div>
-
-      {/* Container avec ton SubCard */}
-      <div className="flex-1">
-        <SubCard
-          borderColor="#0f172a" 
-          bodyColor="#1e293b"   
-          borderThickness="p-[2px]"
-          className="flex flex-row items-center gap-2 px-1.5 py-1"
+    <div className="flex flex-col gap-1.5">
+      {/* En-tête : Nom à gauche, Score à droite */}
+      <div className="flex justify-between items-end px-1">
+        {/* Label du joueur */}
+        <div 
+          className="font-heading truncate uppercase tracking-widest transition-all duration-500"
+          style={{ 
+            fontSize: isWinner ? '1.2rem' : '1rem',
+            fontWeight: isWinner ? 'bold' : 'normal',
+            color: isWinner ? colors.brand.yellowWarm : colors.brand.blueDark 
+          }}
         >
-          {/* Label HP */}
-          <div className="text-[12px] font-display text-orange-400 pt-0.5">
-            HP
-          </div>
-          
-          {/* Jauge de vie */}
-          <div className="flex-1 h-4 bg-slate-700 overflow-hidden relative border-l-2 border-slate-900">
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: `${percentage}%` }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              className="h-full"
-              style={{ 
-                background: `linear-gradient(to bottom, ${barColors.light} 45%, ${barColors.dark} 45%)`
-              }}
-            />
-          </div>
-        </SubCard>
+          {name}
+        </div>
+
+        {/* Score numérique */}
+        <div className="font-heading text-lg text-right tabular-nums tracking-tighter">
+          <span className="text-slate-800">{current}</span>
+          <span className="text-slate-400 text-xs mx-1">/</span>
+          <span className="text-slate-500">{max}</span>
+        </div>
       </div>
 
-      {/* Score numérique */}
-      <div className="font-heading text-lg md:w-32 text-right tabular-nums tracking-tighter">
-        <span className="text-slate-800">{current}</span>
-        <span className="text-slate-400 text-xs mx-1">/</span>
-        <span className="text-slate-500">{max}</span>
-      </div>
+      {/* Container avec ton SubCard pour la barre HP */}
+      <SubCard
+        borderColor="#0f172a" 
+        bodyColor="#1e293b"   
+        borderThickness="p-[2px]"
+        className="flex flex-row items-center gap-2 px-1.5 py-1.5"
+      >
+        {/* Label HP */}
+        <div className="text-[12px] font-display text-orange-400 pt-0.5">
+          HP
+        </div>
+        
+        {/* Jauge de vie */}
+        <div className="flex-1 h-4 bg-slate-700 overflow-hidden relative border-l-2 border-slate-900">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${percentage}%` }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className="h-full"
+            style={{ 
+              background: `linear-gradient(to bottom, ${barColors.light} 65%, ${barColors.dark} 35%)`
+            }}
+          />
+        </div>
+      </SubCard>
     </div>
   )
 }
