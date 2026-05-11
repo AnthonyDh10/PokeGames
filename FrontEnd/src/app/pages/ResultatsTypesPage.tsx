@@ -386,8 +386,10 @@ export default function ResultatsTypesPage() {
           isRelaunching={isRelaunching}
           onRematch={handleRematchClick}
           rematchRequested={rematchRequested}
-          relancerColor={colors.brand.yellow}
-          nouvellePartieColor={colors.brand.yellow}
+          buttonColor={colors.brand.yellow}
+          buttonColorDark={colors.brand.yellowWarm}
+          buttonColorLight={colors.brand.yellowLight}
+          buttonColorBorder={colors.brand.yellowWarm}
         />
       }
     />

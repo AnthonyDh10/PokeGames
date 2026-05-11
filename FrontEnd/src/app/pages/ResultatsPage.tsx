@@ -377,8 +377,10 @@ export default function ResultatsPage() {
           isRelaunching={isRelaunching}
           onRematch={handleRematchClick}
           rematchRequested={rematchRequested}
-          relancerColor={colors.brand.blue}
-          nouvellePartieColor={colors.brand.blue}
+          buttonColor={colors.brand.blue}
+          buttonColorDark={colors.brand.blueDark}
+          buttonColorLight={colors.brand.blueLight}
+          buttonColorBorder={colors.brand.blueDeep}
           requireFinishedForNewGame
         />
       }

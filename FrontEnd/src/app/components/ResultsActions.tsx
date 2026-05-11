@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router'
+import PixelButton from './PixelButton'
+import { colors } from '../design/colors'
 
 interface ResultsActionsProps {
   isSolo: boolean
@@ -17,16 +19,16 @@ interface ResultsActionsProps {
   rematchRequested?: boolean
 
   // Couleurs — une par bouton
-  relancerColor: string
-  nouvellePartieColor: string
+  buttonColor: string
+  buttonColorDark: string
+  buttonColorLight: string
+  buttonColorBorder: string
+  
   menuColor?: string // si absent : style blanc/gris
 
   // Désactiver "Nouvelle partie" tant que bothFinished est false
   requireFinishedForNewGame?: boolean
 }
-
-const BASE =
-  'px-6 py-3 font-semibold border-2 border-white shadow-px hover:-translate-y-0.5 hover:shadow-px-lg transition'
 
 export default function ResultsActions({
   isSolo,
@@ -37,66 +39,91 @@ export default function ResultsActions({
   isRelaunching = false,
   onRematch,
   rematchRequested = false,
-  relancerColor,
-  nouvellePartieColor,
+  buttonColor,
+  buttonColorDark,
+  buttonColorLight,
+  buttonColorBorder,
   menuColor,
   requireFinishedForNewGame = false,
 }: ResultsActionsProps) {
   const navigate = useNavigate()
 
   return (
-    <>
+    <div className="grid sm:grid-cols-3 gap-4 w-full mt-6 h-16">
+    
       {/* Relancer — solo uniquement */}
       {isSolo && bothFinished && onRelancer && (
-        <button
+        <PixelButton
           onClick={onRelancer}
           disabled={isRelaunching}
-          className={`${BASE} text-white disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0`}
-          style={{ backgroundColor: relancerColor }}
+          colorBorder={buttonColorBorder}
+          color={buttonColor}
+          colorDark={buttonColorDark}
+          colorLight={buttonColorLight}
+          className="font-heading font-semibold text-white h-auto"
+          style={{ fontSize: '1.5rem' }}
         >
-          {isRelaunching ? '⏳ Lancement...' : '🔄 Relancer'}
-        </button>
+
+          {isRelaunching ? '⏳ Lancement...' : 'Relancer'}
+        </PixelButton>
       )}
 
       {/* Revanche — multi uniquement */}
       {!isSolo && bothFinished && onRematch && (
-        <button
+        <PixelButton
           onClick={onRematch}
           disabled={rematchRequested}
-          className={`${BASE} text-white disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0`}
-          style={{ backgroundColor: relancerColor }}
+          colorBorder={buttonColorBorder}
+          color={buttonColor}
+          colorDark={buttonColorDark}
+          colorLight={buttonColorLight}
+          className="font-heading font-semibold text-white h-auto"
+          style={{ fontSize: '1.5rem' }}
         >
-          {rematchRequested ? '⏳ En attente...' : '🔄 Revanche'}
-        </button>
+          {rematchRequested ? '⏳ En attente...' : 'Revanche'}
+        </PixelButton>
       )}
 
       {/* Nouvelle partie */}
-      <button
+      <PixelButton
         onClick={onNouvelle}
         disabled={(requireFinishedForNewGame && !bothFinished) || isCreatingNew}
-        className={`${BASE} text-white disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-y-0`}
-        style={{ backgroundColor: nouvellePartieColor }}
+        colorBorder={buttonColorBorder}
+        color={buttonColor}
+        colorDark={buttonColorDark}
+        colorLight={buttonColorLight}
+        className="font-heading font-semibold text-white h-auto"
+        style={{ fontSize: '1.5rem' }}
       >
-        {isCreatingNew ? '⏳ Création...' : '🎮 Nouvelle partie'}
-      </button>
+        {isCreatingNew ? '⏳ Création...' : 'Nouvelle partie'}
+      </PixelButton>
 
       {/* Menu principal */}
       {menuColor ? (
-        <button
+        <PixelButton
           onClick={() => navigate('/home')}
-          className={`${BASE} text-white`}
-          style={{ backgroundColor: menuColor }}
+          colorBorder={menuColor + '80'}
+          color={menuColor}
+          colorDark={menuColor + 'cc'}
+          colorLight={menuColor + '33'}
+          className="font-heading font-bold h-auto"
+          style={{ fontSize: '1.5rem', color: colors.ui.textMuted }}
         >
-          🏠 Menu principal
-        </button>
+          Menu principal
+        </PixelButton>
       ) : (
-        <button
+        <PixelButton
           onClick={() => navigate('/home')}
-          className={`${BASE} bg-white text-gray-700 border-white hover:border-gray-300`}
+          colorBorder='white'
+          color='white'
+          colorDark='white'
+          colorLight='white'
+          className="font-heading font-semibold h-auto"
+          style={{ fontSize: '1.5rem', color: colors.ui.textMuted }}
         >
-          🏠 Menu principal
-        </button>
+          Menu principal
+        </PixelButton>
       )}
-    </>
+    </div>
   )
 }

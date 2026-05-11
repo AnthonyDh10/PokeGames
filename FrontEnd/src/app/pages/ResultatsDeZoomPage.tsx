@@ -317,8 +317,10 @@ export default function ResultatsDeZoomPage() {
           isRelaunching={isRelaunching}
           onRematch={handleRematchClick}
           rematchRequested={rematchRequested}
-          relancerColor={colors.brand.red}
-          nouvellePartieColor={colors.brand.red}
+          buttonColor={colors.brand.red}
+          buttonColorDark={colors.brand.redDark}
+          buttonColorLight={colors.brand.redLight}
+          buttonColorBorder={colors.brand.redDeep}
         />
       }
     />

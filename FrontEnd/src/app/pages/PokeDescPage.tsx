@@ -637,24 +637,24 @@ export default function PokeDescPage() {
                     {(proximityResult.hasOneTypeInCommon || proximityResult.hasPerfectTypeMatch || proximityResult.hasSameGeneration || proximityResult.isInSameEvolutionChain) && (
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         {proximityResult.hasPerfectTypeMatch ? (
-                          <span className="inline-flex items-center bg-green-100 text-green-800 text-[10px] px-1.5 py-0.5 rounded border border-green-200 font-bold uppercase tracking-wide">
-                            ✨ Types exacts
+                          <span className="inline-flex items-center bg-green-100 text-green-800 text-[10px] px-1.5 py-0.5 border border-green-200 font-heading font-bold uppercase tracking-wide">
+                            Types exacts
                           </span>
                         ) : proximityResult.hasOneTypeInCommon ? (
-                          <span className="inline-flex items-center bg-blue-100 text-blue-800 text-[10px] px-1.5 py-0.5 rounded border border-blue-200 font-bold uppercase tracking-wide">
-                            🔮 1 Type en commun
+                          <span className="inline-flex items-center bg-blue-100 text-blue-800 text-[10px] px-1.5 py-0.5 border border-blue-200 font-heading font-bold uppercase tracking-wide">
+                            1 Type en commun
                           </span>
                         ) : null}
 
                         {proximityResult.hasSameGeneration && (
-                          <span className="inline-flex items-center bg-yellow-100 text-yellow-800 text-[10px] px-1.5 py-0.5 rounded border border-yellow-200 font-bold uppercase tracking-wide">
-                            📅 Même Génération
+                          <span className="inline-flex items-center bg-yellow-100 text-yellow-800 text-[10px] px-1.5 py-0.5 border border-yellow-200 font-heading font-bold uppercase tracking-wide">
+                            Même Génération
                           </span>
                         )}
 
                         {proximityResult.isInSameEvolutionChain && (
-                          <span className="inline-flex items-center bg-purple-100 text-purple-800 text-[10px] px-1.5 py-0.5 rounded border border-purple-200 font-bold uppercase tracking-wide">
-                            🧬 Même Famille
+                          <span className="inline-flex items-center bg-purple-100 text-purple-800 text-[10px] px-1.5 py-0.5 border border-purple-200 font-heading font-bold uppercase tracking-wide">
+                            Même Famille
                           </span>
                         )}
                       </div>

@@ -205,7 +205,7 @@ export default function LobbyPage({
 
   async function handleJoin() {
     if (!codeSession.trim()) {
-      setJoinErrorMessage('Veuillez entrer un code de session')
+      setJoinErrorMessage('Entre le code de session')
       return
     }
     setIsLoading(true)
