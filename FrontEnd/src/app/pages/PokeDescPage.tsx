@@ -16,6 +16,7 @@ import { getAllPokemons, getCensoredDescription, getHints } from '../services/po
 import { getPartie, submitGuess, useHint, getTimer, resetTimer } from '../services/partieService'
 import type { PokemonDto, PokemonHintsDto } from '../types/pokemon'
 import type { PartieDto, GuessResultDto } from '../types/partie'
+import HPBar from '../components/HPBar'
 
 const ROMAN_GEN: Record<string, number> = {
   i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9,
@@ -97,10 +98,6 @@ export default function PokeDescPage() {
   const { sessionId, playerName } = useSessionStore()
   const { setBackground } = useBackgroundStore()
   const { setContext: setChatContext } = useChatStore()
-
-  useEffect(() => {
-    setBackground({ colorLeft: colors.ui.bgLeftGame, colorStripe: colors.ui.bgStripeGame, colorRight: colors.ui.bgRightGame });
-  }, []);
 
   // Game state
   const [partie, setPartie] = useState<PartieDto | null>(null)
@@ -539,29 +536,42 @@ export default function PokeDescPage() {
               )}
             </div>
           }
-          pokeballOpacity={0}
-          pokeballColor="white"
+          pokeballOpacity={0.1}
+          pokeballColor={colors.brand.blue}
         >
-          <div className="p-4 md:p-6 text-center">
-            <div className="flex flex-wrap gap-4 justify-center text-gray-500 text-sm mb-3">
-              <span><span className="grayscale opacity-60">🎯</span> Code : {sessionCode}</span>
-              {isSolo ? (
-                <span className="text-gray-700 font-medium"><span className="grayscale opacity-60">👤</span> Mode Solo — {playerName}</span>
-              ) : (
-                <span className="text-gray-700 font-medium"><span className="grayscale opacity-60">👥</span> {playerName} VS Adversaire</span>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-6 justify-center text-base">
-              <span className="font-heading font-semibold" style={{ color: colors.brand.blue }}><span className="grayscale opacity-60">⭐</span> Score : {currentScore}</span>
-              <span className="font-heading font-semibold text-orange-500"><span className="grayscale opacity-60">🎲</span> Tentatives : {attemptsUsed} / 3</span>
-              <Timer
-                value={timeRemaining}
-                mode={partie?.timerDurationSeconds === -1 ? 'stopwatch' : 'countdown'}
-                shake={timerShake}
-                flash={timerFlash}
-                showPenalty={showTimePenalty && (partie?.timerDurationSeconds !== -1)}
-                penaltyValue={currentTimePenalty}
-              />
+          <div className="p-4 md:p-6">
+            {/* Conteneur principal flex (colonne sur mobile, ligne sur desktop) */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-base">
+              
+              {/* ----- PARTIE GAUCHE : HPBar et Tentatives ----- */}
+              <div className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto">
+                
+                {/* Composant HPBar avec une largeur définie */}
+                <div className="w-full sm:w-56 md:w-64">
+                  <HPBar 
+                    name={playerName || "Joueur"}
+                    current={currentScore} 
+                    max={(partie?.nbPokemons ?? 1) * 100} 
+                  />
+                </div>
+
+                <span className="font-heading font-semibold text-orange-500 whitespace-nowrap">
+                  <span className="grayscale opacity-60">🎲</span> Tentatives : {attemptsUsed} / 3
+                </span>
+              </div>
+
+              {/* ----- PARTIE DROITE : Timer ----- */}
+              <div className="flex justify-end w-full md:w-auto">
+                <Timer
+                  value={timeRemaining}
+                  mode={partie?.timerDurationSeconds === -1 ? 'stopwatch' : 'countdown'}
+                  shake={timerShake}
+                  flash={timerFlash}
+                  showPenalty={showTimePenalty && (partie?.timerDurationSeconds !== -1)}
+                  penaltyValue={currentTimePenalty}
+                />
+              </div>
+
             </div>
           </div>
         </Card>
