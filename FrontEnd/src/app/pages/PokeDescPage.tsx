@@ -418,7 +418,6 @@ export default function PokeDescPage() {
       const result: GuessResultDto = await submitGuess(partieId!, sessionId, selectedPokemonName)
       setLastGuessCorrect(result.isCorrect)
       setGuessResultMessage(result.message)
-      setCurrentScore(result.pointsEarned)
 
       setProximityResult({
         hasOneTypeInCommon: result.hasOneTypeInCommon,
@@ -428,6 +427,8 @@ export default function PokeDescPage() {
       })
 
       if (result.isCorrect) {
+        // Mettre à jour la HPBar uniquement sur bonne réponse
+        setCurrentScore(result.pointsEarned)
         clearInterval(timerRef.current!)
         setRevealedPokemonSprite(currentPokemonSprite)
         setIsFinalPokemon(result.isGameFinished)
