@@ -140,6 +140,7 @@ export default function PokeDescPage() {
   // Modals
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showFailureModal, setShowFailureModal] = useState(false)
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false)
   const [revealedPokemonSprite, setRevealedPokemonSprite] = useState('')
   const [isFinalPokemon, setIsFinalPokemon] = useState(false)
   const [isTimeout, setIsTimeout] = useState(false)
@@ -610,25 +611,47 @@ export default function PokeDescPage() {
                     {descriptions[descriptionIndex] || <span className="text-gray-400 italic">Chargement de la description...</span>}
                   </div>
                 </div>
-                {descriptions.length > 1 && (
-                  <div className="flex items-center justify-center gap-4 mt-auto">
-                    <button
-                      onClick={() => setDescriptionIndex(i => (i - 1 + descriptions.length) % descriptions.length)}
-                      className=" font-heading w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
-                      style={{ borderColor: colors.brand.blue, color: colors.brand.blue, fontSize: '1.5rem' }}
-                    >
-                      ◀
-                    </button>
-                    <span className="font-heading text-sm text-gray-500 tabular-nums">{descriptionIndex + 1} / {descriptions.length}</span>
-                    <button
-                      onClick={() => setDescriptionIndex(i => (i + 1) % descriptions.length)}
-                      className=" font-heading w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
-                      style={{ borderColor: colors.brand.blue, color: colors.brand.blue, fontSize: '1.5rem' }}
-                    >
-                      ▶
-                    </button>
+                {/* Contrôles du bas : Pagination + Zoom */}
+                <div className="flex items-center justify-between mt-auto pt-2 w-full">
+                  
+                  {/* Espace vide à gauche (pour centrer parfaitement la pagination) */}
+                  <div className="w-9" />
+
+                  {/* Pagination au centre */}
+                  <div className="flex items-center justify-center gap-4">
+                    {descriptions.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => setDescriptionIndex(i => (i - 1 + descriptions.length) % descriptions.length)}
+                          className="font-heading w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
+                          style={{ borderColor: colors.brand.blue, color: colors.brand.blue, fontSize: '1.5rem' }}
+                        >
+                          ◀
+                        </button>
+                        <span className="font-heading text-sm text-gray-500 tabular-nums">
+                          {descriptionIndex + 1} / {descriptions.length}
+                        </span>
+                        <button
+                          onClick={() => setDescriptionIndex(i => (i + 1) % descriptions.length)}
+                          className="font-heading w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
+                          style={{ borderColor: colors.brand.blue, color: colors.brand.blue, fontSize: '1.5rem' }}
+                        >
+                          ▶
+                        </button>
+                      </>
+                    )}
                   </div>
-                )}
+
+                  {/* Bouton Zoom à droite */}
+                  <button
+                    onClick={() => setShowDescriptionModal(true)}
+                    className="font-heading w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition cursor-pointer"
+                    style={{ color: colors.brand.blue, fontSize: '1.25rem' }}
+                    title="Agrandir la description"
+                  >
+                    🔍
+                  </button>
+                </div>
               </div>
           </Card>
 
@@ -939,6 +962,68 @@ export default function PokeDescPage() {
         </div>
       )}
 
+{/* Modal Zoom Description */}
+      {showDescriptionModal && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4 animate-fade-in"
+          onClick={() => setShowDescriptionModal(false)}
+        >
+          <div 
+            className="max-w-4xl w-full" /* Élargi à max-w-4xl pour accueillir la grande police */
+            onClick={(e) => e.stopPropagation()} 
+          >
+            <Card
+              showHeader={false}
+              pokeballColor={colors.brand.blueLight}
+              pokeballOpacity={0.1}
+            >
+              {/* Le conteneur passe en flex-col pour séparer le texte de la pagination en bas */}
+              <div className="relative p-8 md:p-14 min-h-[300px] flex flex-col">
+                
+                {/* Croix de fermeture propre, calée en haut à droite */}
+                <button 
+                  onClick={() => setShowDescriptionModal(false)}
+                  className="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 flex items-center justify-center text-4xl text-gray-400 hover:text-red-500 transition-colors leading-none cursor-pointer hover:scale-110 z-10"
+                  title="Fermer"
+                >
+                  ×
+                </button>
+
+                {/* Texte de la description centré verticalement */}
+                <div className="flex-1 flex items-center justify-center py-8">
+                  <p className="font-display text-center" style={{ color: colors.ui.textPrimary, fontSize: '1.5rem' }}>
+                    {descriptions[descriptionIndex] || <span className="text-gray-400 italic">Chargement...</span>}
+                  </p>
+                </div>
+                
+                {/* Pagination (affichée uniquement s'il y a plus d'une description) */}
+                {descriptions.length > 1 && (
+                  <div className="flex items-center justify-center gap-6 mt-auto">
+                    <button
+                      onClick={() => setDescriptionIndex(i => (i - 1 + descriptions.length) % descriptions.length)}
+                      className="font-heading w-12 h-12 flex items-center justify-center text-2xl hover:-translate-y-0.5 hover:shadow-px-sm transition cursor-pointer"
+                      style={{ borderColor: colors.brand.blue, color: colors.brand.blue, fontSize: '1.75rem' }}
+                    >
+                      ◀
+                    </button>
+                    <span className="font-heading text-lg text-gray-500 tabular-nums" style={{ fontSize: '1.75rem' }}>
+                      {descriptionIndex + 1} / {descriptions.length}
+                    </span>
+                    <button
+                      onClick={() => setDescriptionIndex(i => (i + 1) % descriptions.length)}
+                      className="font-heading w-12 h-12 flex items-center justify-center text-2xl hover:-translate-y-0.5 hover:shadow-px-sm transition cursor-pointer"
+                      style={{ borderColor: colors.brand.blue, color: colors.brand.blue, fontSize: '1.75rem' }}
+                    >
+                      ▶
+                    </button>
+                  </div>
+                )}
+
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
 
       {/* Animations CSS */}
       <style>{`
