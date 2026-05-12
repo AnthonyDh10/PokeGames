@@ -1,4 +1,5 @@
 import React from 'react'
+import { colors } from '../design/colors'
 
 interface SubCardProps {
   children: React.ReactNode
@@ -12,7 +13,7 @@ interface SubCardProps {
 export default function SubCard({
   children,
   className = '',
-  bodyColor = 'transparent', 
+  bodyColor =  colors.brand.white, 
   borderColor = '#000000',   
   borderThickness = 'p-[2px]', 
   style,

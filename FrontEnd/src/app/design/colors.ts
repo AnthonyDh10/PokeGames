@@ -20,7 +20,7 @@ export const colors = {
 
   brand: {
 
-    white : "#FFFFFF",
+    white : "#F5F5F5",
     /** Rouge vif — spécifique à la Pokéball décorative (SVG/composant Pokeball) */
     pokeballRed: "#FF0000",
     /** Rouge Pokéball (survol, bordures actives, TopBar) */
@@ -61,22 +61,6 @@ export const colors = {
   // Couleurs fonctionnelles pour la structure de l'app.
 
   ui: {
-    /** Fond principal (mode clair) */
-    background:  "#FFFFFF",
-    /** Fond de page côté gauche (diagonal) */
-    bgLeft:      "#FFFFFF",
-    /** Bande diagonale centrale */
-    bgStripe:    "#A6ACAF",
-    /** Fond de page côté droit */
-    bgRight:     "#BDC3C7",
-
-    /** Fond de page côté gauche — pages de jeu (PokéDesc, Partie) */
-    bgLeftGame:   "#FFFFFF",
-    /** Bande diagonale centrale — pages de jeu */
-    bgStripeGame: "#2E3DA0",
-    /** Fond de page côté droit — pages de jeu */
-    bgRightGame:  "#3B4CCA",
-
     /** Bordure principale de l'interface (contour de la zone de jeu) */
     border:      "#B3000C",
 

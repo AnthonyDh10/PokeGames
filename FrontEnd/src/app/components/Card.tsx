@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { PokeballDecor } from './Pokeball'
+import { colors } from '../design/colors'
 
 interface CardProps {
   children: React.ReactNode
@@ -33,7 +34,7 @@ export default function Card({
   headerColor,
   header,
   headerClassName = 'py-8',
-  pokeballColor = 'black',
+  pokeballColor =  colors.brand.white,
   pokeballOpacity = 0.15,
   pokeballSize = 200,
   overflowVisible = false,
@@ -42,7 +43,7 @@ export default function Card({
   style,
   borderColor,
   showHeader = true,
-  bodyColor = 'white',
+  bodyColor = colors.brand.white,
   borderThickness = 'p-1.5',
 }: CardProps) {
 const pixelClipPath = `polygon(

@@ -20,11 +20,6 @@ export interface LobbyTheme {
   primaryLight: string
   primaryDark: string
   textOnColor: string
-  background: {
-    colorLeft: string
-    colorStripe: string
-    colorRight: string
-  }
 }
 
 interface LobbyPageProps {
@@ -67,10 +62,6 @@ export default function LobbyPage({
   const [successMessage, setSuccessMessage] = useState('')
   const autoRefreshRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const prevSettingsRef = useRef<GameSettings | null>(null)
-
-  useEffect(() => {
-    setBackground(theme.background)
-  }, [])
 
   // Sync partie state to chat context
   useEffect(() => {
@@ -287,7 +278,7 @@ export default function LobbyPage({
               <SubCard 
                 borderColor={colors.ui?.grayMid || '#d1d5db'} 
                 borderThickness="p-[2px]" 
-                bodyColor="white"
+                bodyColor={colors.brand.white}
               >
                 <input
                   type="text"
@@ -371,7 +362,7 @@ export default function LobbyPage({
               <SubCard
                 borderColor={isPlayer1 ? theme.primary : (colors.ui?.grayMid || '#e5e7eb')}
                 borderThickness="p-[2px]"
-                bodyColor="white"
+                bodyColor={colors.brand.white}
                 className="text-center p-4 relative transition"
               >
                 <img src={redGif} alt="Joueur 1" className="w-12 h-12 mx-auto mb-1" />
@@ -387,7 +378,7 @@ export default function LobbyPage({
               <SubCard
                 borderColor={!isPlayer1 ? theme.primary : (colors.ui?.grayMid || '#e5e7eb')}
                 borderThickness="p-[2px]"
-                bodyColor="white"
+                bodyColor={colors.brand.white}
                 className="text-center p-4 relative transition"
               >
                 {partie.dresseur2Id ? (
