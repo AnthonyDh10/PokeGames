@@ -280,7 +280,7 @@ export default function ResultatsTypesPage() {
                 {formatElapsed(playerResult.elapsedSeconds)}
               </div>
               <div className="flex gap-3 justify-center text-sm flex-wrap mt-auto" style={{ color: colors.ui.textMuted }}>
-                <span className="px-2 py-1 shadow-px-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
+                <span className="px-2 py-1 shadow-px-sm border">
                   {playerResult.attemptCount} tentative{(playerResult.attemptCount ?? 0) > 1 ? 's' : ''}
                 </span>
               </div>
