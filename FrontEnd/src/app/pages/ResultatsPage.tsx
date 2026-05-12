@@ -141,7 +141,16 @@ function ScoreCard({ name, score, isWinner }: { name: string, score: number, isW
   )
 }
 
-function PokemonCarouselSection({ partie, sprites, isSolo, player1Name, player2Name, gameFullyComplete }: any) {
+interface PokemonCarouselSectionProps {
+  partie: PartieDto
+  sprites: Record<string, string>
+  isSolo: boolean
+  player1Name: string
+  player2Name: string
+  gameFullyComplete: boolean
+}
+
+function PokemonCarouselSection({ partie, sprites, isSolo, player1Name, player2Name, gameFullyComplete }: PokemonCarouselSectionProps) {
   const [index, setIndex] = useState(0)
   
   if (!partie) return null
@@ -245,7 +254,13 @@ function PokemonCarouselSection({ partie, sprites, isSolo, player1Name, player2N
   )
 }
 
-function StatDetails({ data, color, loading }: any) {
+interface StatDetailsProps {
+  data: CompletedPokemonDto | null | undefined
+  color: string
+  loading?: boolean
+}
+
+function StatDetails({ data, color, loading }: StatDetailsProps) {
   if (loading) return <div className="font-heading animate-pulse text-gray-400 py-4">... CHARGEMENT ...</div>
   if (!data) return <div className="font-heading text-gray-300 py-4">AUCUNE DONNÉE</div>
 

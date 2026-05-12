@@ -1,143 +1,41 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { useSessionStore } from '../store/sessionStore'
-import { useBackgroundStore } from '../store/backgroundStore'
 import { useChatStore } from '../store/chatStore'
 import { colors } from '../design/colors'
-import Card from '../components/Card'
-import SubCard from '../components/SubCard'
-import PixelButton, { pixelClipPathSm } from '../components/PixelButton'
-import PokemonSearchInput from '../components/PokemonSearchInput'
-import { normalizeString } from '../components/PokemonSearchInput'
-import Timer from '../components/Timer'
-import indiceTypeIcon from '../components/images/indice_type.png'
-import oakChibi from '../components/images/oak-chibi.png'
-import { getAllPokemons, getCensoredDescription, getHints } from '../services/pokemonService'
-import { getPartie, submitGuess, useHint, getTimer, resetTimer } from '../services/partieService'
-import type { PokemonDto, PokemonHintsDto } from '../types/pokemon'
-import type { PartieDto, GuessResultDto } from '../types/partie'
-import HPBar from '../components/HPBar'
-import Pokeball from "../components/images/pokéball_face.png";
-
-
-const ROMAN_GEN: Record<string, number> = {
-  i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9,
-}
-
-function generationToNumber(nameEn: string): number | null {
-  const match = nameEn.toLowerCase().match(/generation-([ivx]+)/)
-  return match ? (ROMAN_GEN[match[1]] ?? null) : null
-}
-
-function formatGenerations(generations: number[], isShort: boolean = false): string {
-  if (!generations || generations.length === 0) return ''
-
-  const sorted = [...generations].sort((a, b) => a - b)
-  const prefix = isShort ? 'Gén' : 'Générations'
-
-  // Si toutes les générations (1-8)
-  if (sorted.length === 8 && sorted[0] === 1 && sorted[7] === 8) {
-    return 'Toutes générations'
-  }
-
-  // Vérifier si c'est une suite continue
-  let isConsecutive = true
-  for (let i = 1; i < sorted.length; i++) {
-    if (sorted[i] !== sorted[i - 1] + 1) {
-      isConsecutive = false
-      break
-    }
-  }
-
-  // Si suite continue, afficher "X-Y"
-  if (isConsecutive) {
-    return `${prefix} ${sorted[0]}-${sorted[sorted.length - 1]}`
-  }
-
-  // Sinon afficher "X,Y,Z"
-  return `${prefix} ${sorted.join(',')}`
-}
-
-const HINT_PENALTIES: Record<string, number> = {
-  Type1: 10,
-  Type2: 10,
-  Generation: 10,
-  Category: 3,
-  Stats: 7,
-  Height: 2,
-  Weight: 2,
-  Abilities: 8,
-  Sprite: 30,
-}
-
-const HINTS_CONFIG = [
-  { key: 'Type1', imgIcon: indiceTypeIcon, label: 'Type 1' },
-  { key: 'Type2', imgIcon: indiceTypeIcon, label: 'Type 2' },
-  { key: 'Generation', icon: '📅', label: 'Génération' },
-  { key: 'Category', icon: '🏷️', label: 'Catégorie' },
-  { key: 'Stats', icon: '📊', label: 'Statistiques' },
-  { key: 'Height', icon: '📏', label: 'Taille' },
-  { key: 'Weight', icon: '⚖️', label: 'Poids' },
-  { key: 'Abilities', icon: '⚡', label: 'Talents' },
-  { key: 'Sprite', icon: '👤', label: 'Silhouette' },
-]
-
-interface RevealedHints {
-  'Type 1'?: string
-  'Type 2'?: string
-  'Génération'?: string
-  'Catégorie'?: string
-  'Statistiques'?: string
-  'Taille'?: string
-  'Poids'?: string
-  'Talents'?: string
-  'Silhouette'?: string
-}
+import { getAllPokemons, getHints } from '../services/pokemonService'
+import { submitGuess, useHint, resetTimer } from '../services/partieService'
+import type { PokemonDto } from '../types/pokemon'
+import type { GuessResultDto } from '../types/partie'
+import { useTimer } from '../hooks/useTimer'
+import { useGameState } from '../hooks/useGameState'
+import PokeDescHeader from '../components/PokeDescHeader'
+import DescriptionCard from '../components/DescriptionCard'
+import AnswerCard from '../components/AnswerCard'
+import HintsGrid from '../components/HintsGrid'
+import SuccessModal from '../components/modals/SuccessModal'
+import FailureModal from '../components/modals/FailureModal'
+import ZoomDescriptionModal from '../components/modals/ZoomDescriptionModal'
+import { HINT_PENALTIES } from '../utils/pokedescConstants'
+import { isHintLocked as checkHintLocked, filterHintPokemons, filterSearchPokemons } from '../utils/pokedescLogic'
 
 export default function PokeDescPage() {
   const { partieId } = useParams<{ partieId: string }>()
   const navigate = useNavigate()
   const { sessionId, playerName } = useSessionStore()
-  const { setBackground } = useBackgroundStore()
   const { setContext: setChatContext } = useChatStore()
 
-  // Game state
-  const [partie, setPartie] = useState<PartieDto | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  // --- State résiduel (orchestration + UI) ---
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-
-  // Pokemon data
-  const [descriptions, setDescriptions] = useState<string[]>([])
-  const [descriptionIndex, setDescriptionIndex] = useState(0)
-  const [currentPokemonId, setCurrentPokemonId] = useState('')
-  const [currentPokemonSprite, setCurrentPokemonSprite] = useState('')
-  const [currentScore, setCurrentScore] = useState(0)
-  const [attemptsUsed, setAttemptsUsed] = useState(0)
-  const [usedHints, setUsedHints] = useState<string[]>([])
-  const [revealedHints, setRevealedHints] = useState<RevealedHints>({})
-
-  // Session info
-  const [sessionCode, setSessionCode] = useState('')
-  const [isPlayer1, setIsPlayer1] = useState(true)
-
-  // Search
-  const [allPokemons, setAllPokemons] = useState<PokemonDto[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedPokemonName, setSelectedPokemonName] = useState('')
-
-  // Guess result
   const [guessResultMessage, setGuessResultMessage] = useState('')
   const [lastGuessCorrect, setLastGuessCorrect] = useState(false)
-
   const [proximityResult, setProximityResult] = useState<{
-    hasOneTypeInCommon?: boolean;
-    hasPerfectTypeMatch?: boolean;
-    hasSameGeneration?: boolean;
-    isInSameEvolutionChain?: boolean;
+    hasOneTypeInCommon?: boolean
+    hasPerfectTypeMatch?: boolean
+    hasSameGeneration?: boolean
+    isInSameEvolutionChain?: boolean
   }>({})
 
-  // Modals
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showFailureModal, setShowFailureModal] = useState(false)
   const [showDescriptionModal, setShowDescriptionModal] = useState(false)
@@ -145,203 +43,71 @@ export default function PokeDescPage() {
   const [isFinalPokemon, setIsFinalPokemon] = useState(false)
   const [isTimeout, setIsTimeout] = useState(false)
 
-  // Timer
-  const [timeRemaining, setTimeRemaining] = useState(60)
-  const [timerShake, setTimerShake] = useState(false)
-  const [timerFlash, setTimerFlash] = useState(false)
-  const [showTimePenalty, setShowTimePenalty] = useState(false)
-  const [currentTimePenalty, setCurrentTimePenalty] = useState(0)
-  const [hintAnimations, setHintAnimations] = useState<Record<string, number>>({})
+  const [allPokemons, setAllPokemons] = useState<PokemonDto[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedPokemonName, setSelectedPokemonName] = useState('')
 
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const isTimeoutRef = useRef(false)
-  const currentPokemonIdRef = useRef<string>('')
-  const timerDurationRef = useRef<number>(60)
-
-  // Pre-filter by lobby generations and revealed hints (Type 1, Type 2, Generation — AND logic)
-  const hintFilteredPokemons = allPokemons.filter((p) => {
-    // Filter by selected generations from lobby settings
-    if (partie?.selectedGenerations?.length) {
-      const genNumber = p.generation?.nameEn ? generationToNumber(p.generation.nameEn) : null
-      if (genNumber === null || !partie.selectedGenerations.includes(genNumber)) return false
-    }
-    if (revealedHints['Type 1']) {
-      const type1 = p.types?.find((t) => t.slot === 1)
-      if (!type1 || type1.name !== revealedHints['Type 1']) return false
-    }
-    if (revealedHints['Type 2']) {
-      const val = revealedHints['Type 2']
-      if (val === 'Pas de second type') {
-        if (p.types?.some((t) => t.slot === 2)) return false
-      } else {
-        const type2 = p.types?.find((t) => t.slot === 2)
-        if (!type2 || type2.name !== val) return false
-      }
-    }
-    if (revealedHints['Génération']) {
-      if (p.generation?.nameFr !== revealedHints['Génération']) return false
-    }
-    return true
+  // --- Hooks ---
+  // handleTimeout et skipPokemonWithoutDescription sont des déclarations de fonction
+  // hoistées (function declarations), donc accessibles avant leur position dans le code.
+  const timer = useTimer({ partieId, sessionId, onTimeout: handleTimeout })
+  const game = useGameState({
+    partieId,
+    sessionId,
+    setChatContext,
+    timerDurationRef: timer.timerDurationRef,
+    onSkip: skipPokemonWithoutDescription,
   })
 
-  // 2. Préparation du terme de recherche
-  const cleanSearchTerm = searchTerm.trim()
-  const normalizedSearchTerm = normalizeString(cleanSearchTerm)
+  const {
+    partie, isLoading, errorMessage, setErrorMessage,
+    descriptions, descriptionIndex, setDescriptionIndex,
+    currentPokemonId, currentPokemonSprite,
+    currentScore, setCurrentScore,
+    attemptsUsed, setAttemptsUsed,
+    usedHints, setUsedHints,
+    revealedHints, currentPokemonIdRef,
+    loadGameData, processRevealedHints,
+  } = game
 
-  // 3. Filtered pokemons for search (mise à jour avec la normalisation)
-  const filteredPokemons = cleanSearchTerm
-    ? hintFilteredPokemons
-        .filter((p) => {
-          const normalizedName = normalizeString(p.nameFr)
-          return (
-            normalizedName.includes(normalizedSearchTerm) ||
-            p.pokedexNumber.toString().includes(cleanSearchTerm)
-          )
-        })
-        .sort((a, b) => a.pokedexNumber - b.pokedexNumber)
-        .slice(0, 10)
-    : []
+  const {
+    timeRemaining, timerShake, timerFlash, showTimePenalty,
+    currentTimePenalty, hintAnimations, timerDurationRef,
+    startTimer, stopTimer, triggerHintAnimation, triggerTimerAnimation,
+  } = timer
 
-  function isHintLocked(hintKey: string): boolean {
-    if (usedHints.includes(hintKey)) return false
-    if (partie?.timerDurationSeconds === -1) return false // mode infini : jamais bloqué
-    const penalty = HINT_PENALTIES[hintKey] ?? 0
-    return penalty > timeRemaining
-  }
-
-  // Load all pokemons for search
+  // --- Chargement initial ---
   useEffect(() => {
-    getAllPokemons().then(setAllPokemons).catch(() => {})
+    getAllPokemons().then(setAllPokemons).catch((err) =>
+      console.error('[PokeDescPage] Échec du chargement de la liste des Pokémon :', err)
+    )
   }, [])
 
-  // Load game data
-  const loadGameData = useCallback(async () => {
-    if (!partieId) return
-    setIsLoading(true)
-    setErrorMessage('')
-    try {
-      const p = await getPartie(partieId)
-      setPartie(p)
-      timerDurationRef.current = p.timerDurationSeconds
-      setSessionCode(p.codeSession ?? 'N/A')
-      setChatContext({
-        partieId,
-        sessionCode: p.codeSession ?? '',
-        isSolo: !p.dresseur2Id,
-      })
+  useEffect(() => {
+    loadGameData().then(() => startTimer())
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-      const player1 = p.dresseur1Id === sessionId
-      setIsPlayer1(player1)
+  // --- Computed values ---
+  const hintFilteredPokemons = filterHintPokemons(
+    allPokemons,
+    revealedHints,
+    partie?.selectedGenerations ?? [],
+  )
+  const filteredPokemons = filterSearchPokemons(hintFilteredPokemons, searchTerm)
 
-      const currentIndex = player1 ? p.currentIndexJ1 : p.currentIndexJ2
-      const pokemonId = p.pokemonsToGuess?.[currentIndex]?.id ?? ''
-
-      if (!pokemonId) {
-        setErrorMessage('Aucun Pokémon à deviner')
-        setIsLoading(false)
-        return
-      }
-
-      setCurrentPokemonId(pokemonId)
-      currentPokemonIdRef.current = pokemonId
-      setCurrentScore(player1 ? p.scoreJ1 : p.scoreJ2)
-      setAttemptsUsed(player1 ? p.attemptsUsedJ1 : p.attemptsUsedJ2)
-      const hints = player1 ? p.usedHintsJ1 : p.usedHintsJ2
-      setUsedHints(hints)
-
-      // Load description and hints in parallel
-      const [desc, hintData] = await Promise.all([
-        getCensoredDescription(pokemonId),
-        getHints(pokemonId),
-      ])
-
-      // Skip Pokémon without description
-      if (!desc.descriptions?.length) {
-        setIsLoading(false)
-        setErrorMessage('Pokémon sans description — passage au suivant...')
-        setTimeout(() => {
-          skipPokemonWithoutDescription()
-        }, 1500)
-        return
-      }
-
-      setDescriptions(desc.descriptions)
-      setDescriptionIndex(0)
-      processRevealedHints(hintData, hints)
-
-      if (hintData.sprites?.frontDefault) {
-        setCurrentPokemonSprite(hintData.sprites.frontDefault)
-      }
-      setIsLoading(false)
-    } catch (err: any) {
-      setErrorMessage(`Erreur : ${err?.message ?? 'Inconnue'}`)
-      setIsLoading(false)
-    }
-  }, [partieId, sessionId])
-
-  function processRevealedHints(hints: PokemonHintsDto, used: string[]) {
-    const revealed: RevealedHints = {}
-    if (used.includes('Sprite') && hints.sprites?.frontDefault) {
-      revealed['Silhouette'] = hints.sprites.frontDefault
-    }
-    if (used.includes('Type1') && hints.types) {
-      const t = hints.types.find((t) => t.slot === 1)
-      if (t) revealed['Type 1'] = t.name
-    }
-    if (used.includes('Type2') && hints.types) {
-      const t = hints.types.find((t) => t.slot === 2)
-      revealed['Type 2'] = t ? t.name : 'Pas de second type'
-    }
-    if (used.includes('Generation') && hints.generation) {
-      revealed['Génération'] = hints.generation.nameFr
-    }
-    if (used.includes('Category') && hints.category) {
-      revealed['Catégorie'] = hints.category
-    }
-    if (used.includes('Stats') && hints.stats) {
-      const s = hints.stats
-      revealed['Statistiques'] =
-        `PV: ${s.PV?.value ?? '?'}, Atk: ${s.Attaque?.value ?? '?'}, Déf: ${s['Défense']?.value ?? '?'}, ` +
-        `SpA: ${s['Attaque Spé.']?.value ?? '?'}, SpD: ${s['Défense Spé.']?.value ?? '?'}, Spe: ${s.Vitesse?.value ?? '?'}`
-    }
-    if (used.includes('Height') && hints.physical) {
-      revealed['Taille'] = `${hints.physical.heightM}m`
-    }
-    if (used.includes('Weight') && hints.physical) {
-      revealed['Poids'] = `${hints.physical.weightKg}kg`
-    }
-    if (used.includes('Abilities') && hints.abilities?.length) {
-      revealed['Talents'] = hints.abilities.map((a) => a.name).join(', ')
-    }
-    setRevealedHints(revealed)
+  function isHintLocked(hintKey: string): boolean {
+    return checkHintLocked(hintKey, usedHints, timeRemaining, partie?.timerDurationSeconds ?? -1)
   }
 
-  // Timer
-  function startTimer() {
-    if (timerRef.current) clearInterval(timerRef.current)
-    isTimeoutRef.current = false
-    timerRef.current = setInterval(async () => {
-      if (!partieId) return
-      try {
-        const result = await getTimer(partieId, sessionId)
-        setTimeRemaining(result.timeRemaining)
-        if (result.timeRemaining <= 0 && !isTimeoutRef.current && timerDurationRef.current !== -1) {
-          isTimeoutRef.current = true
-          clearInterval(timerRef.current!)
-          handleTimeout()
-        }
-      } catch {
-        // ignore
-      }
-    }, 100)
-  }
+  // --- Fonctions d'orchestration ---
+  // Ces fonctions coordonnent useTimer et useGameState.
+  // Elles sont déclarées comme `function` (hoistées) afin d'être passées
+  // aux hooks avant d'être définies dans le code.
 
   async function handleTimeout() {
     try {
       const result = await submitGuess(partieId!, sessionId, '__TIMEOUT__')
       setIsFinalPokemon(result.isGameFinished)
-
-      // Récupérer le sprite correct du Pokémon courant via le ref (évite le stale closure)
       try {
         const hints = await getHints(currentPokemonIdRef.current)
         if (hints.sprites?.frontDefault) {
@@ -349,45 +115,27 @@ export default function PokeDescPage() {
         } else {
           setRevealedPokemonSprite(currentPokemonSprite)
         }
-      } catch {
+      } catch (err) {
+        console.warn('[Timeout] Impossible de charger le sprite du Pokémon, utilisation du sprite courant :', err)
         setRevealedPokemonSprite(currentPokemonSprite)
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('[Timeout] Échec de la soumission du timeout :', err)
     }
     setIsTimeout(true)
     setShowFailureModal(true)
   }
 
-  // Init
-  useEffect(() => {
-    loadGameData().then(() => startTimer())
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
+  async function skipPokemonWithoutDescription() {
+    try {
+      await resetTimer(partieId!, sessionId)
+    } catch (err) {
+      console.warn('[Skip] Erreur lors du reset du timer (normal si le timer n\'avait pas démarré) :', err)
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  async function triggerHintAnimation(hintKey: string, penalty: number) {
-    setHintAnimations((prev) => ({ ...prev, [hintKey]: penalty }))
-    await new Promise((r) => setTimeout(r, 1500))
-    setHintAnimations((prev) => {
-      const next = { ...prev }
-      delete next[hintKey]
-      return next
-    })
-  }
-
-  async function triggerTimerAnimation(penalty: number) {
-    setCurrentTimePenalty(penalty)
-    setShowTimePenalty(true)
-    setTimerFlash(true)
-    setTimerShake(true)
-    await new Promise((r) => setTimeout(r, 300))
-    setTimerFlash(false)
-    await new Promise((r) => setTimeout(r, 200))
-    setTimerShake(false)
-    await new Promise((r) => setTimeout(r, 1000))
-    setShowTimePenalty(false)
+    resetGuessState()
+    setErrorMessage('')
+    await loadGameData()
+    startTimer()
   }
 
   async function handleRequestHint(hintKey: string) {
@@ -418,23 +166,20 @@ export default function PokeDescPage() {
       const result: GuessResultDto = await submitGuess(partieId!, sessionId, selectedPokemonName)
       setLastGuessCorrect(result.isCorrect)
       setGuessResultMessage(result.message)
-
       setProximityResult({
         hasOneTypeInCommon: result.hasOneTypeInCommon,
         hasPerfectTypeMatch: result.hasPerfectTypeMatch,
         hasSameGeneration: result.hasSameGeneration,
-        isInSameEvolutionChain: result.isInSameEvolutionChain
+        isInSameEvolutionChain: result.isInSameEvolutionChain,
       })
-
       if (result.isCorrect) {
-        // Mettre à jour la HPBar uniquement sur bonne réponse
         setCurrentScore(result.pointsEarned)
-        clearInterval(timerRef.current!)
+        stopTimer()
         setRevealedPokemonSprite(currentPokemonSprite)
         setIsFinalPokemon(result.isGameFinished)
         setShowSuccessModal(true)
       } else if (result.isTurnFinished || result.isTimeout) {
-        clearInterval(timerRef.current!)
+        stopTimer()
         setRevealedPokemonSprite(currentPokemonSprite)
         setIsFinalPokemon(result.isGameFinished)
         setIsTimeout(result.isTimeout)
@@ -442,24 +187,12 @@ export default function PokeDescPage() {
       } else {
         setAttemptsUsed((prev) => prev + 1)
       }
-    } catch {
+    } catch (err) {
+      console.error('[Guess] Échec de l\'envoi de la réponse :', err)
       setGuessResultMessage("Erreur lors de l'envoi de la réponse")
     } finally {
       setIsSubmitting(false)
     }
-  }
-
-  async function skipPokemonWithoutDescription() {
-    // Skip Pokémon without description and load next one
-    try {
-      await resetTimer(partieId!, sessionId)
-    } catch {
-      // Ignore error if timer wasn't started
-    }
-    resetGuessState()
-    setErrorMessage('')
-    await loadGameData()
-    startTimer()
   }
 
   async function proceedAfterModal() {
@@ -469,12 +202,10 @@ export default function PokeDescPage() {
     setLastGuessCorrect(false)
     setGuessResultMessage('')
     setIsFinalPokemon(false)
-
     if (isFinalPokemon) {
       navigate(`/resultats/${partieId}`)
       return
     }
-
     await resetTimer(partieId!, sessionId)
     resetGuessState()
     await loadGameData()
@@ -489,7 +220,7 @@ export default function PokeDescPage() {
     setDescriptionIndex(0)
   }
 
-  // --- States d'affichage ---
+  // --- États d'affichage ---
   if (isLoading) {
     return (
       <div className="max-w-5xl mx-auto p-6">
@@ -518,530 +249,78 @@ export default function PokeDescPage() {
     )
   }
 
-  const isSolo = partie?.modeSolo ?? true
-
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-6 text-gray-900">
-      {/* Header */}
-      <div className="mb-4">
-        <Card
-          headerColor={colors.brand.blue}
-          headerClassName="py-4"
-          header={
-            <div className="flex flex-col md:flex-row md:items-center md:gap-3">
-              <h1 className="font-display text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textOnColor }}>
-                Devine le Pokémon !
-              </h1>
-              {partie?.selectedGenerations && (
-                <span className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textOnColorSoft }}>
-                  <span className="hidden md:inline">{formatGenerations(partie.selectedGenerations, false)}</span>
-                  <span className="md:hidden">{formatGenerations(partie.selectedGenerations, true)}</span>
-                </span>
-              )}
-            </div>
-          }
-          pokeballOpacity={0.1}
-          pokeballColor={colors.brand.blue}
-        >
-          <div className="p-4 md:p-6">
-            {/* Conteneur principal flex (colonne sur mobile, ligne sur desktop) */}
-            <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-base">
-              
-              {/* ----- PARTIE GAUCHE : HPBar et Tentatives ----- */}
-              <div className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto ml-6">
-                
-                {/* Composant HPBar avec une largeur définie */}
-                <div className="w-full sm:w-56 md:w-64">
-                  <HPBar 
-                    name={playerName || "Joueur"}
-                    current={currentScore} 
-                    max={(partie?.nbPokemons ?? 1) * 100} 
-                  />
-                </div>
+      <PokeDescHeader
+        playerName={playerName}
+        currentScore={currentScore}
+        nbPokemons={partie?.nbPokemons ?? 1}
+        attemptsUsed={attemptsUsed}
+        selectedGenerations={partie?.selectedGenerations}
+        timeRemaining={timeRemaining}
+        timerDurationSeconds={partie?.timerDurationSeconds}
+        timerShake={timerShake}
+        timerFlash={timerFlash}
+        showTimePenalty={showTimePenalty}
+        currentTimePenalty={currentTimePenalty}
+      />
 
-                {/* Tentatives affichées avec pokéballs (label au-dessus) */}
-                <div className="flex flex-col items-center gap-1 whitespace-nowrap">
-                  <span className="font-heading font-semibold text-center" style={{ color: colors.brand.blueDark }}>
-                    Tentatives
-                  </span>
-                  <div className="flex gap-2">
-                    {[...Array(3)].map((_, i) => (
-                      <img
-                        key={i}
-                        src={Pokeball}
-                        alt={`Tentative ${i + 1}`}
-                        className={`w-12 h-10 ${i >= 3 - attemptsUsed ? 'grayscale' : ''}`}
-                        style={{ imageRendering: 'pixelated' }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* ----- PARTIE DROITE : Timer ----- */}
-              <div className="flex justify-end w-full md:w-auto mr-6">
-                <Timer
-                  value={timeRemaining}
-                  mode={partie?.timerDurationSeconds === -1 ? 'stopwatch' : 'countdown'}
-                  shake={timerShake}
-                  flash={timerFlash}
-                  showPenalty={showTimePenalty && (partie?.timerDurationSeconds !== -1)}
-                  penaltyValue={currentTimePenalty}
-                />
-              </div>
-
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Content grid */}
       <div className="grid md:grid-cols-2 gap-4">
-        {/* Colonne gauche */}
         <div className="relative z-10 flex flex-col gap-4">
-          {/* Description */}
-          <Card
-            pokeballColor={colors.brand.blueLight}
-            pokeballOpacity={.1}
-            showHeader={false}
-          >
-            <div className="p-4 md:p-6 flex flex-col pb-6 min-h-[160px] md:min-h-[220px]">
-              <h3 className="font-heading text-center text-xl tracking-wide" style={{ color: colors.brand.blue, fontSize: '1.25rem' }}>DESCRIPTION</h3>
-                <div className="flex-1">
-                  <div className="font-heading text-justify p-8 text-base leading-relaxed h-full">
-                    {descriptions[descriptionIndex] || <span className="text-gray-400 italic">Chargement de la description...</span>}
-                  </div>
-                </div>
-                {/* Contrôles du bas : Pagination + Zoom */}
-                <div className="flex items-center justify-between mt-auto pt-2 w-full">
-                  
-                  {/* Espace vide à gauche (pour centrer parfaitement la pagination) */}
-                  <div className="w-9" />
-
-                  {/* Pagination au centre */}
-                  <div className="flex items-center justify-center gap-4">
-                    {descriptions.length > 1 && (
-                      <>
-                        <button
-                          onClick={() => setDescriptionIndex(i => (i - 1 + descriptions.length) % descriptions.length)}
-                          className="font-heading w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
-                          style={{ borderColor: colors.brand.blue, color: colors.brand.blue, fontSize: '1.5rem' }}
-                        >
-                          ◀
-                        </button>
-                        <span className="font-heading text-sm text-gray-500 tabular-nums">
-                          {descriptionIndex + 1} / {descriptions.length}
-                        </span>
-                        <button
-                          onClick={() => setDescriptionIndex(i => (i + 1) % descriptions.length)}
-                          className="font-heading w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition"
-                          style={{ borderColor: colors.brand.blue, color: colors.brand.blue, fontSize: '1.5rem' }}
-                        >
-                          ▶
-                        </button>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Bouton Zoom à droite */}
-                  <button
-                    onClick={() => setShowDescriptionModal(true)}
-                    className="font-heading w-9 h-9 flex items-center justify-center text-lg hover:-translate-y-0.5 hover:shadow-px-sm transition cursor-pointer"
-                    style={{ color: colors.brand.blue, fontSize: '1.25rem' }}
-                    title="Agrandir la description"
-                  >
-                    🔍
-                  </button>
-                </div>
-              </div>
-          </Card>
-
-          <div className="relative">
-            
-            {guessResultMessage && !lastGuessCorrect && (
-              <div className="absolute top-1/2 -translate-y-1/2 right-full mr-6 w-64 md:w-72 z-50 animate-fade-in drop-shadow-xl">
-                
-                <div className="absolute top-1/2 -translate-y-1/2 -right-[12px] w-0 h-0 border-y-[8px] border-y-transparent border-l-[8px] border-l-[#1f2937]" />
-                <div className="absolute top-1/2 -translate-y-1/2 -right-[6px] w-0 h-0 border-y-[6px] border-y-transparent border-l-[6px] border-l-white z-10" />
-
-                <SubCard 
-                  bodyColor={colors.brand.white}
-                  borderColor={colors.brand.blueDeep} 
-                  borderThickness="p-[4px]"
-                  className="p-4 flex gap-3 items-start"
-                >
-                  <div className="flex flex-row items-center gap-2 shrink-0">
-                    <div className="w-10 h-10 flex items-center justify-center">
-                      <img src={oakChibi} alt="Prof. Chen" className="max-w-full max-h-full" style={{ imageRendering: 'pixelated' }} />
-                    </div>
-                    <p className="font-display font-bold tracking-wider" style={{fontSize: '1rem', color: colors.ui.grayBorderDark}}>
-                      PROF. CHEN
-                    </p>
-                  </div>
-                  <div className="flex flex-col justify-center">
-                    <p className="font-heading text-sm text-gray-800 leading-snug" style={{color: colors.brand.red}}>
-                      {guessResultMessage}
-                    </p>
-                    
-                    {/* --- NOUVEAU : Badges de proximité --- */}
-                    {(proximityResult.hasOneTypeInCommon || proximityResult.hasPerfectTypeMatch || proximityResult.hasSameGeneration || proximityResult.isInSameEvolutionChain) && (
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {proximityResult.hasPerfectTypeMatch ? (
-                          <span className="inline-flex items-center bg-green-100 text-green-800 text-[10px] px-1.5 py-0.5 border border-green-200 font-heading font-bold uppercase tracking-wide">
-                            Types exacts
-                          </span>
-                        ) : proximityResult.hasOneTypeInCommon ? (
-                          <span className="inline-flex items-center bg-blue-100 text-blue-800 text-[10px] px-1.5 py-0.5 border border-blue-200 font-heading font-bold uppercase tracking-wide">
-                            1 Type en commun
-                          </span>
-                        ) : null}
-
-                        {proximityResult.hasSameGeneration && (
-                          <span className="inline-flex items-center bg-yellow-100 text-yellow-800 text-[10px] px-1.5 py-0.5 border border-yellow-200 font-heading font-bold uppercase tracking-wide">
-                            Même Génération
-                          </span>
-                        )}
-
-                        {proximityResult.isInSameEvolutionChain && (
-                          <span className="inline-flex items-center bg-purple-100 text-purple-800 text-[10px] px-1.5 py-0.5 border border-purple-200 font-heading font-bold uppercase tracking-wide">
-                            Même Famille
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </SubCard>
-              </div>
-            )}
-
-            <Card
-              pokeballColor={colors.brand.white}
-              pokeballOpacity={0}
-              showHeader={true}
-              overflowVisible
-            >
-              <div className="p-4 md:p-6">
-                <h3 
-                  className="font-heading text-center text-xl tracking-wide mb-6" 
-                  style={{ color: colors.brand.blue }}
-                >
-                  RÉPONSE
-                </h3>
-
-                {/* --- ZONE DE SAISIE / SÉLECTION --- */}
-                {/* On fixe la hauteur à h-12 ici pour que le h-full de la SubCard s'adapte */}
-                <div className="mb-6 relative h-12">
-                  {!selectedPokemonName ? (
-                    <PokemonSearchInput
-                      items={filteredPokemons}
-                      value={searchTerm}
-                      onChange={setSearchTerm}
-                      onSelect={(p) => { 
-                        setSelectedPokemonName(p.nameFr); 
-                        setSearchTerm(p.nameFr); 
-                      }}
-                      disabled={isSubmitting}
-                    />
-                  ) : (
-                  <SubCard
-                    bodyColor="#f9fafb" /* Correspond à tailwind gray-50 */
-                    borderColor={colors.brand.blue}
-                    borderThickness="p-[2px]"
-                    className="shadow-inner"
-                  >
-                    {/* On ajoute un conteneur flex-row (ligne) qui prend toute la hauteur/largeur */}
-                    <div className="flex flex-row items-center justify-between w-full h-full px-4">
-                      <span className="font-heading font-medium text-gray-800 truncate">
-                        ▶ Pokémon choisi : {selectedPokemonName}
-                      </span>
-                      <button
-                        onClick={() => {
-                          setSelectedPokemonName('');
-                          setSearchTerm('');
-                        }}
-                        disabled={isSubmitting}
-                        className="text-gray-400 hover:text-red-500 transition-colors ml-2 disabled:opacity-50 shrink-0"
-                        title="Changer de Pokémon"
-                      >
-                        ✖
-                      </button>
-                    </div>
-                  </SubCard>
-                  )}
-                </div>
-
-                <PixelButton
-                  onClick={handleSubmitGuess}
-                  disabled={!selectedPokemonName || isSubmitting}
-                  className="font-heading font-semibold w-full h-12 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:translate-y-0"
-                  color={colors.brand.blue}
-                  colorLight={colors.brand.blueLight}
-                  colorDark={colors.brand.blueDark}
-                  colorBorder={colors.brand.blueDeep}
-                >
-                  {isSubmitting ? 'Envoi...' : 'Valider la réponse'}
-                </PixelButton>
-
-                {/* --- MESSAGE DE SUCCÈS --- */}
-                {guessResultMessage && lastGuessCorrect && (
-                  <div
-                    className="font-heading font-medium mt-4 px-4 py-3 rounded-xl text-center border"
-                    style={{ 
-                      backgroundColor: colors.game.success + '22', 
-                      color: colors.game.success, 
-                      borderColor: colors.game.success + '88' 
-                    }}
-                  >
-                    {guessResultMessage}
-                  </div>
-                )}
-              </div>
-            </Card>
-          </div>
+          <DescriptionCard
+            descriptions={descriptions}
+            descriptionIndex={descriptionIndex}
+            onChangeIndex={setDescriptionIndex}
+            onZoom={() => setShowDescriptionModal(true)}
+          />
+          <AnswerCard
+            filteredPokemons={filteredPokemons}
+            searchTerm={searchTerm}
+            selectedPokemonName={selectedPokemonName}
+            isSubmitting={isSubmitting}
+            guessResultMessage={guessResultMessage}
+            lastGuessCorrect={lastGuessCorrect}
+            proximityResult={proximityResult}
+            onSearchChange={setSearchTerm}
+            onSelectPokemon={(name) => { setSelectedPokemonName(name); setSearchTerm(name) }}
+            onClearSelection={() => { setSelectedPokemonName(''); setSearchTerm('') }}
+            onSubmit={handleSubmitGuess}
+          />
         </div>
 
-
-        {/* Colonne droite — Indices */}
-        <Card
-          showHeader={false}
-          pokeballOpacity={0}
-        >
-          <div className="p-4 md:p-6">
-            <h3 className="font-heading text-center text-xl tracking-wide mb-4" style={{ color: colors.brand.blue }}>INDICES DISPONIBLES</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {HINTS_CONFIG.map(({ key, icon, imgIcon, label }) => {
-              const used = usedHints.includes(key)
-              const locked = isHintLocked(key)
-              const penalty = HINT_PENALTIES[key]
-              const animation = hintAnimations[key]
-              const revealedKey = label as keyof RevealedHints
-              const revealedValue = revealedHints[revealedKey]
-
-              const btnBorderColor = used ? colors.brand.blueDeep : (locked ? '#9CA3AF' : colors.brand.blueDeep)
-              const btnColorLight = used ? colors.brand.blueLight : (locked ? '#F1F2F4' : '#FFFFFF')
-              const btnColorDark = used ? colors.brand.blueDark : (locked ? '#BEC3CB' : '#E7E7E7')
-              const btnColor = used ? colors.brand.blue : (locked ? '#D7DADF' : '#F9FAFB')
-
-              return (
-                <PixelButton
-                  key={key}
-                  onClick={() => handleRequestHint(key)}
-                  disabled={used || locked}
-                  title={locked ? `Temps insuffisant — il reste ${timeRemaining.toFixed(1)}s, cet indice coûte ${penalty}s` : ''}
-                  className="font-heading w-full min-h-24"
-                  innerClassName="flex-1 flex flex-col items-center justify-center w-full h-full p-2 gap-1.5 relative"
-                  colorBorder={btnBorderColor}
-                  colorLight={btnColorLight}
-                  colorDark={btnColorDark}
-                  color={btnColor}
-                  clipPath={pixelClipPathSm}
-                >
-                  {animation !== undefined && partie?.timerDurationSeconds !== -1 && (
-                    <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-red-500 font-bold text-lg pointer-events-none z-20 bg-white/95 px-2 py-0.5 rounded-md border-2 border-red-500 animate-[hintFloatUp_1.5s_ease-out_forwards]">
-                      -{animation}s
-                    </span>
-                  )}
-
-                  {used && revealedValue ? (
-                    <>
-                      {key === 'Sprite' ? (
-                        <img src={revealedValue} alt="Silhouette" className="max-w-full h-auto" style={{ imageRendering: 'pixelated', filter: 'brightness(0)' }} />
-                      ) : (
-                        <span className={`font-heading font-semibold text-center leading-tight px-1 ${key === 'Stats' ? 'text-xs' : 'text-sm'}`} style={{ color: colors.brand.white }}>
-                          {revealedValue}
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {imgIcon ? (
-                        <img src={imgIcon} alt={label} className="w-8 h-8 grayscale opacity-70 object-contain" />
-                      ) : (
-                        <span className="text-2xl grayscale opacity-70">{icon}</span>
-                      )}
-                      <span className="text-sm text-gray-700">{label}</span>
-                      {locked && (
-                        <span className="absolute top-1 right-1 bg-gray-400 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">🔒</span>
-                      )}
-                    </>
-                  )}
-                </PixelButton>
-              )
-            })}
-          </div>
-          </div>
-        </Card>
+        <HintsGrid
+          usedHints={usedHints}
+          revealedHints={revealedHints}
+          hintAnimations={hintAnimations}
+          timeRemaining={timeRemaining}
+          timerDurationSeconds={partie?.timerDurationSeconds}
+          onRequestHint={handleRequestHint}
+          isHintLocked={isHintLocked}
+        />
       </div>
 
-      {/* Modal succès */}
-      {showSuccessModal && revealedPokemonSprite && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
-          <div className="max-w-sm w-full">
-            <Card
-              showHeader={true}
-              headerColor={colors.game.success}
-              pokeballColor={colors.game.success}
-              pokeballOpacity={0.05}
-              animation={true}
-              header={
-                <h4 className="font-display text-xl tracking-wide text-white text-center w-full">
-                  Bravo !
-                </h4>
-              }
-            >
-              <div className="p-6 text-center flex flex-col items-center">
-                <p className="font-heading font-bold text-lg mb-2" style={{ color: colors.ui.textMuted }}>
-                  C'était bien :
-                </p>
-                <img
-                  src={revealedPokemonSprite}
-                  alt="Pokémon trouvé"
-                  className="w-64 h-64 animate-[spriteReveal_0.8s_ease-out]"
-                  style={{ imageRendering: 'pixelated' }}
-                />
-                <p className="font-heading font-bold mb-6" style={{ color: colors.game.success, fontSize: '1.5rem' }}>
-                  {selectedPokemonName}
-                </p>
-                <PixelButton
-                  onClick={proceedAfterModal}
-                  className="font-heading font-semibold w-full h-12 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:translate-y-0"
-                  color={colors.brand.blue}
-                  colorLight={colors.brand.blueLight}
-                  colorDark={colors.brand.blueDark}
-                  colorBorder={colors.brand.blueDeep}
-                >
-                  {isFinalPokemon ? 'Terminer la partie' : 'Pokémon suivant'}
-                </PixelButton>
-              </div>
-            </Card>
-          </div>
-        </div>
-      )}
-
-      {/* Modal échec */}
-      {showFailureModal && revealedPokemonSprite && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
-          <div className="max-w-sm w-full">
-            <Card
-              showHeader={true}
-              headerColor={colors.game.error}
-              pokeballColor={colors.game.error}
-              pokeballOpacity={0.05}
-              animation={true}
-              header={
-                <h4 className="font-display text-xl tracking-wide text-white text-center w-full">
-                  {isTimeout ? "Temps écoulé !" : "Dommage !"}
-                </h4>
-              }
-            >
-              <div className="p-6 text-center flex flex-col items-center">
-                <p className="font-heading font-bold text-lg mb-2" style={{ color: colors.ui.textMuted }}>
-                  C'était :
-                </p>
-                <img
-                  src={revealedPokemonSprite}
-                  alt="Pokémon à deviner"
-                  className="w-64 h-64 animate-[spriteReveal_0.8s_ease-out]"
-                  style={{ imageRendering: 'pixelated' }}
-                />
-                <p className="font-heading font-bold mb-6" style={{ color: colors.game.error, fontSize: '1.5rem' }}>
-                  {allPokemons.find((p) => p.id === currentPokemonId)?.nameFr ?? 'Pokémon inconnu'}
-                </p>
-                <PixelButton
-                  onClick={proceedAfterModal}
-                  className="font-heading font-semibold w-full h-12 text-white rounded hover:-translate-y-0.5 hover:shadow-px-sm transition disabled:opacity-50 disabled:translate-y-0"
-                  color={colors.brand.red}
-                  colorDark={colors.brand.redDark}
-                  colorLight={colors.brand.redLight}
-                  colorBorder={colors.brand.redDeep}
-                >
-                  {isFinalPokemon ? 'Terminer la partie' : 'Pokémon suivant'}
-                </PixelButton>
-              </div>
-            </Card>
-          </div>
-        </div>
-      )}
-
-{/* Modal Zoom Description */}
-      {showDescriptionModal && (
-        <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4 animate-fade-in"
-          onClick={() => setShowDescriptionModal(false)}
-        >
-          <div 
-            className="max-w-4xl w-full" /* Élargi à max-w-4xl pour accueillir la grande police */
-            onClick={(e) => e.stopPropagation()} 
-          >
-            <Card
-              showHeader={false}
-              pokeballColor={colors.brand.blueLight}
-              pokeballOpacity={0.1}
-            >
-              {/* Le conteneur passe en flex-col pour séparer le texte de la pagination en bas */}
-              <div className="relative p-8 md:p-14 min-h-[300px] flex flex-col">
-                
-                {/* Croix de fermeture propre, calée en haut à droite */}
-                <button 
-                  onClick={() => setShowDescriptionModal(false)}
-                  className="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 flex items-center justify-center text-4xl text-gray-400 hover:text-red-500 transition-colors leading-none cursor-pointer hover:scale-110 z-10"
-                  title="Fermer"
-                >
-                  ×
-                </button>
-
-                {/* Texte de la description centré verticalement */}
-                <div className="flex-1 flex items-center justify-center py-8">
-                  <p className="font-display text-center" style={{ color: colors.ui.textPrimary, fontSize: '1.5rem' }}>
-                    {descriptions[descriptionIndex] || <span className="text-gray-400 italic">Chargement...</span>}
-                  </p>
-                </div>
-                
-                {/* Pagination (affichée uniquement s'il y a plus d'une description) */}
-                {descriptions.length > 1 && (
-                  <div className="flex items-center justify-center gap-6 mt-auto">
-                    <button
-                      onClick={() => setDescriptionIndex(i => (i - 1 + descriptions.length) % descriptions.length)}
-                      className="font-heading w-12 h-12 flex items-center justify-center text-2xl hover:-translate-y-0.5 hover:shadow-px-sm transition cursor-pointer"
-                      style={{ borderColor: colors.brand.blue, color: colors.brand.blue, fontSize: '1.75rem' }}
-                    >
-                      ◀
-                    </button>
-                    <span className="font-heading text-lg text-gray-500 tabular-nums" style={{ fontSize: '1.75rem' }}>
-                      {descriptionIndex + 1} / {descriptions.length}
-                    </span>
-                    <button
-                      onClick={() => setDescriptionIndex(i => (i + 1) % descriptions.length)}
-                      className="font-heading w-12 h-12 flex items-center justify-center text-2xl hover:-translate-y-0.5 hover:shadow-px-sm transition cursor-pointer"
-                      style={{ borderColor: colors.brand.blue, color: colors.brand.blue, fontSize: '1.75rem' }}
-                    >
-                      ▶
-                    </button>
-                  </div>
-                )}
-
-              </div>
-            </Card>
-          </div>
-        </div>
-      )}
-
-      {/* Animations CSS */}
-      <style>{`
-        @keyframes hintFloatUp {
-          0% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-          50% { opacity: 1; transform: translateX(-50%) translateY(-15px) scale(1.15); }
-          100% { opacity: 0; transform: translateX(-50%) translateY(-40px) scale(0.9); }
-        }
-        @keyframes fadeInScale {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes spriteReveal {
-          from { opacity: 0; filter: brightness(0); transform: scale(0.9); }
-          to { opacity: 1; filter: brightness(1); transform: scale(1); }
-        }
-      `}</style>
+      <SuccessModal
+        show={showSuccessModal}
+        sprite={revealedPokemonSprite}
+        pokemonName={selectedPokemonName}
+        isFinalPokemon={isFinalPokemon}
+        onProceed={proceedAfterModal}
+      />
+      <FailureModal
+        show={showFailureModal}
+        sprite={revealedPokemonSprite}
+        pokemonName={allPokemons.find((p) => p.id === currentPokemonId)?.nameFr ?? 'Pokémon inconnu'}
+        isFinalPokemon={isFinalPokemon}
+        isTimeout={isTimeout}
+        onProceed={proceedAfterModal}
+      />
+      <ZoomDescriptionModal
+        show={showDescriptionModal}
+        descriptions={descriptions}
+        descriptionIndex={descriptionIndex}
+        onChangeIndex={setDescriptionIndex}
+        onClose={() => setShowDescriptionModal(false)}
+      />
     </div>
   )
 }
