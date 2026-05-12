@@ -17,6 +17,8 @@ import { getPartie, submitGuess, useHint, getTimer, resetTimer } from '../servic
 import type { PokemonDto, PokemonHintsDto } from '../types/pokemon'
 import type { PartieDto, GuessResultDto } from '../types/partie'
 import HPBar from '../components/HPBar'
+import Pokeball from "../components/images/pokéball_face.png";
+
 
 const ROMAN_GEN: Record<string, number> = {
   i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9,
@@ -544,7 +546,7 @@ export default function PokeDescPage() {
             <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-base">
               
               {/* ----- PARTIE GAUCHE : HPBar et Tentatives ----- */}
-              <div className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto">
+              <div className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto ml-6">
                 
                 {/* Composant HPBar avec une largeur définie */}
                 <div className="w-full sm:w-56 md:w-64">
@@ -555,13 +557,27 @@ export default function PokeDescPage() {
                   />
                 </div>
 
-                <span className="font-heading font-semibold text-orange-500 whitespace-nowrap">
-                  <span className="grayscale opacity-60">🎲</span> Tentatives : {attemptsUsed} / 3
-                </span>
+                {/* Tentatives affichées avec pokéballs (label au-dessus) */}
+                <div className="flex flex-col items-center gap-1 whitespace-nowrap">
+                  <span className="font-heading font-semibold text-center" style={{ color: colors.brand.blueDark }}>
+                    Tentatives
+                  </span>
+                  <div className="flex gap-2">
+                    {[...Array(3)].map((_, i) => (
+                      <img
+                        key={i}
+                        src={Pokeball}
+                        alt={`Tentative ${i + 1}`}
+                        className={`w-12 h-10 ${i >= 3 - attemptsUsed ? 'grayscale' : ''}`}
+                        style={{ imageRendering: 'pixelated' }}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* ----- PARTIE DROITE : Timer ----- */}
-              <div className="flex justify-end w-full md:w-auto">
+              <div className="flex justify-end w-full md:w-auto mr-6">
                 <Timer
                   value={timeRemaining}
                   mode={partie?.timerDurationSeconds === -1 ? 'stopwatch' : 'countdown'}

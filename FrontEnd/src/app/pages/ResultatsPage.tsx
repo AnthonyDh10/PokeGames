@@ -169,7 +169,7 @@ function PokemonCarouselSection({ partie, sprites, isSolo, player1Name, player2N
         </h3>
 
         {/* PARTIE CARROUSEL (HAUT) */}
-        <div className="relative flex items-center justify-center min-h-[180px] mb-8 bg-white/50">
+        <div className="relative flex items-center justify-center min-h-[180px] mb-8" style={{backgroundColor: colors.brand.white}}>
            <button onClick={prev} className="absolute left-4 z-10 text-3xl hover:scale-125 transition-transform select-none" style={{ color: colors.brand.blueDark }}>◀</button>
            
            <div className="relative w-64 h-40 flex items-center justify-center">
