@@ -43,10 +43,11 @@ export default function Timer({
   return (
     <>
       <span
-        className={`font-heading font-semibold relative ${shake ? 'animate-[shake_0.5s_ease-in-out]' : ''} ${flash ? 'animate-[flashRed_0.3s_ease-in-out]' : ''}`}
+        className={`font-heading font-semibold relative flex flex-col items-center ${shake ? 'animate-[shake_0.5s_ease-in-out]' : ''} ${flash ? 'animate-[flashRed_0.3s_ease-in-out]' : ''}`}
         style={{ color }}
       >
-        <span className="grayscale opacity-60">⏱️</span> Temps : {display}
+        <span className="block text-sm text-gray-500 text-center">Temps :</span>
+        <span className="block text-lg mt-1">{display}</span>
         {showPenalty && penaltyValue !== undefined && (
           <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-red-500 font-bold text-lg pointer-events-none animate-[timerFloatUp_1.5s_ease-out_forwards]">
             -{penaltyValue}s
