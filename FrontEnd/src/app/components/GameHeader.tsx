@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import Card from './Card'
 import Timer from './Timer'
 import { colors } from '../design/colors'
-import { formatGenerations } from '../utils/pokedescLogic'
+import { getGenerationsDisplay } from '../utils/pokedescLogic'
 
 interface GameHeaderProps {
   /** Titre affiché dans la barre colorée de la carte */
@@ -38,17 +38,9 @@ export default function GameHeader({
       headerColor={color}
       headerClassName="py-4"
       header={
-        <div className="flex flex-col md:flex-row md:items-center md:gap-3">
-          <h1 className="font-display text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textOnColor }}>
-            {title}
-          </h1>
-          {selectedGenerations && selectedGenerations.length > 0 && selectedGenerations.length < 9 && (
-            <span className="font-heading text-lg md:text-xl tracking-wide" style={{ color: colors.ui.textOnColorSoft }}>
-              <span className="hidden md:inline">{formatGenerations(selectedGenerations, false)}</span>
-              <span className="md:hidden">{formatGenerations(selectedGenerations, true)}</span>
-            </span>
-          )}
-        </div>
+        <h1 className="font-display text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textOnColor }}>
+          {title}
+        </h1>
       }
       pokeballOpacity={0.1}
       pokeballColor={color}
@@ -72,6 +64,12 @@ export default function GameHeader({
                 <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Tentatives</div>
                 <div className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>{attemptCount}</div>
               </div>
+              {selectedGenerations && getGenerationsDisplay(selectedGenerations) && (
+                <div className="text-center">
+                  <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">{getGenerationsDisplay(selectedGenerations)?.label}</div>
+                  <div className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>{getGenerationsDisplay(selectedGenerations)?.value}</div>
+                </div>
+              )}
             </div>
           </div>
 

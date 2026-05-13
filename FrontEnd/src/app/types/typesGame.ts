@@ -4,7 +4,6 @@ export interface TypeSimpleDto {
 }
 
 export interface TypesGameDto {
-  isMono: boolean
   interactions: Record<string, string[]> // "x4" | "x2" | "x1" | "x0.5" | "x0.25" | "x0" → noms FR
 }
 
@@ -23,7 +22,6 @@ export interface TypesPlayerResultDto {
 }
 
 export interface TypesGameResultsDto {
-  isMono: boolean
   interactions: Record<string, string[]>
   correctType1NameFr?: string
   correctType2NameFr?: string

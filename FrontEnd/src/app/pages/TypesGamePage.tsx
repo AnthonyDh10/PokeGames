@@ -30,6 +30,7 @@ import solImg from '../components/images/sol.png'
 import spectreImg from '../components/images/spectre.png'
 import ténèbresImg from '../components/images/ténèbres.png'
 import volImg from '../components/images/vol.png'
+import { color } from 'motion-dom'
 
 const TYPE_IMAGES: Record<string, string> = {
   acier: acierImg, combat: combatImg, dragon: dragonImg, eau: eauImg,
@@ -122,7 +123,7 @@ export default function TypesGamePage() {
     e.preventDefault()
     if (!selectedType1 || isSubmitting) return
 
-    const t2 = game?.isMono ? undefined : selectedType2?.id
+    const t2 = selectedType2?.id
 
     setIsSubmitting(true)
     try {
@@ -161,12 +162,7 @@ export default function TypesGamePage() {
       errorBackColor={colors.brand.yellow}
       header={
         <GameHeader
-          title={`Quel est ce type ?${game?.isMono ? '' : ' (paire)'}`}
-          description={
-            game?.isMono
-              ? 'Devine le type unique dont les interactions défensives sont affichées à droite.'
-              : 'Devine la paire de types dont les interactions défensives combinées sont affichées à droite.'
-          }
+          title={<span style={{ color: colors.ui.textMuted }}>TYPUZZLE : Devine la paire de types !</span>}
           color={colors.brand.yellow}
           sessionCode={sessionCode}
           attemptCount={attemptCount}
@@ -177,16 +173,13 @@ export default function TypesGamePage() {
         <>
           <Card
             pokeballOpacity={0}
-            headerColor={colors.brand.yellow}
-            headerClassName="py-4"
-            header={
-              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
-                Ta réponse
-              </h1>
-            }
-            className="mt-4"
-          >
+            showHeader={false}
+            >
             <div className="p-4 md:p-6">
+
+              <h1 className="font-heading text-center text-xl md:text-2xl tracking-wide" style={{ color: colors.brand.yellowDark, fontSize: '1.25rem' }}>
+                Réponse
+              </h1>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {result && !result.isCorrect && (
                   <p className="font-body text-red-600 text-sm">{result.message}</p>
@@ -194,8 +187,8 @@ export default function TypesGamePage() {
 
                 <div className="flex flex-col gap-3">
                   <div>
-                    <label className="font-body text-sm font-medium text-gray-600 block mb-1">
-                      {game?.isMono ? 'Type' : 'Type 1'}
+                    <label className="font-heading text-sm font-medium text-gray-600 block mt-4 mb-1">
+                      Type 1
                     </label>
                     {selectedType1 ? (
                       <SubCard borderColor={colors.brand.yellowDark} bodyColor={colors.brand.white} className="px-3 py-2">
@@ -220,39 +213,37 @@ export default function TypesGamePage() {
                     )}
                   </div>
 
-                  {!game?.isMono && (
-                    <div>
-                      <label className="font-body text-sm font-medium text-gray-600 block mb-1">
-                        Type 2
-                      </label>
-                      {selectedType2 ? (
-                        <SubCard borderColor={colors.brand.yellowDark} bodyColor={colors.brand.white} className="px-3 py-2">
-                          <div className="flex items-center gap-2">
-                            <TypeImage name={selectedType2.nameFr} className="h-7" />
-                            <button
-                              type="button"
-                              onClick={() => { setSelectedType2(null); setSearchTerm2('') }}
-                              className="ml-auto text-gray-400 hover:text-gray-600 text-lg leading-none"
-                              aria-label="Effacer"
-                            >×</button>
-                          </div>
-                        </SubCard>
-                      ) : (
-                        <PokemonSearchInput
-                          items={filteredTypes2}
-                          value={searchTerm2}
-                          onChange={setSearchTerm2}
-                          onSelect={(t) => { setSelectedType2(t); setSearchTerm2(t.nameFr) }}
-                          placeholder="Rechercher un type..."
-                        />
-                      )}
-                    </div>
-                  )}
+                  <div>
+                    <label className="font-heading text-sm font-medium text-gray-600 block mt-4 mb-1">
+                      Type 2
+                    </label>
+                    {selectedType2 ? (
+                      <SubCard borderColor={colors.brand.yellowDark} bodyColor={colors.brand.white} className="px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          <TypeImage name={selectedType2.nameFr} className="h-7" />
+                          <button
+                            type="button"
+                            onClick={() => { setSelectedType2(null); setSearchTerm2('') }}
+                            className="ml-auto text-gray-400 hover:text-gray-600 text-lg leading-none"
+                            aria-label="Effacer"
+                          >×</button>
+                        </div>
+                      </SubCard>
+                    ) : (
+                      <PokemonSearchInput
+                        items={filteredTypes2}
+                        value={searchTerm2}
+                        onChange={setSearchTerm2}
+                        onSelect={(t) => { setSelectedType2(t); setSearchTerm2(t.nameFr) }}
+                        placeholder="Rechercher un type..."
+                      />
+                    )}
+                  </div>
                 </div>
 
                 <PixelButton
                   type="submit"
-                  disabled={isSubmitting || !selectedType1 || (!game?.isMono && !selectedType2)}
+                  disabled={isSubmitting || !selectedType1 || !selectedType2}
                   color={colors.brand.yellow}
                   colorLight={colors.brand.yellowLight}
                   colorDark={colors.brand.yellowWarm}
@@ -271,15 +262,12 @@ export default function TypesGamePage() {
       right={
         <Card
           pokeballOpacity={0}
-          headerColor={colors.brand.yellow}
-          headerClassName="py-4"
-          header={
-            <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
-              Interactions défensives
-            </h1>
-          }
+          showHeader={false}
         >
           <div className="p-4 md:p-6">
+            <h1 className="font-heading text-center text-xl md:text-2xl tracking-wide mb-4" style={{ color: colors.brand.yellowDark, fontSize: '1.25rem' }}>
+              Interactions défensives
+            </h1>
             <div className="grid grid-cols-1 gap-4">
               {INTERACTION_ORDER.map((key) => {
                 const typeNames = game?.interactions[key] ?? []

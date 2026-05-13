@@ -169,8 +169,7 @@ export default function DeZoomGamePage() {
       errorBackColor={colors.brand.red}
       header={
         <GameHeader
-          title="DéZoom"
-          description="Identifie le Pokémon caché. Chaque mauvaise réponse révèle un peu plus !"
+          title="DEX-ZOOM : Devine le Pokémon !"
           color={colors.brand.red}
           sessionCode={sessionCode}
           attemptCount={attemptCount}
@@ -182,16 +181,12 @@ export default function DeZoomGamePage() {
         <>
           <Card
             pokeballOpacity={0}
-            headerColor={colors.brand.red}
-            headerClassName="py-4"
-            header={
-              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: '#ffffff' }}>
-                Ta réponse
-              </h1>
-            }
-            className="mt-4"
+            showHeader={false}
           >
             <div className="p-4 md:p-6 space-y-4">
+              <h1 className="font-heading text-center text-xl md:text-2xl tracking-wide" style={{ color: colors.brand.redDark, fontSize: '1.25rem' }}>
+                Réponse
+              </h1>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {wrongMessage && (
                   <p className="font-body text-red-600 text-sm">{wrongMessage}</p>
@@ -274,15 +269,13 @@ export default function DeZoomGamePage() {
       right={
         <Card
           pokeballOpacity={0}
-          headerColor={colors.brand.red}
-          headerClassName="py-4"
-          header={
-            <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: '#ffffff' }}>
-              Quel est ce Pokémon ?
-            </h1>
-          }
+          showHeader={false}
         >
           <div className="p-6 flex flex-col items-center justify-center gap-4">
+
+            <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.brand.redDark, fontSize: '1.25rem' }}>
+              Quel est ce Pokémon ?
+            </h1>
               <div
                 style={{
                   position: 'relative',
@@ -314,16 +307,13 @@ export default function DeZoomGamePage() {
                     width: windowDisplayPx,
                     height: windowDisplayPx,
                     border: '2px solid red',
-                    boxShadow: '0 0 0 500px white',
+                    boxShadow: '0 0 0 500px' + colors.brand.white ,
                     transition: 'left 0.3s ease, top 0.3s ease, width 0.3s ease, height 0.3s ease',
                     pointerEvents: 'none',
                   }}
                 />
               </div>
 
-              <p className="font-body text-sm text-gray-400">
-                Fenêtre visible : {windowSpritePx}×{windowSpritePx} px
-              </p>
             </div>
           </Card>
       }

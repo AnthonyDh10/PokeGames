@@ -375,7 +375,7 @@ export default function ResultatsDeZoomPage() {
     <GameResultsLayout
       title="DEX-ZOOM"
       sessionCode={state?.sessionCode}
-      pokeballColor={colors.brand.red}
+      pokeballColor='white'
       bodyColor={colors.brand.red}
       textColor="white"
       scores={scoresSection}

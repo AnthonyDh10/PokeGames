@@ -243,22 +243,22 @@ export default function ResultatsTypesPage() {
             </p>
         )}
         
-        <h3 className="font-heading text-center text-xl mb-6 uppercase tracking-widest" style={{ color: colors.brand.yellowWarm }}>
+        <h3 className="font-heading text-center text-xl mb-6 uppercase tracking-widest" style={{ color: colors.brand.yellowDark }}>
           SCORES FINAUX
         </h3>
         
         <div className={`grid ${isSolo ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-2'} gap-6`}>
           {/* Joueur 1 */}
           <div className="flex flex-col space-y-3 w-full">
-            <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.yellowWarm }}>
+            <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.yellowDark }}>
               {myName}
             </div>
             
             {myResult.elapsedSeconds !== undefined ? (
               <>
-                <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.yellowWarm }}>
+                <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.yellowDark }}>
                   <span className="font-heading font-bold text-sm text-gray-600">TEMPS</span>
-                  <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.yellowWarm }}>
+                  <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.yellowDark }}>
                     {formatElapsed(myResult.elapsedSeconds)}
                   </span>
                 </div>
@@ -266,7 +266,7 @@ export default function ResultatsTypesPage() {
                 <div className="grid grid-cols-1 gap-2">
                   <div 
                     className="p-2 bg-white border-2 transition-transform hover:-translate-y-0.5"
-                    style={{ borderColor: colors.brand.yellowWarm, boxShadow: `3px 3px 0px ${colors.brand.yellowWarm}` }}
+                    style={{ borderColor: colors.brand.yellowDark, boxShadow: `3px 3px 0px ${colors.brand.yellowDark}` }}
                   >
                     <div className="text-[10px] text-gray-500 mb-1">TENTATIVE(S)</div>
                     <div className="font-bold text-lg text-gray-800">{myResult.attemptCount}</div>
