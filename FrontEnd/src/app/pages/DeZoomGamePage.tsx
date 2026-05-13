@@ -5,6 +5,8 @@ import { useBackgroundStore } from '../store/backgroundStore'
 import { useChatStore } from '../store/chatStore'
 import { colors } from '../design/colors'
 import Card from '../components/Card'
+import PixelButton from '../components/PixelButton'
+import SubCard from '../components/SubCard'
 import PokemonSearchInput from '../components/PokemonSearchInput'
 import Timer from '../components/Timer'
 import { getDeZoomGame, submitDeZoomGuess } from '../services/dezoomService'
@@ -222,17 +224,26 @@ export default function DeZoomGamePage() {
             pokeballOpacity={0}
             pokeballColor="white"
           >
-            <div className="p-4 text-center font-body text-sm space-y-2">
-              <p className="text-gray-500">
+            <div className="p-4 md:p-6 flex flex-col items-center gap-4">
+              <p className="font-heading text-sm text-center text-gray-500">
                 Identifie le Pokémon caché. Chaque mauvaise réponse révèle un peu plus !
               </p>
-              <div className="flex flex-wrap gap-4 justify-center text-gray-500">
-                <span><span className="grayscale opacity-60">🎯</span> Code : {sessionCode}</span>
-                <span className="font-semibold text-gray-700"><span className="grayscale opacity-60">🎲</span> Tentatives : {attemptCount}</span>
-                <br /><Timer value={elapsed} mode="stopwatch" />
+              <div className="flex flex-wrap gap-6 justify-center items-end">
+                <div className="text-center">
+                  <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Code</div>
+                  <div className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>{sessionCode}</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Tentatives</div>
+                  <div className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>{attemptCount}</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Temps</div>
+                  <Timer value={elapsed} mode="stopwatch" />
+                </div>
               </div>
               {selectedGenerations.length > 0 && selectedGenerations.length < 9 && (
-                <p className="font-body text-xs mt-1" style={{ color: colors.ui.textMuted }}>
+                <p className="font-heading text-xs" style={{ color: colors.ui.textMuted }}>
                   {formatGenerations(selectedGenerations)}
                 </p>
               )}
@@ -257,16 +268,18 @@ export default function DeZoomGamePage() {
                 )}
 
                 {selectedPokemon ? (
-                  <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-xl">
-                    <span className="text-gray-400 text-sm min-w-[48px]">#{selectedPokemon.pokedexNumber}</span>
-                    <span className="font-medium text-gray-900">{selectedPokemon.nameFr}</span>
-                    <button
-                      type="button"
-                      onClick={() => { setSelectedPokemon(null); setSearchTerm('') }}
-                      className="ml-auto text-gray-400 hover:text-gray-600 text-lg leading-none"
-                      aria-label="Effacer"
-                    >×</button>
-                  </div>
+                  <SubCard borderColor={colors.brand.redDeep} bodyColor={colors.brand.white} className="px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-heading text-gray-400 text-sm min-w-[48px]">#{selectedPokemon.pokedexNumber}</span>
+                      <span className="font-heading font-medium text-gray-900">{selectedPokemon.nameFr}</span>
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedPokemon(null); setSearchTerm('') }}
+                        className="ml-auto text-gray-400 hover:text-gray-600 text-lg leading-none"
+                        aria-label="Effacer"
+                      >×</button>
+                    </div>
+                  </SubCard>
                 ) : (
                   <PokemonSearchInput
                     items={filteredPokemons}
@@ -277,14 +290,19 @@ export default function DeZoomGamePage() {
                   />
                 )}
 
-                <button
+                <PixelButton
                   type="submit"
                   disabled={isSubmitting || !selectedPokemon}
-                  className="font-body font-semibold px-6 py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed text-white w-full"
-                  style={{ backgroundColor: colors.brand.red }}
+                  color={colors.brand.red}
+                  colorLight={colors.brand.redLight}
+                  colorDark={colors.brand.redDark}
+                  colorBorder={colors.brand.redDeep}
+                  className="h-12 w-full"
                 >
-                  {isSubmitting ? 'Vérification...' : 'Valider'}
-                </button>
+                  <span className="font-heading font-semibold text-white">
+                    {isSubmitting ? 'Vérification...' : 'Valider'}
+                  </span>
+                </PixelButton>
               </form>
 
               {/* Filtres */}

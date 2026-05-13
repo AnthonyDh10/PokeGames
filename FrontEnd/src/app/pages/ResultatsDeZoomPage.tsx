@@ -7,6 +7,7 @@ import { createPartie, startPartie } from '../services/partieService'
 import GameResultsLayout from '../components/GameResultsLayout'
 import ResultsActions from '../components/ResultsActions'
 import Card from '../components/Card'
+import SubCard from '../components/SubCard'
 import { colors } from '../design/colors'
 import type { DeZoomGameResultsDto } from '../types/dezoom'
 
@@ -233,10 +234,16 @@ export default function ResultatsDeZoomPage() {
               <div className="text-4xl font-bold my-2" style={{ color: colors.ui.textPrimary }}>
                 {formatElapsed(playerResult.elapsedSeconds)}
               </div>
-              <div className="flex gap-3 justify-center text-sm flex-wrap mt-auto" style={{ color: colors.ui.textMuted }}>
-                <span className="px-2 py-1 shadow-px-sm border" style={{ backgroundColor: colors.ui.surface, borderColor: colors.ui.bgRight }}>
+              <div className="mt-auto flex justify-center">
+                <div
+                  className="px-3 py-2 border-2 bg-white font-heading text-xs uppercase tracking-widest text-gray-800"
+                  style={{
+                    borderColor: isWinner ? colors.brand.red : colors.brand.redDeep,
+                    boxShadow: `3px 3px 0px ${isWinner ? colors.brand.red : colors.brand.redDeep}`,
+                  }}
+                >
                   {playerResult.attemptCount} tentative{(playerResult.attemptCount ?? 0) > 1 ? 's' : ''}
-                </span>
+                </div>
               </div>
             </>
           ) : (
@@ -248,22 +255,33 @@ export default function ResultatsDeZoomPage() {
   }
 
   const scoresSection = (
-    <div className={`flex flex-col md:flex-row items-stretch gap-4 ${isSolo ? 'justify-center' : ''}`}>
-      <PlayerCard name={myName} playerResult={myResult} isWinner={iWon} />
-      {!isSolo && (
-        <>
-          <div className="flex items-center justify-center text-2xl font-bold px-2 py-4 md:py-0" style={{ color: colors.ui.textMuted }}>
-            VS
-          </div>
-          <PlayerCard
-            name="Adversaire"
-            playerResult={opponentResult!}
-            isWinner={opponentWon}
-            pending={!results.bothFinished && !(opponentResult?.hasFinished)}
-          />
-        </>
-      )}
-    </div>
+    <Card
+      borderColor={colors.brand.redDeep}
+      className="border-4 bg-slate-50 overflow-hidden shadow-[8px_8px_0px_rgba(0,0,0,0.1)]"
+      pokeballOpacity={0}
+    >
+      <div className="p-6">
+        <h3 className="font-heading text-center text-xl mb-6 uppercase tracking-widest" style={{ color: colors.brand.redDark }}>
+          SCORES FINAUX
+        </h3>
+        <div className={`flex flex-col md:flex-row items-stretch gap-4 ${isSolo ? 'justify-center' : ''}`}>
+          <PlayerCard name={myName} playerResult={myResult} isWinner={iWon} />
+          {!isSolo && (
+            <>
+              <div className="flex items-center justify-center text-2xl font-bold px-2 py-4 md:py-0" style={{ color: colors.ui.textMuted }}>
+                VS
+              </div>
+              <PlayerCard
+                name="Adversaire"
+                playerResult={opponentResult!}
+                isWinner={opponentWon}
+                pending={!results.bothFinished && !(opponentResult?.hasFinished)}
+              />
+            </>
+          )}
+        </div>
+      </div>
+    </Card>
   )
 
   const detailsSection = (
@@ -309,6 +327,8 @@ export default function ResultatsDeZoomPage() {
       title="Résultats — DéZoom"
       sessionCode={state?.sessionCode}
       pokeballColor={colors.brand.red}
+      bodyColor={colors.brand.red}
+      textColor="#ffffff"
       topAlert={
         !isSolo && !results.bothFinished ? (
           <p className="text-orange-500 font-medium mt-2 animate-pulse">

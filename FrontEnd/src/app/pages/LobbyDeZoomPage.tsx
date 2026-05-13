@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocation } from 'react-router'
 import Card from '../components/Card'
+import SubCard from '../components/SubCard'
 import LobbyPage from '../components/LobbyPage'
 import { colors } from '../design/colors'
 import type { PartieDto } from '../types/partie'
@@ -67,50 +68,51 @@ export default function LobbyDeZoomPage() {
               </div>
 
               <div className="flex items-center justify-between mb-3">
-                <span className="font-body text-sm text-gray-400">Inclure dans la partie :</span>
+                <span className="font-heading text-sm font-medium" style={{ color: colors.ui.textMuted }}>Générations</span>
                 {isPlayer1 && (
                   <div className="flex gap-2">
                     <button
                       onClick={() => setSettings((prev) => ({ ...prev, generations: [...ALL_GENERATIONS] }))}
-                      className="font-body text-xs hover:underline"
+                      className="font-heading text-xs hover:underline"
                       style={{ color: colors.brand.red }}
                     >
-                      Tout
+                      Tout sélectionner
                     </button>
                     <span className="text-gray-300">|</span>
                     <button
                       onClick={() => setSettings((prev) => ({ ...prev, generations: [prev.generations[0]] }))}
-                      className="font-body text-xs text-gray-500 hover:underline"
+                      className="font-heading text-xs text-gray-500 hover:underline"
                     >
-                      Une seule
+                      Tout désélectionner
                     </button>
                   </div>
                 )}
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {ALL_GENERATIONS.map((gen) => {
                   const active = displayGens.includes(gen)
                   return (
-                    <button
+                    <SubCard
                       key={gen}
                       onClick={() => isPlayer1 && toggleGeneration(gen)}
-                      disabled={!isPlayer1}
-                      className={`px-3 py-1.5 rounded-lg font-body text-sm font-semibold border-2 transition ${!isPlayer1 ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
-                      style={
-                        active
-                          ? { backgroundColor: colors.brand.red, color: '#fff', borderColor: colors.brand.red }
-                          : { backgroundColor: '#fff', color: colors.ui.textMuted, borderColor: '#e5e7eb' }
-                      }
+                      bodyColor={active ? colors.brand.red : '#ffffff'}
+                      borderColor={active ? colors.brand.redDark : '#e5e7eb'}
+                      className={`p-2 text-center ${isPlayer1 ? 'hover:-translate-y-0.5 transition cursor-pointer' : 'cursor-not-allowed opacity-70'}`}
                     >
-                      Gén. {gen}
-                    </button>
+                      <span
+                        className="font-heading text-sm font-semibold"
+                        style={{ color: active ? '#ffffff' : colors.ui.textMuted }}
+                      >
+                        Gén. {gen}
+                      </span>
+                    </SubCard>
                   )
                 })}
               </div>
 
               {displayGens.length < ALL_GENERATIONS.length && (
-                <p className="font-body text-xs mt-3" style={{ color: colors.ui.textMuted }}>
+                <p className="font-heading text-xs mt-3" style={{ color: colors.ui.textMuted }}>
                   {displayGens.length} génération{displayGens.length > 1 ? 's' : ''} sélectionnée{displayGens.length > 1 ? 's' : ''} sur {ALL_GENERATIONS.length}
                 </p>
               )}

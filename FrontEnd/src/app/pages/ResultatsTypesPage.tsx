@@ -7,6 +7,7 @@ import { createPartie, startPartie } from '../services/partieService'
 import GameResultsLayout from '../components/GameResultsLayout'
 import ResultsActions from '../components/ResultsActions'
 import Card from '../components/Card'
+import SubCard from '../components/SubCard'
 import { colors } from '../design/colors'
 import type { TypesGameResultsDto } from '../types/typesGame'
 import acierImg from '../components/images/acier.png'
@@ -279,10 +280,16 @@ export default function ResultatsTypesPage() {
               <div className="text-4xl font-bold my-2" style={{ color: colors.ui.textPrimary }}>
                 {formatElapsed(playerResult.elapsedSeconds)}
               </div>
-              <div className="flex gap-3 justify-center text-sm flex-wrap mt-auto" style={{ color: colors.ui.textMuted }}>
-                <span className="px-2 py-1 shadow-px-sm border">
+              <div className="mt-auto flex justify-center">
+                <div
+                  className="px-3 py-2 border-2 bg-white font-heading text-xs uppercase tracking-widest text-gray-800"
+                  style={{
+                    borderColor: isWinner ? colors.brand.yellowWarm : colors.brand.yellowDark,
+                    boxShadow: `3px 3px 0px ${isWinner ? colors.brand.yellowWarm : colors.brand.yellowDark}`,
+                  }}
+                >
                   {playerResult.attemptCount} tentative{(playerResult.attemptCount ?? 0) > 1 ? 's' : ''}
-                </span>
+                </div>
               </div>
             </>
           ) : (
@@ -294,29 +301,40 @@ export default function ResultatsTypesPage() {
   }
 
   const scoresSection = (
-    <div className={`flex flex-col md:flex-row items-stretch gap-4 ${isSolo ? 'justify-center' : ''}`}>
-      <PlayerCard
-        name={myName}
-        playerResult={myResult}
-        isWinner={iWon}
-      />
-      {!isSolo && (
-        <>
-          <div
-            className="flex items-center justify-center text-2xl font-bold px-2 py-4 md:py-0"
-            style={{ color: colors.ui.textMuted }}
-          >
-            VS
-          </div>
+    <Card
+      borderColor={colors.brand.yellowDark}
+      className="border-4 bg-slate-50 overflow-hidden shadow-[8px_8px_0px_rgba(0,0,0,0.1)]"
+      pokeballOpacity={0}
+    >
+      <div className="p-6">
+        <h3 className="font-heading text-center text-xl mb-6 uppercase tracking-widest" style={{ color: colors.brand.yellowWarm }}>
+          SCORES FINAUX
+        </h3>
+        <div className={`flex flex-col md:flex-row items-stretch gap-4 ${isSolo ? 'justify-center' : ''}`}>
           <PlayerCard
-            name={opponentName}
-            playerResult={opponentResult!}
-            isWinner={opponentWon}
-            pending={!results.bothFinished && !(opponentResult?.hasFinished)}
+            name={myName}
+            playerResult={myResult}
+            isWinner={iWon}
           />
-        </>
-      )}
-    </div>
+          {!isSolo && (
+            <>
+              <div
+                className="flex items-center justify-center text-2xl font-bold px-2 py-4 md:py-0"
+                style={{ color: colors.ui.textMuted }}
+              >
+                VS
+              </div>
+              <PlayerCard
+                name={opponentName}
+                playerResult={opponentResult!}
+                isWinner={opponentWon}
+                pending={!results.bothFinished && !(opponentResult?.hasFinished)}
+              />
+            </>
+          )}
+        </div>
+      </div>
+    </Card>
   )
 
   const detailsSection = (
@@ -345,16 +363,16 @@ export default function ResultatsTypesPage() {
               const typeNames = results.interactions[key] ?? []
               if (typeNames.length === 0) return null
               return (
-                <div key={key} className="border border-gray-200 rounded-xl p-3">
-                  <h3 className="font-body font-semibold text-sm mb-2" style={{ color: colors.ui.textMuted }}>
+                <SubCard key={key} borderColor={colors.brand.yellowDark} bodyColor={colors.brand.white} className="p-3">
+                  <h3 className="font-heading font-semibold text-sm mb-2" style={{ color: colors.ui.textMuted }}>
                     {INTERACTION_LABELS[key]}
                   </h3>
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-2">
                     {typeNames.map((name) => (
                       <TypeImage key={name} name={name} />
                     ))}
                   </div>
-                </div>
+                </SubCard>
               )
             })}
           </div>
@@ -368,6 +386,8 @@ export default function ResultatsTypesPage() {
       title="Résultats — Quel est ce type ?"
       sessionCode={state?.sessionCode}
       pokeballColor={colors.brand.yellow}
+      bodyColor={colors.brand.yellow}
+      textColor={colors.ui.textPrimary}
       topAlert={
         !isSolo && !results.bothFinished ? (
           <p className="text-orange-500 font-medium mt-2 animate-pulse">
