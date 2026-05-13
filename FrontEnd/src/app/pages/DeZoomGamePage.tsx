@@ -4,10 +4,11 @@ import { useSessionStore } from '../store/sessionStore'
 import { useChatStore } from '../store/chatStore'
 import { colors } from '../design/colors'
 import Card from '../components/Card'
+import GameHeader from '../components/GameHeader'
+import GameLayout from '../components/GameLayout'
 import PixelButton from '../components/PixelButton'
 import SubCard from '../components/SubCard'
 import PokemonSearchInput from '../components/PokemonSearchInput'
-import Timer from '../components/Timer'
 import { getDeZoomGame, submitDeZoomGuess } from '../services/dezoomService'
 import { getAllPokemons } from '../services/pokemonService'
 import { getPartie } from '../services/partieService'
@@ -21,19 +22,6 @@ const ROMAN_GEN: Record<string, number> = {
 function generationToNumber(nameEn: string): number | null {
   const match = nameEn.toLowerCase().match(/generation-([ivx]+)/)
   return match ? (ROMAN_GEN[match[1]] ?? null) : null
-}
-
-function formatGenerations(generations: number[], isShort: boolean = false): string {
-  if (!generations || generations.length === 0) return ''
-  const sorted = [...generations].sort((a, b) => a - b)
-  const prefix = isShort ? 'Gén' : 'Générations'
-  if (sorted.length === 9 && sorted[0] === 1 && sorted[8] === 9) return 'Toutes générations'
-  let isConsecutive = true
-  for (let i = 1; i < sorted.length; i++) {
-    if (sorted[i] !== sorted[i - 1] + 1) { isConsecutive = false; break }
-  }
-  if (isConsecutive) return `${prefix} ${sorted[0]}-${sorted[sorted.length - 1]}`
-  return `${prefix} ${sorted.join(',')}`
 }
 
 const DISPLAY_SCALE = 4
@@ -165,81 +153,33 @@ export default function DeZoomGamePage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="max-w-5xl mx-auto p-6">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
-          <p className="text-gray-500">Chargement...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (errorMessage) {
-    return (
-      <div className="max-w-5xl mx-auto p-6">
-        <div className="bg-white rounded-xl border-2 border-red-500 shadow-sm p-12 text-center">
-          <p className="text-red-600 font-medium mb-4">{errorMessage}</p>
-          <button
-            onClick={() => navigate('/dezoom')}
-            className="font-body font-semibold px-6 py-2.5 text-white rounded-xl hover:-translate-y-0.5 transition"
-            style={{ backgroundColor: colors.brand.red }}
-          >
-            Retour au menu
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (!game) return null
+  if (!game && !isLoading && !errorMessage) return null
 
   const windowSpritePx = WINDOW_STEPS[stepIndex]
   const windowDisplayPx = windowSpritePx * DISPLAY_SCALE
   const windowOffset = ((96 - windowSpritePx) / 2) * DISPLAY_SCALE
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-6 text-gray-900">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-        {/* LEFT: Header + Response */}
-        <div className="md:col-span-1">
-          <Card
-            headerColor={colors.brand.red}
-            headerClassName="py-4"
-            header={
-              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: '#ffffff' }}>
-                DéZoom
-              </h1>
-            }
-            pokeballOpacity={0}
-            pokeballColor="white"
-          >
-            <div className="p-4 md:p-6 flex flex-col items-center gap-4">
-              <p className="font-heading text-sm text-center text-gray-500">
-                Identifie le Pokémon caché. Chaque mauvaise réponse révèle un peu plus !
-              </p>
-              <div className="flex flex-wrap gap-6 justify-center items-end">
-                <div className="text-center">
-                  <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Code</div>
-                  <div className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>{sessionCode}</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Tentatives</div>
-                  <div className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>{attemptCount}</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Temps</div>
-                  <Timer value={elapsed} mode="stopwatch" />
-                </div>
-              </div>
-              {selectedGenerations.length > 0 && selectedGenerations.length < 9 && (
-                <p className="font-heading text-xs" style={{ color: colors.ui.textMuted }}>
-                  {formatGenerations(selectedGenerations)}
-                </p>
-              )}
-            </div>
-          </Card>
-
+    <GameLayout
+      columns="1+2"
+      isLoading={isLoading}
+      error={errorMessage}
+      onErrorBack={() => navigate('/dezoom')}
+      errorBackLabel="Retour au menu"
+      errorBackColor={colors.brand.red}
+      header={
+        <GameHeader
+          title="DéZoom"
+          description="Identifie le Pokémon caché. Chaque mauvaise réponse révèle un peu plus !"
+          color={colors.brand.red}
+          sessionCode={sessionCode}
+          attemptCount={attemptCount}
+          elapsed={elapsed}
+          selectedGenerations={selectedGenerations}
+        />
+      }
+      left={
+        <>
           <Card
             pokeballOpacity={0}
             headerColor={colors.brand.red}
@@ -329,21 +269,20 @@ export default function DeZoomGamePage() {
               </div>
             </div>
           </Card>
-        </div>
-
-        {/* RIGHT: Sprite avec masque */}
-        <div className="md:col-span-2">
-          <Card
-            pokeballOpacity={0}
-            headerColor={colors.brand.red}
-            headerClassName="py-4"
-            header={
-              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: '#ffffff' }}>
-                Quel est ce Pokémon ?
-              </h1>
-            }
-          >
-            <div className="p-6 flex flex-col items-center justify-center gap-4">
+        </>
+      }
+      right={
+        <Card
+          pokeballOpacity={0}
+          headerColor={colors.brand.red}
+          headerClassName="py-4"
+          header={
+            <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: '#ffffff' }}>
+              Quel est ce Pokémon ?
+            </h1>
+          }
+        >
+          <div className="p-6 flex flex-col items-center justify-center gap-4">
               <div
                 style={{
                   position: 'relative',
@@ -355,7 +294,7 @@ export default function DeZoomGamePage() {
                 }}
               >
                 <img
-                  src={game.spriteUrl}
+                  src={game?.spriteUrl ?? ''}
                   alt="Pokémon mystère"
                   draggable={false}
                   style={{
@@ -387,8 +326,7 @@ export default function DeZoomGamePage() {
               </p>
             </div>
           </Card>
-        </div>
-      </div>
-    </div>
+      }
+    />
   )
 }

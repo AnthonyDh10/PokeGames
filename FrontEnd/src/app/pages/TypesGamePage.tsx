@@ -7,9 +7,10 @@ import Card from '../components/Card'
 import PixelButton from '../components/PixelButton'
 import SubCard from '../components/SubCard'
 import PokemonSearchInput from '../components/PokemonSearchInput'
-import Timer from '../components/Timer'
 import { getAllTypes, getTypesGame, submitTypesGuess } from '../services/typesGameService'
 import { getPartie } from '../services/partieService'
+import GameLayout from '../components/GameLayout'
+import GameHeader from '../components/GameHeader'
 import type { TypeSimpleDto, TypesGameDto, TypesGuessResultDto } from '../types/typesGame'
 import acierImg from '../components/images/acier.png'
 import combatImg from '../components/images/combat.png'
@@ -148,76 +149,32 @@ export default function TypesGamePage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="max-w-5xl mx-auto p-6">
-        <div className="bg-white border border-gray-200 shadow-px-sm p-12 text-center">
-          <p className="text-gray-500">Chargement...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (errorMessage) {
-    return (
-      <div className="max-w-5xl mx-auto p-6">
-        <div className="bg-white border-2 border-red-500 shadow-px-sm p-12 text-center">
-          <p className="text-red-600 font-medium mb-4">{errorMessage}</p>
-          <button
-            onClick={() => navigate('/types')}
-            className="font-body font-semibold px-6 py-2.5 text-white rounded hover:-translate-y-0.5 transition"
-            style={{ backgroundColor: colors.brand.yellow }}
-          >
-            Retour au menu
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (!game) return null
+  if (!game && !isLoading && !errorMessage) return null
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-6 text-gray-900">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-        {/* RIGHT: Header + Response */}
-        <div className="md:col-span-1">
-          {/* Header */}
-          <Card
-            headerColor={colors.brand.yellow}
-            headerClassName="py-4"
-            header={
-              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
-                Quel est ce type ?{game.isMono ? '' : ' (paire)'}
-              </h1>
-            }
-            pokeballOpacity={0}
-            pokeballColor="white"
-          >
-            <div className="p-4 md:p-6 flex flex-col items-center gap-4">
-              <p className="font-heading text-sm text-center text-gray-500">
-                {game.isMono
-                  ? 'Devine le type unique dont les interactions défensives sont affichées à droite.'
-                  : 'Devine la paire de types dont les interactions défensives combinées sont affichées à droite.'}
-              </p>
-              <div className="flex flex-wrap gap-6 justify-center items-end">
-                <div className="text-center">
-                  <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Code</div>
-                  <div className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>{sessionCode}</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Tentatives</div>
-                  <div className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>{attemptCount}</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Temps</div>
-                  <Timer value={elapsed} mode="stopwatch" />
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          {/* Response Form */}
+    <GameLayout
+      columns="1+2"
+      isLoading={isLoading}
+      error={errorMessage}
+      onErrorBack={() => navigate('/types')}
+      errorBackLabel="Retour au menu"
+      errorBackColor={colors.brand.yellow}
+      header={
+        <GameHeader
+          title={`Quel est ce type ?${game?.isMono ? '' : ' (paire)'}`}
+          description={
+            game?.isMono
+              ? 'Devine le type unique dont les interactions défensives sont affichées à droite.'
+              : 'Devine la paire de types dont les interactions défensives combinées sont affichées à droite.'
+          }
+          color={colors.brand.yellow}
+          sessionCode={sessionCode}
+          attemptCount={attemptCount}
+          elapsed={elapsed}
+        />
+      }
+      left={
+        <>
           <Card
             pokeballOpacity={0}
             headerColor={colors.brand.yellow}
@@ -231,22 +188,50 @@ export default function TypesGamePage() {
           >
             <div className="p-4 md:p-6">
               <form onSubmit={handleSubmit} className="space-y-4">
-                  {result && !result.isCorrect && (
-                    <p className="font-body text-red-600 text-sm">{result.message}</p>
-                  )}
+                {result && !result.isCorrect && (
+                  <p className="font-body text-red-600 text-sm">{result.message}</p>
+                )}
 
-                  <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <label className="font-body text-sm font-medium text-gray-600 block mb-1">
+                      {game?.isMono ? 'Type' : 'Type 1'}
+                    </label>
+                    {selectedType1 ? (
+                      <SubCard borderColor={colors.brand.yellowDark} bodyColor={colors.brand.white} className="px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          <TypeImage name={selectedType1.nameFr} className="h-7" />
+                          <button
+                            type="button"
+                            onClick={() => { setSelectedType1(null); setSearchTerm1('') }}
+                            className="ml-auto text-gray-400 hover:text-gray-600 text-lg leading-none"
+                            aria-label="Effacer"
+                          >×</button>
+                        </div>
+                      </SubCard>
+                    ) : (
+                      <PokemonSearchInput
+                        items={filteredTypes1}
+                        value={searchTerm1}
+                        onChange={setSearchTerm1}
+                        onSelect={(t) => { setSelectedType1(t); setSearchTerm1(t.nameFr) }}
+                        placeholder="Rechercher un type..."
+                      />
+                    )}
+                  </div>
+
+                  {!game?.isMono && (
                     <div>
                       <label className="font-body text-sm font-medium text-gray-600 block mb-1">
-                        {game.isMono ? 'Type' : 'Type 1'}
+                        Type 2
                       </label>
-                      {selectedType1 ? (
+                      {selectedType2 ? (
                         <SubCard borderColor={colors.brand.yellowDark} bodyColor={colors.brand.white} className="px-3 py-2">
                           <div className="flex items-center gap-2">
-                            <TypeImage name={selectedType1.nameFr} className="h-7" />
+                            <TypeImage name={selectedType2.nameFr} className="h-7" />
                             <button
                               type="button"
-                              onClick={() => { setSelectedType1(null); setSearchTerm1('') }}
+                              onClick={() => { setSelectedType2(null); setSearchTerm2('') }}
                               className="ml-auto text-gray-400 hover:text-gray-600 text-lg leading-none"
                               aria-label="Effacer"
                             >×</button>
@@ -254,98 +239,68 @@ export default function TypesGamePage() {
                         </SubCard>
                       ) : (
                         <PokemonSearchInput
-                          items={filteredTypes1}
-                          value={searchTerm1}
-                          onChange={setSearchTerm1}
-                          onSelect={(t) => { setSelectedType1(t); setSearchTerm1(t.nameFr) }}
+                          items={filteredTypes2}
+                          value={searchTerm2}
+                          onChange={setSearchTerm2}
+                          onSelect={(t) => { setSelectedType2(t); setSearchTerm2(t.nameFr) }}
                           placeholder="Rechercher un type..."
                         />
                       )}
                     </div>
+                  )}
+                </div>
 
-                    {!game.isMono && (
-                      <div>
-                        <label className="font-body text-sm font-medium text-gray-600 block mb-1">
-                          Type 2
-                        </label>
-                        {selectedType2 ? (
-                          <SubCard borderColor={colors.brand.yellowDark} bodyColor={colors.brand.white} className="px-3 py-2">
-                            <div className="flex items-center gap-2">
-                              <TypeImage name={selectedType2.nameFr} className="h-7" />
-                              <button
-                                type="button"
-                                onClick={() => { setSelectedType2(null); setSearchTerm2('') }}
-                                className="ml-auto text-gray-400 hover:text-gray-600 text-lg leading-none"
-                                aria-label="Effacer"
-                              >×</button>
-                            </div>
-                          </SubCard>
-                        ) : (
-                          <PokemonSearchInput
-                            items={filteredTypes2}
-                            value={searchTerm2}
-                            onChange={setSearchTerm2}
-                            onSelect={(t) => { setSelectedType2(t); setSearchTerm2(t.nameFr) }}
-                            placeholder="Rechercher un type..."
-                          />
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <PixelButton
-                    type="submit"
-                    disabled={isSubmitting || !selectedType1 || (!game.isMono && !selectedType2)}
-                    color={colors.brand.yellow}
-                    colorLight={colors.brand.yellowLight}
-                    colorDark={colors.brand.yellowWarm}
-                    colorBorder={colors.brand.yellowDark}
-                    className="h-12 w-full"
-                  >
-                    <span className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>
-                      {isSubmitting ? 'Vérification...' : 'Valider'}
-                    </span>
-                  </PixelButton>
-                </form>
+                <PixelButton
+                  type="submit"
+                  disabled={isSubmitting || !selectedType1 || (!game?.isMono && !selectedType2)}
+                  color={colors.brand.yellow}
+                  colorLight={colors.brand.yellowLight}
+                  colorDark={colors.brand.yellowWarm}
+                  colorBorder={colors.brand.yellowDark}
+                  className="h-12 w-full"
+                >
+                  <span className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>
+                    {isSubmitting ? 'Vérification...' : 'Valider'}
+                  </span>
+                </PixelButton>
+              </form>
             </div>
           </Card>
-        </div>
-
-        {/* RIGHT: Interactions */}
-        <div className="md:col-span-2">
-          <Card
-            pokeballOpacity={0}
-            headerColor={colors.brand.yellow}
-            headerClassName="py-4"
-            header={
-              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
-                Interactions défensives
-              </h1>
-            }
-          >
-            <div className="p-4 md:p-6">
-              <div className="grid grid-cols-1 gap-4">
-                {INTERACTION_ORDER.map((key) => {
-                  const typeNames = game.interactions[key] ?? []
-                  if (typeNames.length === 0) return null
-                  return (
-                    <SubCard key={key} borderColor={colors.brand.yellowDark} bodyColor={colors.brand.white} className="p-3">
-                      <h3 className="font-heading font-semibold text-sm mb-2" style={{ color: colors.ui.textMuted }}>
-                        {INTERACTION_LABELS[key]}
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {typeNames.map((name) => (
-                          <TypeImage key={name} name={name} />
-                        ))}
-                      </div>
-                    </SubCard>
-                  )
-                })}
-              </div>
+        </>
+      }
+      right={
+        <Card
+          pokeballOpacity={0}
+          headerColor={colors.brand.yellow}
+          headerClassName="py-4"
+          header={
+            <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
+              Interactions défensives
+            </h1>
+          }
+        >
+          <div className="p-4 md:p-6">
+            <div className="grid grid-cols-1 gap-4">
+              {INTERACTION_ORDER.map((key) => {
+                const typeNames = game?.interactions[key] ?? []
+                if (typeNames.length === 0) return null
+                return (
+                  <SubCard key={key} borderColor={colors.brand.yellowDark} bodyColor={colors.brand.white} className="p-3">
+                    <h3 className="font-heading font-semibold text-sm mb-2" style={{ color: colors.ui.textMuted }}>
+                      {INTERACTION_LABELS[key]}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {typeNames.map((name) => (
+                        <TypeImage key={name} name={name} />
+                      ))}
+                    </div>
+                  </SubCard>
+                )
+              })}
             </div>
-          </Card>
-        </div>
-      </div>
-    </div>
+          </div>
+        </Card>
+      }
+    />
   )
 }

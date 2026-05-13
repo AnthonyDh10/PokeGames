@@ -33,8 +33,7 @@ export default function PokeDescHeader({
   currentTimePenalty,
 }: PokeDescHeaderProps) {
   return (
-    <div className="mb-4">
-      <Card
+    <Card
         headerColor={colors.brand.blue}
         headerClassName="py-4"
         header={
@@ -98,6 +97,5 @@ export default function PokeDescHeader({
           </div>
         </div>
       </Card>
-    </div>
   )
 }
