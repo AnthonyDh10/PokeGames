@@ -183,7 +183,6 @@ export default function ResultatsDeZoomPage() {
   const opponentResult = isPlayer1 ? results.player2 : results.player1
 
   const myName = playerName || 'Moi'
-  const opponentName = 'Adversaire'
 
   const iWon = !isSolo && results.bothFinished
     && myResult.elapsedSeconds !== undefined
@@ -262,75 +261,23 @@ export default function ResultatsDeZoomPage() {
       pokeballOpacity={0}
     >
       <div className="p-6">
-        {!isSolo && !results.bothFinished && (
-          <p className="text-center font-medium" style={{ color: colors.brand.red }}>
-            ⏳ En attente de la fin de partie de l'adversaire...
-          </p>
-        )}
-
         <h3 className="font-heading text-center text-xl mb-6 uppercase tracking-widest" style={{ color: colors.brand.redDark }}>
           SCORES FINAUX
         </h3>
-
-        <div className={`grid ${isSolo ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-2'} gap-6`}>
-          <div className="flex flex-col space-y-3 w-full">
-            <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.redDark }}>
-              {myName}
-            </div>
-
-            {myResult.elapsedSeconds !== undefined ? (
-              <>
-                <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.redDark }}>
-                  <span className="font-heading font-bold text-sm text-gray-600">TEMPS</span>
-                  <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.redDark }}>
-                    {formatElapsed(myResult.elapsedSeconds)}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 gap-2">
-                  <div 
-                    className="p-2 bg-white border-2 transition-transform hover:-translate-y-0.5"
-                    style={{ borderColor: colors.brand.redDark, boxShadow: `3px 3px 0px ${colors.brand.redDark}` }}
-                  >
-                    <div className="text-[10px] text-gray-500 mb-1">TENTATIVE(S)</div>
-                    <div className="font-bold text-lg text-gray-800">{myResult.attemptCount}</div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="text-gray-400 italic py-4">—</div>
-            )}
-          </div>
-
+        <div className={`flex flex-col md:flex-row items-stretch gap-4 ${isSolo ? 'justify-center' : ''}`}>
+          <PlayerCard name={myName} playerResult={myResult} isWinner={iWon} />
           {!isSolo && (
-            <div className="flex flex-col space-y-3 w-full">
-              <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.redDark }}>
-                {opponentName}
+            <>
+              <div className="flex items-center justify-center text-2xl font-bold px-2 py-4 md:py-0" style={{ color: colors.ui.textMuted }}>
+                VS
               </div>
-
-              {opponentResult?.elapsedSeconds !== undefined ? (
-                <>
-                  <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.redDark }}>
-                    <span className="font-heading font-bold text-sm text-gray-600">TEMPS</span>
-                    <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.redDark }}>
-                      {formatElapsed(opponentResult.elapsedSeconds)}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-2">
-                    <div 
-                      className="p-2 bg-white border-2 transition-transform hover:-translate-y-0.5"
-                      style={{ borderColor: colors.brand.redDark, boxShadow: `3px 3px 0px ${colors.brand.redDark}` }}
-                    >
-                      <div className="text-[10px] text-gray-500 mb-1">TENTATIVE(S)</div>
-                      <div className="font-bold text-lg text-gray-800">{opponentResult.attemptCount}</div>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="font-heading animate-pulse" style={{ color: colors.brand.red }}>⏳ EN ATTENTE...</div>
-              )}
-            </div>
+              <PlayerCard
+                name="Adversaire"
+                playerResult={opponentResult!}
+                isWinner={opponentWon}
+                pending={!results.bothFinished && !(opponentResult?.hasFinished)}
+              />
+            </>
           )}
         </div>
       </div>
@@ -349,9 +296,10 @@ export default function ResultatsDeZoomPage() {
 
       <Card
         pokeballOpacity={0}
+        headerColor={colors.brand.redDeep}
+        headerClassName="py-4"
         showHeader={false}
         borderColor={colors.brand.redDeep}
-        bodyColor={colors.brand.white}
       >
         <div className="p-6 flex flex-col items-center gap-4">
           <img
@@ -363,7 +311,7 @@ export default function ResultatsDeZoomPage() {
               imageRendering: 'pixelated',
             }}
           />
-          <p className="font-display" style={{ color: colors.ui.textMuted }}>
+          <p className="font-display" style={{ color: colors.ui.textPrimary }}>
             C'était... <strong style={{ fontSize: '1.5rem', color: colors.brand.redDeep }}>{results.correctPokemonNameFr}</strong>
           </p>
         </div>
@@ -373,11 +321,18 @@ export default function ResultatsDeZoomPage() {
 
   return (
     <GameResultsLayout
-      title="DEX-ZOOM"
+      title="Résultats — DéZoom"
       sessionCode={state?.sessionCode}
       pokeballColor={colors.brand.red}
       bodyColor={colors.brand.red}
-      textColor="white"
+      textColor="#ffffff"
+      topAlert={
+        !isSolo && !results.bothFinished ? (
+          <p className="text-orange-500 font-medium mt-2 animate-pulse">
+            ⏳ En attente de la fin de partie de l'adversaire...
+          </p>
+        ) : undefined
+      }
       scores={scoresSection}
       details={detailsSection}
       actions={
