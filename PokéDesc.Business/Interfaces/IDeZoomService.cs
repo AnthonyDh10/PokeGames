@@ -28,6 +28,8 @@ public class DeZoomGameResultsDto
     public DeZoomPlayerResultDto Player1 { get; set; } = new();
     public DeZoomPlayerResultDto? Player2 { get; set; }
     public bool BothFinished { get; set; }
+    // Générations sélectionnées pour la partie (1..9)
+    public List<int>? Generations { get; set; }
 }
 
 public class DeZoomRematchStatusDto

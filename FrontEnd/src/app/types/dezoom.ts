@@ -22,6 +22,7 @@ export interface DeZoomGameResultsDto {
   player1: DeZoomPlayerResultDto
   player2?: DeZoomPlayerResultDto
   bothFinished: boolean
+  generations?: number[]
 }
 
 export interface DeZoomRematchStatusDto {

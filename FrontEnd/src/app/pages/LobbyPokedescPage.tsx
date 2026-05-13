@@ -19,11 +19,7 @@ const THEME = {
   primaryLight: colors.brand.blueLight,
   primaryDark: colors.brand.blueDark,
   textOnColor: '#ffffff',
-  background: {
-    colorLeft: colors.brand.white,
-    colorStripe: colors.brand.blueDark,
-    colorRight: colors.brand.blue,
-  },
+  borderColor: colors.brand.blueDeep,
 }
 
 export default function LobbyPokedescPage() {

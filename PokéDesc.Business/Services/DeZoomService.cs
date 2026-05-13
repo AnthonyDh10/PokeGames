@@ -198,6 +198,7 @@ public class DeZoomService : IDeZoomService
                 },
                 Player2 = player2,
                 BothFinished = state.IsGuessedJ1 && (state.DresseurId2 == null || state.IsGuessedJ2),
+                Generations = state.SelectedGenerations,
             };
         }
     }

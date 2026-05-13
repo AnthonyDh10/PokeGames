@@ -83,10 +83,11 @@ export default function ResultatsDeZoomPage() {
   }
 
   async function handleRelaunchClick() {
+    if (!results) return
     setIsRelaunching(true)
     try {
       const newPartie = await createPartie(sessionId)
-      await startPartie(newPartie.id, true, { nbPokemons: 1, generations: [1, 2, 3, 4, 5, 6, 7, 8], timerDuration: -1 })
+      await startPartie(newPartie.id, true, { nbPokemons: 1, generations: results.generations ?? [1, 2, 3, 4, 5, 6, 7, 8, 9], timerDuration: -1 })
       navigate(`/dezoom/${newPartie.id}`)
     } catch {
       setErrorMessage('Erreur lors du relancement de la partie.')
@@ -95,10 +96,20 @@ export default function ResultatsDeZoomPage() {
   }
 
   async function handleNewGame() {
+    if (!results) return
     setIsCreatingNew(true)
     try {
       const newPartie = await createPartie(sessionId)
-      navigate('/dezoom', { state: { existingPartieId: newPartie.id } })
+      navigate('/dezoom', {
+        state: {
+          existingPartieId: newPartie.id,
+          previousSettings: {
+            nbPokemons: 1,
+            generations: results.generations ?? [1, 2, 3, 4, 5, 6, 7, 8, 9],
+            timerDuration: 60,
+          },
+        },
+      })
     } catch {
       setErrorMessage('Erreur lors de la création de la partie.')
       setIsCreatingNew(false)

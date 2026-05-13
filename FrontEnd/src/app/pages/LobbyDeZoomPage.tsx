@@ -13,20 +13,18 @@ const THEME = {
   primaryLight: colors.brand.pokeballRed,
   primaryDark: colors.brand.redDark,
   textOnColor: '#ffffff',
-  background: {
-    colorLeft: colors.ui.bgLeftGame,
-    colorStripe: colors.brand.redDark,
-    colorRight: colors.brand.red,
-  },
+  borderColor: colors.brand.redDeep,
 }
 
 export default function LobbyDeZoomPage() {
   const location = useLocation()
   const previousSettings = (location.state as { previousSettings?: GameSettings } | null)?.previousSettings
 
-  const [settings, setSettings] = useState<GameSettings>(
-    previousSettings ?? { nbPokemons: 1, generations: [...ALL_GENERATIONS] }
-  )
+  const [settings, setSettings] = useState<GameSettings>({
+    nbPokemons: previousSettings?.nbPokemons ?? 1,
+    generations: previousSettings?.generations ?? [...ALL_GENERATIONS],
+    timerDuration: previousSettings?.timerDuration ?? 60,
+  })
 
   function toggleGeneration(gen: number) {
     setSettings((prev) => {

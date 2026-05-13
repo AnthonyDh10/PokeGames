@@ -6,11 +6,7 @@ const THEME = {
   primaryLight: colors.brand.yellowLight,
   primaryDark: colors.brand.yellowWarm,
   textOnColor: colors.ui.textPrimary,
-  background: {
-    colorLeft: colors.ui.bgLeftGame,
-    colorStripe: colors.brand.yellowWarm,
-    colorRight: colors.brand.yellow,
-  },
+  borderColor: colors.brand.yellowDark,
 }
 
 export default function LobbyTypesPage() {

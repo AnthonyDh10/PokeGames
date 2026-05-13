@@ -19,6 +19,7 @@ export interface LobbyTheme {
   primary: string
   primaryLight: string
   primaryDark: string
+  borderColor: string
   textOnColor: string
 }
 
@@ -299,10 +300,10 @@ export default function LobbyPage({
                 disabled={!pseudoInput.trim()}
                 className="font-heading w-full"
                 innerClassName="flex items-center justify-center w-full h-full px-4 py-3"
-                colorBorder={theme.primaryDark}
-                colorLight={theme.primaryDark}
-                colorDark={theme.primary}
-                color={theme.primaryDark}
+                colorBorder={theme.borderColor}
+                colorLight={theme.primaryLight}
+                colorDark={theme.primaryDark}
+                color={theme.primary}
               >
                 <span style={{ color: theme.textOnColor }} className="font-semibold">Continuer</span>
               </PixelButton>
@@ -332,7 +333,7 @@ export default function LobbyPage({
             <div className="inline-flex justify-center">
               <SubCard 
                 borderColor={colors.brand.white} 
-                bodyColor={colors.brand.blueLight} 
+                bodyColor={theme.primaryLight} 
                 borderThickness="p-[2px]"
               >
                 {/* On force le flex-row ici pour s'assurer que le code et le bouton soient sur la même ligne */}
@@ -448,7 +449,7 @@ export default function LobbyPage({
                     disabled={isLoading}
                     className="inline-flex items-center gap-2 mx-4"
                     innerClassName="inline-flex items-center gap-2 px-6 py-2.5"
-                    colorBorder={colors.brand.blueDeep}
+                    colorBorder={theme.borderColor}
                     colorLight={theme.primaryLight}
                     colorDark={theme.primaryDark}
                     color={theme.primary}
@@ -474,10 +475,10 @@ export default function LobbyPage({
               onClick={handleCancel}
               className="inline-flex items-center gap-2 mx-4"
               innerClassName="inline-flex items-center gap-2 px-6 py-2.5"
-              colorBorder={colors.brand.redDeep}
-              colorLight={colors.brand.redLight}
-              colorDark={colors.brand.redDark}
-              color={colors.brand.red}
+              colorBorder={colors.ui.grayBorderDark}
+              colorLight={colors.ui.grayLight}
+              colorDark={colors.ui.grayDark}
+              color={colors.ui.grayMid}
             >
               <span style={{ color: '#ffffff' }} className="font-semibold font-heading">Annuler</span>
             </PixelButton>
@@ -565,7 +566,7 @@ export default function LobbyPage({
               disabled={isLoading}
               className="w-full mt-auto mb-2"
               innerClassName="flex items-center justify-center w-full h-full px-4 py-2.5"
-              colorBorder={colors.brand.blueDeep}
+              colorBorder={theme.borderColor}
               colorLight={theme.primaryLight}
               colorDark={theme.primaryDark}
               color={theme.primary}
@@ -620,7 +621,7 @@ export default function LobbyPage({
               disabled={isLoading}
               className="w-full mt-auto mb-2"
               innerClassName="flex items-center justify-center w-full h-full px-4 py-2.5"
-              colorBorder={colors.brand.blueDeep}
+              colorBorder={theme.borderColor}
               colorLight={theme.primaryLight}
               colorDark={theme.primaryDark}
               color={theme.primaryLight}
