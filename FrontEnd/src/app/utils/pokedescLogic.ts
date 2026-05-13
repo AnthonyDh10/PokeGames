@@ -33,6 +33,45 @@ export function formatGenerations(generations: number[], isShort: boolean = fals
   return `${prefix} ${sorted.join(',')}`
 }
 
+export function getGenerationsDisplay(generations: number[] | undefined): { label: string; value: string } | null {
+  if (!generations || generations.length === 0) return null
+
+  const sorted = [...generations].sort((a, b) => a - b)
+
+  // Si toutes les générations (1-8)
+  if (sorted.length === 8 && sorted[0] === 1 && sorted[7] === 8) {
+    return {
+      label: 'Générations sélectionnées :',
+      value: '1 à 8'
+    }
+  }
+
+  // Vérifier si consécutives depuis le début
+  let isConsecutiveFromStart = true
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] !== sorted[i - 1] + 1) {
+      isConsecutiveFromStart = false
+      break
+    }
+  }
+  if (sorted[0] !== 1) {
+    isConsecutiveFromStart = false
+  }
+
+  if (isConsecutiveFromStart) {
+    return {
+      label: 'Générations sélectionnées :',
+      value: `1 à ${sorted[sorted.length - 1]}`
+    }
+  }
+
+  // Sinon afficher juste les numéros séparés par des virgules
+  return {
+    label: 'Générations sélectionnées :',
+    value: sorted.join(',')
+  }
+}
+
 export function isHintLocked(
   hintKey: string,
   usedHints: string[],
