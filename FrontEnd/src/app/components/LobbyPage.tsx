@@ -5,7 +5,6 @@ import { PokeballDecor } from './Pokeball'
 import Card from './Card'
 import PixelButton, { pixelClipPathSm, pixelClipPathLg } from './PixelButton'
 import { useSessionStore } from '../store/sessionStore'
-import { useBackgroundStore } from '../store/backgroundStore'
 import { useChatStore } from '../store/chatStore'
 import { createPartie, joinPartie, getPartie, startPartie, updateGameSettings } from '../services/partieService'
 import type { PartieDto } from '../types/partie'
@@ -49,7 +48,6 @@ export default function LobbyPage({
   const navigate = useNavigate()
   const location = useLocation()
   const { sessionId, playerName, setPlayerName } = useSessionStore()
-  const { setBackground } = useBackgroundStore()
   const { setContext: setChatContext, clearContext: clearChatContext } = useChatStore()
 
   const [pseudoInput, setPseudoInput] = useState('')

@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { useSessionStore } from '../store/sessionStore'
-import { useBackgroundStore } from '../store/backgroundStore'
 import { useChatStore } from '../store/chatStore'
 import { colors } from '../design/colors'
 import Card from '../components/Card'
@@ -45,16 +44,7 @@ export default function DeZoomGamePage() {
   const { partieId } = useParams<{ partieId: string }>()
   const navigate = useNavigate()
   const { sessionId } = useSessionStore()
-  const { setBackground } = useBackgroundStore()
   const { setContext: setChatContext } = useChatStore()
-
-  useEffect(() => {
-    setBackground({
-      colorLeft: colors.ui.bgLeftGame,
-      colorStripe: colors.brand.redDark,
-      colorRight: colors.brand.red,
-    })
-  }, [])
 
   const [game, setGame] = useState<DeZoomGameDto | null>(null)
   const [pokemons, setPokemons] = useState<PokemonDto[]>([])

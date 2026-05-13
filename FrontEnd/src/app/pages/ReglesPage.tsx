@@ -4,7 +4,6 @@ import { useNavigate } from "react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import GameCard from "../components/GameCard";
 import SectionTitle from "../components/SectionTitle";
-import { useBackgroundStore } from "../store/backgroundStore";
 import { useNavDirectionStore } from "../store/navDirectionStore";
 import { colors } from "../design/colors";
 import oak from "../components/images/oak.png";
@@ -331,15 +330,10 @@ const cardsVariants = {
 };
 
 export default function ReglesPage() {
-  const { setBackground } = useBackgroundStore();
   const { direction, setDirection } = useNavDirectionStore();
   const navigate = useNavigate();
   const [openModal, setOpenModal] = useState<keyof typeof GAME_RULES | null>(null);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
-
-  useEffect(() => {
-    setBackground({ colorLeft: colors.ui.bgLeft, colorStripe: colors.ui.bgStripe, colorRight: colors.ui.bgRight });
-  }, []);
 
   const handleOpenModal = (gameKey: keyof typeof GAME_RULES) => {
     setOpenModal(gameKey);

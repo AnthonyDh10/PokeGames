@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import GameCard from "../components/GameCard";
-import { useBackgroundStore } from "../store/backgroundStore";
 import { useChatStore } from "../store/chatStore";
 import { colors } from "../design/colors";
 import pokeballFace from "../components/images/pokéball_face.png";
@@ -81,7 +80,6 @@ const games: Game[] = [
 ];
 
 export default function HomePage() {
-  const { setBackground } = useBackgroundStore();
   const { clearContext, setOpen } = useChatStore();
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -133,11 +131,6 @@ export default function HomePage() {
     gifRef.current = img;
   }, []);
 
-  useEffect(() => {
-    setBackground({ colorLeft: colors.ui.bgLeft, colorStripe: colors.ui.bgStripe, colorRight: colors.ui.bgRight });
-    clearContext();
-    setOpen(false);
-  }, [setBackground, clearContext, setOpen]);
 
   const handlePokeballClick = (index: number) => {
     setSelectedIndex(prev => prev === index ? null : index);

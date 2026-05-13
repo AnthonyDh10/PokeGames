@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { useSessionStore } from '../store/sessionStore'
-import { useBackgroundStore } from '../store/backgroundStore'
 import { useChatStore } from '../store/chatStore'
 import { colors } from '../design/colors'
 import Card from '../components/Card'
@@ -61,7 +60,6 @@ export default function TypesGamePage() {
   const { partieId } = useParams<{ partieId: string }>()
   const navigate = useNavigate()
   const { sessionId } = useSessionStore()
-  const { setBackground } = useBackgroundStore()
   const { setContext: setChatContext } = useChatStore()
 
   const [types, setTypes] = useState<TypeSimpleDto[]>([])
