@@ -88,7 +88,7 @@ export default function ResultatsDeZoomPage() {
     setIsRelaunching(true)
     try {
       const newPartie = await createPartie(sessionId)
-      await startPartie(newPartie.id, true, { nbPokemons: 1, generations: results.generations ?? [1, 2, 3, 4, 5, 6, 7, 8, 9], timerDuration: -1 })
+      await startPartie(newPartie.id, true, { nbPokemons: 1, generations: results.generations ?? [1, 2, 3, 4, 5, 6, 7, 8, 9], timerDuration: -1 }, 'DeZoom')
       navigate(`/dezoom/${newPartie.id}`)
     } catch {
       setErrorMessage('Erreur lors du relancement de la partie.')
