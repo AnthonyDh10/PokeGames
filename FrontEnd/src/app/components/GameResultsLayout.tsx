@@ -23,7 +23,7 @@ export default function GameResultsLayout({
   actions,
   pokeballColor,
   textColor = colors.brand.white,
-  bodyColor = colors.ui.background
+  bodyColor = colors.brand.white,
 }: GameResultsLayoutProps) {
   return (
     <div className="max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6 md:gap-8">
