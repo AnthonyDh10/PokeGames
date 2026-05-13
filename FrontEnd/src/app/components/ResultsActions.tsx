@@ -23,7 +23,7 @@ interface ResultsActionsProps {
   buttonColorDark: string
   buttonColorLight: string
   buttonColorBorder: string
-  
+
   menuColor?: string
 
   // Désactiver "Nouvelle partie" tant que bothFinished est false
@@ -136,22 +136,23 @@ export default function ResultsActions({
               onMouseEnter={() => setSelectedIndex(index)}
               onClick={() => !opt.disabled && opt.onClick()}
               className={`
-                flex items-center gap-3 cursor-pointer select-none transition-opacity
-                font-heading font-semibold tracking-wide
-                ${opt.disabled ? 'opacity-40 cursor-not-allowed' : 'opacity-100'}
-              `}
-              style={{ 
-                fontSize: '1.5rem',
-                color: opt.id === 'menu' && menuColor ? menuColor : 'white'
-              }}
+                  flex items-center gap-3 cursor-pointer select-none transition-opacity
+                  font-heading font-semibold tracking-wide
+                  ${opt.disabled ? 'opacity-40 cursor-not-allowed' : 'opacity-100'}
+                `}
+                style={{
+                  fontSize: '1.5rem',
+                  color: (['menu', 'nouvelle', 'relancer', 'revanche'].includes(opt.id) && menuColor)
+                    ? menuColor
+                    : 'white',
+                }}
             >
               {/* L'indicateur de sélection */}
-              <span 
-                className="text-white"
-                style={{ visibility: isSelected ? 'visible' : 'hidden' }}
-              >
-                ▶
-              </span>
+                <span
+                  style={{ visibility: isSelected ? 'visible' : 'hidden', color: opt.disabled ? buttonColorLight : 'inherit' }}
+                >
+                  ▶
+                </span>
               
               {/* Le texte du choix */}
               <span style={{ color: opt.disabled ? buttonColorLight : 'inherit' }}>

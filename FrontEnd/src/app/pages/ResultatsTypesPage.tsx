@@ -230,76 +230,6 @@ export default function ResultatsTypesPage() {
       : results.correctType1NameFr)
     : null
 
-  function PlayerCard({
-    name,
-    playerResult,
-    isWinner,
-    pending = false,
-  }: {
-    name: string
-    playerResult: typeof myResult
-    isWinner: boolean
-    pending?: boolean
-  }) {
-    return (
-      <Card
-        headerColor={isWinner ? colors.brand.yellowWarm : colors.brand.yellowLight}
-        pokeballColor={isWinner ? colors.brand.yellowWarm : colors.brand.yellowLight}
-        headerClassName="py-3"
-        header={
-          <h2 className="font-heading text-lg tracking-wide" style={{ color: colors.ui.textPrimary }}>
-            {name} {isWinner && (
-              <span style={{ filter: 'grayscale(1)', marginLeft: '0.5rem' }}>
-                👑
-              </span>
-            )}
-          </h2>
-        }
-        className="flex-1 transition-all"
-        style={{
-          borderColor: isWinner ? colors.brand.white : undefined,
-          boxShadow: isWinner ? `0 8px 24px ${colors.ui.textPrimary}40` : undefined,
-        }}
-      >
-        <div className="p-6 flex flex-col h-full text-center">
-          {pending && (
-            <span
-              className="mx-auto inline-block text-xs font-medium px-2 py-1 rounded-full mb-3 animate-pulse border"
-              style={{
-                backgroundColor: `${colors.game.hint}1A`,
-                color: colors.brand.yellowWarm,
-                borderColor: colors.game.hint,
-              }}
-            >
-              ⏳ En cours...
-            </span>
-          )}
-
-          {playerResult.elapsedSeconds !== undefined ? (
-            <>
-              <div className="text-4xl font-bold my-2" style={{ color: colors.ui.textPrimary }}>
-                {formatElapsed(playerResult.elapsedSeconds)}
-              </div>
-              <div className="mt-auto flex justify-center">
-                <div
-                  className="px-3 py-2 border-2 bg-white font-heading text-xs uppercase tracking-widest text-gray-800"
-                  style={{
-                    borderColor: isWinner ? colors.brand.yellowWarm : colors.brand.yellowDark,
-                    boxShadow: `3px 3px 0px ${isWinner ? colors.brand.yellowWarm : colors.brand.yellowDark}`,
-                  }}
-                >
-                  {playerResult.attemptCount} tentative{(playerResult.attemptCount ?? 0) > 1 ? 's' : ''}
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="text-gray-400 italic py-4">—</div>
-          )}
-        </div>
-      </Card>
-    )
-  }
-
   const scoresSection = (
     <Card
       borderColor={colors.brand.yellowDark}
@@ -307,32 +237,97 @@ export default function ResultatsTypesPage() {
       pokeballOpacity={0}
     >
       <div className="p-6">
+        {!isSolo && !results.bothFinished && (
+            <p className="text-orange-500 font-medium text-center">
+              ⏳ En attente de la fin de partie de l'adversaire...
+            </p>
+        )}
+        
         <h3 className="font-heading text-center text-xl mb-6 uppercase tracking-widest" style={{ color: colors.brand.yellowWarm }}>
           SCORES FINAUX
         </h3>
-        <div className={`flex flex-col md:flex-row items-stretch gap-4 ${isSolo ? 'justify-center' : ''}`}>
-          <PlayerCard
-            name={myName}
-            playerResult={myResult}
-            isWinner={iWon}
-          />
+        
+        <div className={`grid ${isSolo ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-2'} gap-6`}>
+          {/* Joueur 1 */}
+          <div className="flex flex-col space-y-3 w-full">
+            <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.yellowWarm }}>
+              {myName}
+            </div>
+            
+            {myResult.elapsedSeconds !== undefined ? (
+              <>
+                <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.yellowWarm }}>
+                  <span className="font-heading font-bold text-sm text-gray-600">TEMPS</span>
+                  <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.yellowWarm }}>
+                    {formatElapsed(myResult.elapsedSeconds)}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-2">
+                  <div 
+                    className="p-2 bg-white border-2 transition-transform hover:-translate-y-0.5"
+                    style={{ borderColor: colors.brand.yellowWarm, boxShadow: `3px 3px 0px ${colors.brand.yellowWarm}` }}
+                  >
+                    <div className="text-[10px] text-gray-500 mb-1">TENTATIVE(S)</div>
+                    <div className="font-bold text-lg text-gray-800">{myResult.attemptCount}</div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="text-gray-400 italic py-4">—</div>
+            )}
+          </div>
+          
+          {/* Joueur 2 (si multijoueur) */}
           {!isSolo && (
-            <>
-              <div
-                className="flex items-center justify-center text-2xl font-bold px-2 py-4 md:py-0"
-                style={{ color: colors.ui.textMuted }}
-              >
-                VS
+            <div className="flex flex-col space-y-3 w-full">
+              <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.yellowWarm }}>
+                {opponentName}
               </div>
-              <PlayerCard
-                name={opponentName}
-                playerResult={opponentResult!}
-                isWinner={opponentWon}
-                pending={!results.bothFinished && !(opponentResult?.hasFinished)}
-              />
-            </>
+              
+              {opponentResult?.elapsedSeconds !== undefined ? (
+                <>
+                  <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.yellowWarm }}>
+                    <span className="font-heading font-bold text-sm text-gray-600">TEMPS</span>
+                    <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.yellowWarm }}>
+                      {formatElapsed(opponentResult.elapsedSeconds)}
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-2">
+                    <div 
+                      className="p-2 bg-white border-2 transition-transform hover:-translate-y-0.5"
+                      style={{ borderColor: colors.brand.yellowWarm, boxShadow: `3px 3px 0px ${colors.brand.yellowWarm}` }}
+                    >
+                      <div className="text-[10px] text-gray-500 mb-1">TENTATIVE(S)</div>
+                      <div className="font-bold text-lg text-gray-800">{opponentResult.attemptCount}</div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="font-heading animate-pulse text-orange-500 py-4">⏳ EN ATTENTE...</div>
+              )}
+            </div>
           )}
         </div>
+        
+        {correctAnswer && (
+          <div className="mt-6 pt-6 border-t border-gray-300 text-center">
+            <p className="text-sm font-heading uppercase tracking-widest text-gray-600 mb-3">
+              Réponse 
+            </p>
+            <div className="flex justify-center gap-3 items-center">
+              {results.correctType1NameFr && (
+                <TypeImage name={results.correctType1NameFr} className="h-12" />
+              )}
+              {results.correctType2NameFr && (
+                <>
+                  <TypeImage name={results.correctType2NameFr} className="h-12" />
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </Card>
   )
@@ -351,11 +346,8 @@ export default function ResultatsTypesPage() {
         pokeballOpacity={0}
         headerColor={colors.brand.yellowLight}
         headerClassName="py-4"
-        header={
-          <h2 className="font-heading text-xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
-            Interactions défensives{correctAnswer && ` — ${correctAnswer}`}
-          </h2>
-        }
+        showHeader={false}
+        borderColor={colors.brand.yellowDark}
       >
         <div className="p-4 md:p-6">
           <div className="grid grid-cols-1 gap-4">
@@ -383,18 +375,11 @@ export default function ResultatsTypesPage() {
 
   return (
     <GameResultsLayout
-      title="Résultats — Quel est ce type ?"
+      title="Résultats"
       sessionCode={state?.sessionCode}
-      pokeballColor={colors.brand.yellow}
+      pokeballColor={colors.ui.textMuted}
       bodyColor={colors.brand.yellow}
-      textColor={colors.ui.textPrimary}
-      topAlert={
-        !isSolo && !results.bothFinished ? (
-          <p className="text-orange-500 font-medium mt-2 animate-pulse">
-            ⏳ En attente de la fin de partie de l'adversaire...
-          </p>
-        ) : undefined
-      }
+      textColor={colors.ui.textMuted}
       scores={scoresSection}
       details={detailsSection}
       actions={
@@ -411,6 +396,7 @@ export default function ResultatsTypesPage() {
           buttonColorDark={colors.brand.yellowWarm}
           buttonColorLight={colors.brand.yellowLight}
           buttonColorBorder={colors.brand.yellowWarm}
+          menuColor={colors.ui.textMuted}
         />
       }
     />
