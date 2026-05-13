@@ -120,7 +120,7 @@ export default function LobbyPokedescPage() {
               <label className="font-heading block text-sm font-medium mb-3" style={{ color: colors.ui.textMuted }}>
                 Durée du timer :{' '}
                 <span className="font-bold" style={{ color: colors.brand.blue }}>
-                  {displayTimer === -1 ? '∞' : `${displayTimer}s`}
+                  {displayTimer === -1 ? 'Infini' : `${displayTimer}s`}
                 </span>
               </label>
               <div className="flex gap-2">

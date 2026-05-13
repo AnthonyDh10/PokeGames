@@ -158,6 +158,7 @@ export default function ResultatsPage() {
           previousSettings: {
             nbPokemons: partie.nbPokemons,
             generations: partie.selectedGenerations,
+            timerDuration: partie.timerDurationSeconds,
           },
         },
       })
