@@ -8,6 +8,7 @@ import GameResultsLayout from '../components/GameResultsLayout'
 import ResultsActions from '../components/ResultsActions'
 import Card from '../components/Card'
 import SubCard from '../components/SubCard'
+import WinnerCard from '../components/WinnerCard'
 import { colors } from '../design/colors'
 import type { DeZoomGameResultsDto } from '../types/dezoom'
 
@@ -256,11 +257,12 @@ export default function ResultatsDeZoomPage() {
   }
 
   const scoresSection = (
-    <Card
-      borderColor={colors.brand.redDeep}
-      className="border-4 bg-slate-50 overflow-hidden shadow-[8px_8px_0px_rgba(0,0,0,0.1)]"
-      pokeballOpacity={0}
-    >
+    <div className="flex flex-col gap-6">
+      <Card
+        borderColor={colors.brand.redDeep}
+        className="border-4 bg-slate-50 overflow-hidden shadow-[8px_8px_0px_rgba(0,0,0,0.1)]"
+        pokeballOpacity={0}
+      >
       <div className="p-6">
         {!isSolo && !results.bothFinished && (
           <p className="text-center font-medium" style={{ color: colors.brand.red }}>
@@ -335,6 +337,16 @@ export default function ResultatsDeZoomPage() {
         </div>
       </div>
     </Card>
+      {!isSolo && (
+        <WinnerCard
+          winner={iWon ? myName : (opponentWon ? opponentName : null)}
+          isSolo={isSolo}
+          bothFinished={results.bothFinished}
+          borderColor={colors.brand.redDeep}
+          mainColor={colors.brand.red}
+        />
+      )}
+    </div>
   )
 
   const detailsSection = (

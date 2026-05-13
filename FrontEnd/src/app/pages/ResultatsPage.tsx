@@ -9,6 +9,7 @@ import Card from '../components/Card'
 import GameResultsLayout from '../components/GameResultsLayout'
 import ResultsActions from '../components/ResultsActions'
 import HPBar from '../components/HPBar'
+import WinnerCard from '../components/WinnerCard'
 import { colors } from '../design/colors'
 import type { PartieDto, CompletedPokemonDto } from '../types/partie'
 
@@ -174,13 +175,28 @@ export default function ResultatsPage() {
 
   // --- RENDU DES SECTIONS ---
 
+  const j1Wins = !isSolo && partie.scoreJ1 > partie.scoreJ2
+  const j2Wins = !isSolo && partie.scoreJ2 > partie.scoreJ1
+  const winnerName = j1Wins ? player1Name : (j2Wins ? player2Name : null)
+
   const scoresSection = (
-    <FinalScoreBars 
-      partie={partie} 
-      player1Name={player1Name} 
-      player2Name={player2Name} 
-      isSolo={isSolo} 
-    />
+    <div className="flex flex-col gap-6">
+      <FinalScoreBars 
+        partie={partie} 
+        player1Name={player1Name} 
+        player2Name={player2Name} 
+        isSolo={isSolo} 
+      />
+      {!isSolo && (
+        <WinnerCard
+          winner={winnerName}
+          isSolo={isSolo}
+          bothFinished={gameFullyComplete}
+          borderColor={colors.brand.blueDeep}
+          mainColor={colors.brand.blue}
+        />
+      )}
+    </div>
   )
 
   return (
