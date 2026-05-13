@@ -375,7 +375,7 @@ export default function ResultatsTypesPage() {
 
   return (
     <GameResultsLayout
-      title="Résultats"
+      title="TYPUZZLE"
       sessionCode={state?.sessionCode}
       pokeballColor={colors.ui.textMuted}
       bodyColor={colors.brand.yellow}

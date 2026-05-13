@@ -185,7 +185,7 @@ export default function ResultatsPage() {
 
   return (
     <GameResultsLayout
-      title="Résultats"
+      title="POKÉDESC"
       bodyColor={colors.brand.blue}
       sessionCode={partie.codeSession}
       scores={scoresSection}
