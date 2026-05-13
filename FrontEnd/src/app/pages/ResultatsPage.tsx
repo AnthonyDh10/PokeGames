@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { motion } from 'framer-motion'
 import { useSessionStore } from '../store/sessionStore'
@@ -11,7 +11,6 @@ import ResultsActions from '../components/ResultsActions'
 import HPBar from '../components/HPBar'
 import { colors } from '../design/colors'
 import type { PartieDto, CompletedPokemonDto } from '../types/partie'
-import SubCard from '../components/SubCard'
 
 const HINT_LABELS: Record<string, string> = {
   Type1: 'Type 1', Type2: 'Type 2', Generation: 'Génération', Category: 'Catégorie',
@@ -34,6 +33,7 @@ export default function ResultatsPage() {
   const [isCreatingNew, setIsCreatingNew] = useState(false)
   
   const autoRefreshRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const rematchPollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const isPlayer1 = partie?.dresseur1Id === sessionId
   const player1Name = isPlayer1 ? (playerName || 'Joueur 1') : 'Adversaire'
@@ -54,6 +54,11 @@ export default function ResultatsPage() {
     setSprites((prev) => ({ ...prev, ...newSprites }))
   }
 
+  function isComplete(p: PartieDto): boolean {
+    if (p.modeSolo) return (p.completedPokemonsJ1?.length ?? 0) > 0
+    return (p.completedPokemonsJ1?.length ?? 0) > 0 && (p.completedPokemonsJ2?.length ?? 0) > 0
+  }
+
   async function load() {
     if (!partieId) return
     setIsLoading(true)
@@ -61,7 +66,7 @@ export default function ResultatsPage() {
       const p = await getPartie(partieId)
       setPartie(p)
       setChatContext({ partieId, sessionCode: p.codeSession ?? '', isSolo: p.modeSolo || !p.dresseur2Id })
-      const complete = p.modeSolo ? (p.completedPokemonsJ1?.length ?? 0) > 0 : ((p.completedPokemonsJ1?.length ?? 0) > 0 && (p.completedPokemonsJ2?.length ?? 0) > 0)
+      const complete = isComplete(p)
       setGameFullyComplete(complete)
       await loadSprites(p)
     } catch (err: any) { setErrorMessage(err?.message ?? 'Erreur') } 
@@ -70,28 +75,112 @@ export default function ResultatsPage() {
 
   useEffect(() => { load() }, [partieId])
 
-  // --- HANDLERS ACTIONS ---
-  async function handleRematchClick() { /* ... ta logique de revanche ... */ setRematchRequested(true); await markRematchReady(partieId!, sessionId); }
-  async function handleRelaunchClick() { /* ... ta logique relancer ... */ setIsRelaunching(true); const n = await createPartie(sessionId); navigate(`/pokedesc/${n.id}`); }
-  async function handleNewGame() { setIsCreatingNew(true); const n = await createPartie(sessionId); navigate('/pokedesc', { state: { existingPartieId: n.id } }); }
+  // --- AUTO-REFRESH MULTIJOUEUR ---
+  useEffect(() => {
+    if (!partie || gameFullyComplete || partie.modeSolo) return
+    autoRefreshRef.current = setInterval(async () => {
+      try {
+        const p = await getPartie(partieId!)
+        const prevJ2Count = partie.completedPokemonsJ2?.length ?? 0
+        const newJ2Count = p.completedPokemonsJ2?.length ?? 0
+        if (newJ2Count !== prevJ2Count) {
+          setPartie(p)
+          await loadSprites(p)
+        }
+        if (isComplete(p)) {
+          setGameFullyComplete(true)
+          setPartie(p)
+          clearInterval(autoRefreshRef.current!)
+        }
+      } catch {
+        // silent
+      }
+    }, 2000)
+    return () => { if (autoRefreshRef.current) clearInterval(autoRefreshRef.current) }
+  }, [partie, gameFullyComplete])
+
+  useEffect(() => {
+    return () => { 
+      if (rematchPollRef.current) clearInterval(rematchPollRef.current)
+      if (autoRefreshRef.current) clearInterval(autoRefreshRef.current)
+    }
+  }, [])
+
+  async function handleRematchClick() {
+    if (!partieId) return
+    setRematchRequested(true)
+    try {
+      const status = await markRematchReady(partieId, sessionId)
+      if (status.rematchPartieId) {
+        navigate(`/pokedesc/${status.rematchPartieId}`)
+        return
+      }
+      rematchPollRef.current = setInterval(async () => {
+        try {
+          const fresh = await markRematchReady(partieId, sessionId)
+          if (fresh.rematchPartieId) {
+            clearInterval(rematchPollRef.current!)
+            navigate(`/pokedesc/${fresh.rematchPartieId}`)
+          }
+        } catch {
+          // silent
+        }
+      }, 1000)
+    } catch {
+      setRematchRequested(false)
+    }
+  }
+
+  async function handleRelaunchClick() {
+    if (!partie) return
+    setIsRelaunching(true)
+    try {
+      const newPartie = await createPartie(sessionId)
+      await startPartie(newPartie.id, true, {
+        nbPokemons: partie.nbPokemons,
+        generations: partie.selectedGenerations,
+        timerDuration: partie.timerDurationSeconds,
+      })
+      navigate(`/pokedesc/${newPartie.id}`)
+    } catch {
+      setIsRelaunching(false)
+    }
+  }
+
+  async function handleNewGame() {
+    if (!partie) return
+    setIsCreatingNew(true)
+    try {
+      const newPartie = await createPartie(sessionId)
+      navigate('/pokedesc', {
+        state: {
+          existingPartieId: newPartie.id,
+          previousSettings: {
+            nbPokemons: partie.nbPokemons,
+            generations: partie.selectedGenerations,
+          },
+        },
+      })
+    } catch {
+      setIsCreatingNew(false)
+    }
+  }
 
   if (isLoading) return <div className="p-12 text-center">Chargement...</div>
   if (!partie) return null
 
   const isSolo = partie.modeSolo
-  const j1Won = partie.scoreJ1 > partie.scoreJ2
-  const j2Won = partie.scoreJ2 > partie.scoreJ1
 
   // --- RENDU DES SECTIONS ---
 
-const scoresSection = (
-  <FinalScoreBars 
-    partie={partie} 
-    player1Name={player1Name} 
-    player2Name={player2Name} 
-    isSolo={isSolo} 
-  />
-)
+  const scoresSection = (
+    <FinalScoreBars 
+      partie={partie} 
+      player1Name={player1Name} 
+      player2Name={player2Name} 
+      isSolo={isSolo} 
+    />
+  )
 
   return (
     <GameResultsLayout
@@ -100,14 +189,28 @@ const scoresSection = (
       sessionCode={partie.codeSession}
       scores={scoresSection}
       details={
-        <PokemonCarouselSection 
-          partie={partie} 
-          sprites={sprites} 
-          isSolo={isSolo} 
-          player1Name={player1Name} 
-          player2Name={player2Name} 
-          gameFullyComplete={gameFullyComplete} 
-        />
+        !isSolo && !gameFullyComplete ? (
+          <Card 
+            pokeballOpacity={0} 
+            className="overflow-hidden bg-slate-50 border-4 flex items-center justify-center min-h-[300px]" 
+            borderColor={colors.brand.blueDeep}
+          >
+            <div className="p-10 text-center">
+              <h3 className="font-heading text-xl uppercase tracking-widest text-orange-500 animate-pulse">
+                ⏳ En attente que le second joueur finisse...
+              </h3>
+            </div>
+          </Card>
+        ) : (
+          <PokemonCarouselSection 
+            partie={partie} 
+            sprites={sprites} 
+            isSolo={isSolo} 
+            player1Name={player1Name} 
+            player2Name={player2Name} 
+            gameFullyComplete={gameFullyComplete} 
+          />
+        )
       }
       actions={
         <ResultsActions
@@ -125,21 +228,6 @@ const scoresSection = (
 }
 
 // --- SOUS-COMPOSANTS LOCAUX ---
-
-function ScoreCard({ name, score, isWinner }: { name: string, score: number, isWinner: boolean }) {
-  return (
-    <Card 
-      header={<h2 className="font-heading text-lg text-white">{name} {isWinner && '👑'}</h2>}
-      headerColor={isWinner ? colors.brand.yellow : colors.brand.blue}
-      className="flex-1 text-center"
-    >
-      <div className="p-6">
-        <div className="text-5xl font-bold mb-2" style={{ color: colors.brand.blue }}>{score}</div>
-        <p className="text-sm text-gray-400 uppercase tracking-widest">points</p>
-      </div>
-    </Card>
-  )
-}
 
 interface PokemonCarouselSectionProps {
   partie: PartieDto
@@ -167,10 +255,10 @@ function PokemonCarouselSection({ partie, sprites, isSolo, player1Name, player2N
 
   return (
     <Card 
-    pokeballOpacity={0} 
-    className="overflow-hidden bg-slate-50 border-4" 
-    borderColor={colors.brand.blueDeep}
-  >
+      pokeballOpacity={0} 
+      className="overflow-hidden bg-slate-50 border-4" 
+      borderColor={colors.brand.blueDeep}
+    >
       <div className="p-6">
         {/* TITRE DU MENU */}
         <h3 className="font-heading text-center text-xl mb-8 uppercase tracking-tighter" style={{ color: colors.brand.blueDark }}>
@@ -224,7 +312,7 @@ function PokemonCarouselSection({ partie, sprites, isSolo, player1Name, player2N
         {/* LIGNE DE SÉPARATION STYLE RPG */}
         <div className="h-1 w-full bg-slate-200 mb-8" />
 
-        {/* PARTIE STATISTIQUES (BAS) - DANS LA MÊME CARD */}
+        {/* PARTIE STATISTIQUES (BAS) */}
         <div className={`grid gap-6 ${isSolo ? 'max-w-md mx-auto' : 'grid-cols-2'}`}>
           
           {/* Stats Joueur 1 */}
@@ -261,7 +349,7 @@ interface StatDetailsProps {
 }
 
 function StatDetails({ data, color, loading }: StatDetailsProps) {
-  if (loading) return <div className="font-heading animate-pulse text-gray-400 py-4">... CHARGEMENT ...</div>
+  if (loading) return <div className="font-heading animate-pulse text-orange-500 py-4">⏳ EN ATTENTE DU JOUEUR...</div>
   if (!data) return <div className="font-heading text-gray-300 py-4">AUCUNE DONNÉE</div>
 
   return (
@@ -312,7 +400,6 @@ function StatDetails({ data, color, loading }: StatDetailsProps) {
   )
 }
 
-
 function FinalScoreBars({ partie, player1Name, player2Name, isSolo }: { 
   partie: PartieDto, 
   player1Name: string, 
@@ -357,4 +444,3 @@ function FinalScoreBars({ partie, player1Name, player2Name, isSolo }: {
     </Card>
   )
 }
-

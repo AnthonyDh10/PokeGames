@@ -112,7 +112,7 @@ public class PartieController : ControllerBase
     {
         try
         {
-            var partie = await _partieService.UpdateGameSettingsAsync(partieId, request.NbPokemons, request.Generations);
+            var partie = await _partieService.UpdateGameSettingsAsync(partieId, request.NbPokemons, request.Generations, request.TimerDuration);
             return Ok(partie);
         }
         catch (KeyNotFoundException ex)

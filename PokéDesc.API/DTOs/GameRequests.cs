@@ -57,6 +57,9 @@ public class UpdateGameSettingsRequest
     public int NbPokemons { get; set; } = 1;
 
     public List<int>? Generations { get; set; }
+
+    [Range(-1, int.MaxValue)]
+    public int? TimerDuration { get; set; }
 }
 
 public class ResetTimerRequest

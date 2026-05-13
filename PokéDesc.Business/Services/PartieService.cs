@@ -529,7 +529,7 @@ public class PartieService : IPartieService
         return Math.Max(0, timeRemaining - elapsed);
     }
 
-    public async Task<Partie> UpdateGameSettingsAsync(string partieId, int nbPokemons, List<int>? generations)
+    public async Task<Partie> UpdateGameSettingsAsync(string partieId, int nbPokemons, List<int>? generations, int? timerDuration)
     {
         var partie = await GetGameAsync(partieId);
 
@@ -540,6 +540,12 @@ public class PartieService : IPartieService
         // Mettre à jour les paramètres
         partie.NbPokemons = nbPokemons;
         partie.SelectedGenerations = generations ?? Enumerable.Range(1, 8).ToList();
+
+        // Mettre à jour la durée du timer si fournie (-1 = infini)
+        if (timerDuration.HasValue)
+        {
+            partie.TimerDurationSeconds = timerDuration.Value;
+        }
 
         return partie;
     }

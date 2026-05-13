@@ -122,7 +122,12 @@ export default function LobbyPage({
 
     if (settingsChanged) {
       prevSettingsRef.current = currentSettings
-      updateGameSettings(currentPartieId, currentSettings.nbPokemons, currentSettings.generations)
+      updateGameSettings(
+        currentPartieId,
+        currentSettings.nbPokemons,
+        currentSettings.generations,
+        currentSettings.timerDuration
+      )
         .then((updated) => {
           setPartie(updated)
           onSettingsChange?.(currentSettings)

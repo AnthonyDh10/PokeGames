@@ -67,12 +67,16 @@ export async function resetTimer(partieId: string, dresseurId: string): Promise<
 export async function updateGameSettings(
   partieId: string,
   nbPokemons: number,
-  generations: number[]
+  generations: number[],
+  timerDuration?: number
 ): Promise<PartieDto> {
-  const { data } = await api.put<PartieDto>(`/api/partie/${partieId}/settings`, {
+  const payload: any = {
     nbPokemons,
     generations,
-  })
+  }
+  if (timerDuration !== undefined) payload.timerDuration = timerDuration
+
+  const { data } = await api.put<PartieDto>(`/api/partie/${partieId}/settings`, payload)
   return data
 }
 

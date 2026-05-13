@@ -55,9 +55,9 @@ public interface IPartieService
     void ResetTimer(string partieId, string dresseurId);
 
     /// <summary>
-    /// Met à jour les paramètres de la partie (nombre de Pokémon et générations sélectionnées).
+    /// Met à jour les paramètres de la partie (nombre de Pokémon, générations sélectionnées et durée du timer).
     /// </summary>
-    Task<Partie> UpdateGameSettingsAsync(string partieId, int nbPokemons, List<int>? generations);
+    Task<Partie> UpdateGameSettingsAsync(string partieId, int nbPokemons, List<int>? generations, int? timerDuration);
 
     /// <summary>
     /// Marque un joueur comme prêt pour une revanche. Si les deux sont prêts, crée et démarre une nouvelle partie.
