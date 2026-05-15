@@ -188,7 +188,7 @@ export default function TypesGamePage() {
             headerClassName="py-4"
             header={
               <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
-                Quel est ce type ?{game.isMono ? '' : ' (paire)'}
+                Typuzzle{game.isMono ? '' : ' (paire)'}
               </h1>
             }
             pokeballOpacity={0}

@@ -78,8 +78,8 @@ export default function LobbyPage({
   const gameTitle = (() => {
     const route = (gameRoute || '').toLowerCase()
     if (route.includes('pokedesc')) return 'PokéDesc'
-    if (route.includes('dezoom')) return 'Dezoom'
-    if (route.includes('types')) return 'Quel est ce type ?'
+    if (route.includes('dezoom')) return 'Dex-zoom'
+    if (route.includes('types')) return 'Typuzzle'
     if (startMode) return startMode
     return 'Explication'
   })()

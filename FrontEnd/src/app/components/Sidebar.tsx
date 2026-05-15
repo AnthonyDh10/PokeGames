@@ -51,8 +51,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const navItems = [
     { icon: rulesLogo, label: "Règles", to: "/regles" },
     { icon: pokedescLogo, label: "PokéDesc", to: "/pokedesc" },
-    { icon: typeLogo, label: "Quel est ce type ?", to: "/types" },
-    { icon: dezoomLogo, label: "Dézoom", to: "/dezoom" },
+    { icon: typeLogo, label: "Typuzzle", to: "/types" },
+    { icon: dezoomLogo, label: "Dex-zoom", to: "/dezoom" },
   ];
 
   const sidebarWidth = "clamp(3.75rem, 12vw, 8rem)";

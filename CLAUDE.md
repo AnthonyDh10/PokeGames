@@ -143,8 +143,8 @@ pnpm dev
 | Jeu | Route | Statut |
 |---|---|---|
 | PokéDesc (deviner par description) | `/pokedesc/:partieId` | ✅ Migré |
-| Quel est ce type ? | `/types` | ⏸ En attente — ne pas toucher pour l'instant |
-| Dézoom | `/dezoom` | ⏸ En attente — ne pas toucher pour l'instant |
+| TYPUZZLE ? | `/types` | ⏸ En attente — ne pas toucher pour l'instant |
+| DEX-ZOOM | `/dezoom` | ⏸ En attente — ne pas toucher pour l'instant |
 
 ---
 
