@@ -57,8 +57,8 @@ export default function LobbyDeZoomPage() {
             <div className="p-6">
               <div className="flex items-center gap-3 mb-5">
                 <span className="text-xl">⚙️</span>
-                <h3 className="font-heading text-xl tracking-wide" style={{ color: colors.ui.textPrimary }}>
-                  Générations
+                <h3 className="font-heading text-xl tracking-wide" style={{ color: colors.ui.textPrimary, fontSize: '1.25rem' }}>
+                  Paramètres de la partie
                 </h3>
                 {!isPlayer1 && (
                   <span className="ml-auto font-body text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
@@ -74,7 +74,7 @@ export default function LobbyDeZoomPage() {
                     <button
                       onClick={() => setSettings((prev) => ({ ...prev, generations: [...ALL_GENERATIONS] }))}
                       className="font-heading text-xs hover:underline"
-                      style={{ color: colors.brand.red }}
+                      style={{ color: colors.brand.red, fontSize: '0.6rem' }}
                     >
                       Tout sélectionner
                     </button>
@@ -82,6 +82,7 @@ export default function LobbyDeZoomPage() {
                     <button
                       onClick={() => setSettings((prev) => ({ ...prev, generations: [prev.generations[0]] }))}
                       className="font-heading text-xs text-gray-500 hover:underline"
+                      style={{ fontSize: '0.6rem' }}
                     >
                       Tout désélectionner
                     </button>
@@ -89,7 +90,7 @@ export default function LobbyDeZoomPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="grid sm:grid-cols-3 gap-2">
                 {ALL_GENERATIONS.map((gen) => {
                   const active = displayGens.includes(gen)
                   return (

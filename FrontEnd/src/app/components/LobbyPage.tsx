@@ -78,8 +78,8 @@ export default function LobbyPage({
   const gameTitle = (() => {
     const route = (gameRoute || '').toLowerCase()
     if (route.includes('pokedesc')) return 'PokéDesc'
-    if (route.includes('dezoom')) return 'Dezoom'
-    if (route.includes('types')) return 'Quel est ce type ?'
+    if (route.includes('dezoom')) return 'Dex-Zoom'
+    if (route.includes('types')) return 'Typuzzle'
     if (startMode) return startMode
     return 'Explication'
   })()
@@ -354,7 +354,7 @@ export default function LobbyPage({
       >
         <div className="relative p-6 overflow-hidden">
           <PokeballDecor
-            size={280}
+            size={150}
             opacity={0.1}
             color={theme.primary}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0"
@@ -478,7 +478,7 @@ export default function LobbyPage({
               colorDark={colors.ui.grayDark}
               color={colors.ui.grayMid}
             >
-              <span style={{ color: '#ffffff' }} className="font-semibold font-heading">Annuler</span>
+              <span style={{ color: colors.ui.textMuted }} className="font-semibold font-heading">Annuler</span>
             </PixelButton>
           </div>
         </div>

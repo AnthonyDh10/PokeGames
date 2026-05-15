@@ -26,7 +26,7 @@ function generationToNumber(nameEn: string): number | null {
 
 const DISPLAY_SCALE = 4
 const SPRITE_DISPLAY = 96 * DISPLAY_SCALE // 384px
-const WINDOW_STEPS = [16, 48, 96] // tailles en px sprite (3 étapes = 3 tentatives)
+const WINDOW_STEPS = [16, 24, 32, 96] // tailles en px sprite (3 étapes = 3 tentatives)
 
 export default function DeZoomGamePage() {
   const { partieId } = useParams<{ partieId: string }>()

@@ -20,7 +20,7 @@ L'objectif est de proposer une base solide pour enrichir progressivement le cata
 Le joueur doit deviner le Pokémon à partir d'une description censurée et d'indices.
 <img width="1851" height="907" alt="Capture d&#39;écran 2026-05-02 155210" src="https://github.com/user-attachments/assets/140d2b94-3927-4263-8de9-8979ec78ded3" />
 
-### 2) Quel est ce type ?
+### 2) Typuzzle
 Mini-jeu orienté connaissances de la table des types Pokémon.
 <img width="1849" height="825" alt="Capture d&#39;écran 2026-05-02 154940" src="https://github.com/user-attachments/assets/19d1ddc1-777a-4f1c-a35a-22d7f43e7461" />
 

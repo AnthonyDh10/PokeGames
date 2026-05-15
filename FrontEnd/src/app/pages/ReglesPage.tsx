@@ -163,7 +163,7 @@ const GAME_RULES: Record<string, GameRules> = {
     ],
   },
   types: {
-    title: "Règles — Quel est ce type ?",
+    title: "Règles — Typuzzle",
     color: colors.brand.yellow,
     pages: [
       {
