@@ -320,24 +320,6 @@ export default function ResultatsTypesPage() {
               </div>
             )}
           </div>
-          
-          {correctAnswer && (
-            <div className="mt-6 pt-6 border-t border-gray-300 text-center">
-              <p className="text-sm font-heading uppercase tracking-widest text-gray-600 mb-3">
-                Réponse 
-              </p>
-              <div className="flex justify-center gap-3 items-center">
-                {results.correctType1NameFr && (
-                  <TypeImage name={results.correctType1NameFr} className="h-12" />
-                )}
-                {results.correctType2NameFr && (
-                  <>
-                    <TypeImage name={results.correctType2NameFr} className="h-12" />
-                  </>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </Card>
       {!isSolo && (
@@ -354,14 +336,6 @@ export default function ResultatsTypesPage() {
 
   const detailsSection = (
     <>
-      {isDraw && (
-        <Card className="bg-orange-50 border-2 border-orange-400">
-          <div className="p-4 text-center text-orange-600 font-semibold text-lg">
-            🤝 Égalité ! Même temps pour les deux joueurs !
-          </div>
-        </Card>
-      )}
-
       <Card
         pokeballOpacity={0}
         headerColor={colors.brand.yellowLight}
@@ -369,6 +343,24 @@ export default function ResultatsTypesPage() {
         showHeader={false}
         borderColor={colors.brand.yellowDark}
       >
+        {correctAnswer && (
+            <div className="mt-4 text-center">
+              <p className="text-sm font-heading uppercase tracking-widest mb-3" style={{color: colors.brand.yellowDark}}>
+                Réponse 
+              </p>
+              <div className="flex justify-center gap-3 items-center">
+                {results.correctType1NameFr && (
+                  <TypeImage name={results.correctType1NameFr} className="h-12" />
+                )}
+                {results.correctType2NameFr && (
+                  <>
+                    <TypeImage name={results.correctType2NameFr} className="h-12" />
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+          
         <div className="p-4 md:p-6">
           <div className="grid grid-cols-1 gap-4">
             {INTERACTION_ORDER.map((key) => {
