@@ -17,6 +17,7 @@ export interface TypesGuessResultDto {
 export interface TypesPlayerResultDto {
   dresseurId?: string
   hasFinished: boolean
+  wasCorrect: boolean
   elapsedSeconds?: number
   attemptCount?: number
 }

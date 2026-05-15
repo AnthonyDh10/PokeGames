@@ -18,6 +18,10 @@ export function formatGenerations(generations: number[], isShort: boolean = fals
     return 'Toutes générations'
   }
 
+  if (sorted.length === 1) {
+    return `${prefix} ${sorted[0]}`
+  }
+
   let isConsecutive = true
   for (let i = 1; i < sorted.length; i++) {
     if (sorted[i] !== sorted[i - 1] + 1) {
@@ -43,6 +47,14 @@ export function getGenerationsDisplay(generations: number[] | undefined): { labe
     return {
       label: 'Générations sélectionnées :',
       value: '1 à 8'
+    }
+  }
+
+  // Si une seule génération, afficher juste le numéro (ex: "3" au lieu de "3 à 3")
+  if (sorted.length === 1) {
+    return {
+      label: 'Génération sélectionnée :',
+      value: String(sorted[0])
     }
   }
 

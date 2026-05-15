@@ -26,7 +26,7 @@ function generationToNumber(nameEn: string): number | null {
 
 const DISPLAY_SCALE = 4
 const SPRITE_DISPLAY = 96 * DISPLAY_SCALE // 384px
-const WINDOW_STEPS = [16, 24, 32, 48, 96] // tailles en px sprite
+const WINDOW_STEPS = [16, 48, 96] // tailles en px sprite (3 étapes = 3 tentatives)
 
 export default function DeZoomGamePage() {
   const { partieId } = useParams<{ partieId: string }>()
@@ -139,8 +139,8 @@ export default function DeZoomGamePage() {
       setSelectedPokemon(null)
       setSearchTerm('')
 
-      // Dernière étape : sprite entièrement révélé → naviguer après l'animation
-      if (WINDOW_STEPS[newStepIndex] === 96) {
+      // 3ème mauvaise tentative → naviguer après l'animation
+      if (newAttemptCount >= 3) {
         if (timerRef.current) clearInterval(timerRef.current)
         setTimeout(() => {
           navigate(`/resultats-dezoom/${partieId}`, { state: { sessionCode } })
@@ -171,8 +171,7 @@ export default function DeZoomGamePage() {
         <GameHeader
           title="DEX-ZOOM : Devine le Pokémon !"
           color={colors.brand.red}
-          sessionCode={sessionCode}
-          attemptCount={attemptCount}
+          attemptsUsed={attemptCount}
           elapsed={elapsed}
           selectedGenerations={selectedGenerations}
         />
@@ -217,7 +216,7 @@ export default function DeZoomGamePage() {
 
                 <PixelButton
                   type="submit"
-                  disabled={isSubmitting || !selectedPokemon}
+                  disabled={isSubmitting || !selectedPokemon || attemptCount >= 3}
                   color={colors.brand.red}
                   colorLight={colors.brand.redLight}
                   colorDark={colors.brand.redDark}

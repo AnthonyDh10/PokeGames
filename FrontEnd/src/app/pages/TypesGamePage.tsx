@@ -30,7 +30,6 @@ import solImg from '../components/images/sol.png'
 import spectreImg from '../components/images/spectre.png'
 import ténèbresImg from '../components/images/ténèbres.png'
 import volImg from '../components/images/vol.png'
-import { color } from 'motion-dom'
 
 const TYPE_IMAGES: Record<string, string> = {
   acier: acierImg, combat: combatImg, dragon: dragonImg, eau: eauImg,
@@ -143,6 +142,10 @@ export default function TypesGamePage() {
         return
       }
       setResult(res)
+      if (newAttemptCount >= 3) {
+        if (timerRef.current) clearInterval(timerRef.current)
+        navigate(`/resultats-types/${partieId}`, { state: { sessionCode } })
+      }
     } catch {
       setErrorMessage("Erreur lors de l'envoi de la réponse.")
     } finally {
@@ -164,8 +167,7 @@ export default function TypesGamePage() {
         <GameHeader
           title={<span style={{ color: colors.ui.textMuted }}>TYPUZZLE : Devine la paire de types !</span>}
           color={colors.brand.yellow}
-          sessionCode={sessionCode}
-          attemptCount={attemptCount}
+          attemptsUsed={attemptCount}
           elapsed={elapsed}
         />
       }
@@ -243,7 +245,7 @@ export default function TypesGamePage() {
 
                 <PixelButton
                   type="submit"
-                  disabled={isSubmitting || !selectedType1 || !selectedType2}
+                  disabled={isSubmitting || !selectedType1 || !selectedType2 || attemptCount >= 3}
                   color={colors.brand.yellow}
                   colorLight={colors.brand.yellowLight}
                   colorDark={colors.brand.yellowWarm}

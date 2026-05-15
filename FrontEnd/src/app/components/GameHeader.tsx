@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import Card from './Card'
 import Timer from './Timer'
+import AttemptsDisplay from './AttemptsDisplay'
 import { colors } from '../design/colors'
 import { getGenerationsDisplay } from '../utils/pokedescLogic'
 
@@ -12,9 +13,11 @@ interface GameHeaderProps {
   /** Couleur de la barre du header (CSS color) */
   color: string
   /** Code de session affiché dans les stats */
-  sessionCode: string
-  /** Nombre de tentatives */
-  attemptCount: number
+  sessionCode?: string
+  /** Nombre de mauvaises tentatives utilisées */
+  attemptsUsed: number
+  /** Nombre maximum de tentatives (défaut : 3) */
+  maxAttempts?: number
   /** Temps écoulé en secondes (mode chronomètre) */
   elapsed: number
   /** Générations sélectionnées (optionnel) */
@@ -28,7 +31,8 @@ export default function GameHeader({
   description,
   color,
   sessionCode,
-  attemptCount,
+  attemptsUsed,
+  maxAttempts = 3,
   elapsed,
   selectedGenerations,
   right,
@@ -55,15 +59,14 @@ export default function GameHeader({
                 {description}
               </p>
             )}
-            <div className="flex flex-wrap gap-6 justify-center items-end">
-              <div className="text-center">
-                <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Code</div>
-                <div className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>{sessionCode}</div>
-              </div>
-              <div className="text-center">
-                <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Tentatives</div>
-                <div className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>{attemptCount}</div>
-              </div>
+            <div className="flex flex-wrap gap-6 justify-center items-center">
+              {sessionCode && (
+                <div className="text-center">
+                  <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Code</div>
+                  <div className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>{sessionCode}</div>
+                </div>
+              )}
+              <AttemptsDisplay used={attemptsUsed} max={maxAttempts} accentColor={color} />
               {selectedGenerations && getGenerationsDisplay(selectedGenerations) && (
                 <div className="text-center">
                   <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">{getGenerationsDisplay(selectedGenerations)?.label}</div>

@@ -259,10 +259,14 @@ export default function ResultatsTypesPage() {
               {myResult.elapsedSeconds !== undefined ? (
                 <>
                   <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.yellowDark }}>
-                    <span className="font-heading font-bold text-sm text-gray-600">TEMPS</span>
-                    <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.yellowDark }}>
-                      {formatElapsed(myResult.elapsedSeconds)}
+                    <span className={`font-heading font-bold text-sm ${myResult.wasCorrect ? 'text-gray-600' : 'text-red-500'}`}>
+                      {myResult.wasCorrect ? 'TEMPS' : 'X ÉCHEC'}
                     </span>
+                    {myResult.wasCorrect && (
+                      <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.yellowDark }}>
+                        {formatElapsed(myResult.elapsedSeconds)}
+                      </span>
+                    )}
                   </div>
                   
                   <div className="grid grid-cols-1 gap-2">
@@ -290,10 +294,14 @@ export default function ResultatsTypesPage() {
                 {opponentResult?.elapsedSeconds !== undefined ? (
                   <>
                     <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.yellowWarm }}>
-                      <span className="font-heading font-bold text-sm text-gray-600">TEMPS</span>
-                      <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.yellowWarm }}>
-                        {formatElapsed(opponentResult.elapsedSeconds)}
+                      <span className={`font-heading font-bold text-sm ${opponentResult.wasCorrect ? 'text-gray-600' : 'text-red-500'}`}>
+                        {opponentResult.wasCorrect ? 'TEMPS' : 'X ÉCHEC'}
                       </span>
+                      {opponentResult.wasCorrect && (
+                        <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.yellowWarm }}>
+                          {formatElapsed(opponentResult.elapsedSeconds)}
+                        </span>
+                      )}
                     </div>
                     
                     <div className="grid grid-cols-1 gap-2">

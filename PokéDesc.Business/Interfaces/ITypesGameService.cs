@@ -24,6 +24,7 @@ public class TypesPlayerResultDto
 {
     public string? DresseurId { get; set; }
     public bool HasFinished { get; set; }
+    public bool WasCorrect { get; set; }
     public int? ElapsedSeconds { get; set; }
     public int? AttemptCount { get; set; }
 }
