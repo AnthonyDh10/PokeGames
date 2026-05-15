@@ -25,7 +25,7 @@ export default function WinnerCard({
     message = 'VICTOIRE !'
     messageColor = mainColor
   } else if (!bothFinished) {
-    message = 'EN ATTENTE...'
+    message = 'EN ATTENTE QUE L\'AUTRE JOUEUR FINISSE...'
     messageColor = 'orange'
   } else if (winner) {
     message = 'VAINQUEUR'

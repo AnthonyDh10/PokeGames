@@ -231,7 +231,7 @@ export default function ResultatsTypesPage() {
       : results.correctType1NameFr)
     : null
 
-  const scoresSection = (
+const scoresSection = (
     <div className="flex flex-col gap-6">
       <Card
         borderColor={colors.brand.yellowDark}
@@ -239,12 +239,6 @@ export default function ResultatsTypesPage() {
         pokeballOpacity={0}
       >
         <div className="p-6">
-          {!isSolo && !results.bothFinished && (
-              <p className="text-orange-500 font-medium text-center">
-                ⏳ En attente de la fin de partie de l'adversaire...
-              </p>
-          )}
-          
           <h3 className="font-heading text-center text-xl mb-6 uppercase tracking-widest" style={{ color: colors.brand.yellowDark }}>
             SCORES FINAUX
           </h3>
@@ -294,10 +288,10 @@ export default function ResultatsTypesPage() {
                 {opponentResult?.elapsedSeconds !== undefined ? (
                   <>
                     <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.yellowWarm }}>
-                      <span className={`font-heading font-bold text-sm ${opponentResult.wasCorrect ? 'text-gray-600' : 'text-red-500'}`}>
-                        {opponentResult.wasCorrect ? 'TEMPS' : 'X ÉCHEC'}
+                      <span className={`font-heading font-bold text-sm ${!results.bothFinished ? 'text-gray-500 animate-pulse' : (opponentResult.wasCorrect ? 'text-gray-600' : 'text-red-500')}`}>
+                        {!results.bothFinished ? 'EN ATTENTE...' : (opponentResult.wasCorrect ? 'TEMPS' : 'X ÉCHEC')}
                       </span>
-                      {opponentResult.wasCorrect && (
+                      {results.bothFinished && opponentResult.wasCorrect && (
                         <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.yellowWarm }}>
                           {formatElapsed(opponentResult.elapsedSeconds)}
                         </span>
@@ -310,7 +304,9 @@ export default function ResultatsTypesPage() {
                         style={{ borderColor: colors.brand.yellowWarm, boxShadow: `3px 3px 0px ${colors.brand.yellowWarm}` }}
                       >
                         <div className="text-[10px] text-gray-500 mb-1">TENTATIVE(S)</div>
-                        <div className="font-bold text-lg text-gray-800">{opponentResult.attemptCount}</div>
+                        <div className="font-bold text-lg text-gray-800">
+                          {!results.bothFinished ? '...' : opponentResult.attemptCount}
+                        </div>
                       </div>
                     </div>
                   </>

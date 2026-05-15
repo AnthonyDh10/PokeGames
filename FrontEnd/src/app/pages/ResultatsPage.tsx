@@ -12,6 +12,8 @@ import HPBar from '../components/HPBar'
 import WinnerCard from '../components/WinnerCard'
 import { colors } from '../design/colors'
 import type { PartieDto, CompletedPokemonDto } from '../types/partie'
+import dittoGif from '../components/images/ditto-gif.gif'
+
 
 const HINT_LABELS: Record<string, string> = {
   Type1: 'Type 1', Type2: 'Type 2', Generation: 'Génération', Category: 'Catégorie',
@@ -213,8 +215,8 @@ export default function ResultatsPage() {
             borderColor={colors.brand.blueDeep}
           >
             <div className="p-10 text-center">
-              <h3 className="font-heading text-xl uppercase tracking-widest text-orange-500 animate-pulse">
-                ⏳ En attente que le second joueur finisse...
+              <h3 className="font-heading text-xl uppercase tracking-widest text-orange-500">
+                <img src={dittoGif} alt="" className="w-full h-full" />    
               </h3>
             </div>
           </Card>
