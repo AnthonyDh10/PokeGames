@@ -44,11 +44,11 @@ export default function LobbyDeZoomPage() {
       theme={THEME}
       startMode="DeZoom"
       explanationText={
-        <>
+        <span style={{ fontSize: '1.25rem' }}>
           Un sprite Pokémon s'affiche, très zoomé. <br /> Identifie de quel Pokémon il s'agit !{' '}
           <br />
           <br /> Chaque mauvaise réponse agrandit la zone visible.
-        </>
+        </span>
       }
       settingsPanel={(isPlayer1, partie: PartieDto | null) => {
         const displayGens = isPlayer1 ? settings.generations : (partie?.selectedGenerations ?? settings.generations)

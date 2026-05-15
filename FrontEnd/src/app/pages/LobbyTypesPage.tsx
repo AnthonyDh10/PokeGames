@@ -15,7 +15,7 @@ export default function LobbyTypesPage() {
       gameRoute="/types"
       theme={THEME}
       startMode="Types"
-      explanationText="Des résistances, faiblesses et immunités sont affichées. Devine le type ou la paire de types Pokémon qui correspond à ces interactions !"
+      explanationText={<span style={{ fontSize: '1.25rem' }}>Des résistances, faiblesses et immunités sont affichées. Devine le type ou la paire de types Pokémon qui correspond à ces interactions !</span>}
     />
   )
 }
