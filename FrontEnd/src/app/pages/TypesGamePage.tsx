@@ -120,9 +120,9 @@ export default function TypesGamePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!selectedType1 || isSubmitting) return
+    if (!selectedType1 || !selectedType2 || isSubmitting) return
 
-    const t2 = selectedType2?.id
+    const t2 = selectedType2.id
 
     setIsSubmitting(true)
     try {

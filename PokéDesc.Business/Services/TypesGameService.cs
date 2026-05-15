@@ -60,11 +60,9 @@ public class TypesGameService : ITypesGameService
             if (!_gameStore.TryGetValue(partieId, out var state))
             {
                 var random = new Random();
-                bool isMono = random.Next(10) < 3; // 30% mono
-
                 var shuffled = _types.OrderBy(_ => random.Next()).ToList();
                 int type1Id = shuffled[0].Id;
-                int? type2Id = isMono ? null : shuffled[1].Id;
+                int type2Id = shuffled[1].Id;
 
                 state = new TypesGameState
                 {
@@ -96,29 +94,20 @@ public class TypesGameService : ITypesGameService
             if (alreadyGuessed)
             {
                 var t1Cached = _types.First(t => t.Id == state.Type1Id);
-                var t2Cached = state.Type2Id.HasValue ? _types.First(t => t.Id == state.Type2Id.Value) : null;
-                var answer = t2Cached != null ? $"{t1Cached.NameFr} / {t2Cached.NameFr}" : t1Cached.NameFr;
-                return new TypesGuessResult { IsCorrect = true, Message = $"Bravo ! C'était {answer}.", CorrectType1NameFr = t1Cached.NameFr, CorrectType2NameFr = t2Cached?.NameFr };
+                var t2Cached = _types.First(t => t.Id == state.Type2Id);
+                var answer = $"{t1Cached.NameFr} / {t2Cached.NameFr}";
+                return new TypesGuessResult { IsCorrect = true, Message = $"Bravo ! C'était {answer}.", CorrectType1NameFr = t1Cached.NameFr, CorrectType2NameFr = t2Cached.NameFr };
             }
 
-            bool isMono = state.Type2Id == null;
-            bool guessIsMono = type2Id == null;
+            // La réponse doit toujours être une paire (type2Id ne peut pas être null)
+            if (type2Id == null)
+            {
+                return new TypesGuessResult { IsCorrect = false, Message = "Vous devez sélectionner deux types !" };
+            }
 
-            bool isCorrect;
-            if (isMono && guessIsMono)
-            {
-                isCorrect = type1Id == state.Type1Id;
-            }
-            else if (!isMono && !guessIsMono)
-            {
-                var secretSet = new HashSet<int> { state.Type1Id, state.Type2Id!.Value };
-                var guessSet = new HashSet<int> { type1Id, type2Id!.Value };
-                isCorrect = secretSet.SetEquals(guessSet);
-            }
-            else
-            {
-                isCorrect = false;
-            }
+            var secretSet = new HashSet<int> { state.Type1Id, state.Type2Id };
+            var guessSet = new HashSet<int> { type1Id, type2Id.Value };
+            bool isCorrect = secretSet.SetEquals(guessSet);
 
             if (isCorrect)
             {
@@ -138,14 +127,14 @@ public class TypesGameService : ITypesGameService
                 }
 
                 var t1 = _types.First(t => t.Id == state.Type1Id);
-                var t2 = state.Type2Id.HasValue ? _types.First(t => t.Id == state.Type2Id.Value) : null;
-                var answerStr = t2 != null ? $"{t1.NameFr} / {t2.NameFr}" : t1.NameFr;
+                var t2 = _types.First(t => t.Id == state.Type2Id);
+                var answerStr = $"{t1.NameFr} / {t2.NameFr}";
                 return new TypesGuessResult
                 {
                     IsCorrect = true,
                     Message = $"Bravo ! C'était {answerStr}.",
                     CorrectType1NameFr = t1.NameFr,
-                    CorrectType2NameFr = t2?.NameFr,
+                    CorrectType2NameFr = t2.NameFr,
                 };
             }
 
@@ -185,7 +174,7 @@ public class TypesGameService : ITypesGameService
                 return new TypesGameResultsDto();
 
             var t1 = _types.First(t => t.Id == state.Type1Id);
-            var t2 = state.Type2Id.HasValue ? _types.First(t => t.Id == state.Type2Id.Value) : null;
+            var t2 = _types.First(t => t.Id == state.Type2Id);
 
             var player2 = state.DresseurId2 != null
                 ? new TypesPlayerResultDto
@@ -200,10 +189,10 @@ public class TypesGameService : ITypesGameService
 
             return new TypesGameResultsDto
             {
-                IsMono = state.Type2Id == null,
+                IsMono = false,
                 Interactions = BuildDto(state).Interactions,
                 CorrectType1NameFr = t1.NameFr,
-                CorrectType2NameFr = t2?.NameFr,
+                CorrectType2NameFr = t2.NameFr,
                 Player1 = new TypesPlayerResultDto
                 {
                     DresseurId = state.DresseurId1,
@@ -231,7 +220,7 @@ public class TypesGameService : ITypesGameService
         };
 
         var defType1 = _types.First(t => t.Id == state.Type1Id);
-        TypeData? defType2 = state.Type2Id.HasValue ? _types.First(t => t.Id == state.Type2Id.Value) : null;
+        var defType2 = _types.First(t => t.Id == state.Type2Id);
 
         foreach (var attacker in _types)
         {
