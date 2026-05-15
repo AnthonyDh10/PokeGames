@@ -1,23 +1,12 @@
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import GameCard from "../components/GameCard";
-import SectionTitle from "../components/SectionTitle";
 import { useNavDirectionStore } from "../store/navDirectionStore";
 import { colors } from "../design/colors";
-import oak from "../components/images/oak.png";
 import pokedescLogo from "../components/images/pokedesc-logo-transparant.png";
 import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "../components/ui/dialog";
-import { Button } from "../components/ui/button";
+import Card from "../components/Card";
+import PixelButton, { pixelClipPathSm } from "../components/PixelButton";
 
 interface GameRulesPage {
   title: string;
@@ -55,19 +44,19 @@ const GAME_RULES: Record<string, GameRules> = {
             <p className="font-medium text-gray-900">Avant de lancer le jeu, l'hôte de la partie doit configurer la session :</p>
             <ul className="space-y-3 mt-2">
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Nombre de Pokémon :</strong> Choisis la longueur de la partie (de 1 à 6 manches).</span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Chronomètre :</strong> Définis le temps accordé par Pokémon (30s, 60s, 120s ou sans limite).</span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Générations :</strong> Sélectionne les générations autorisées.</span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Mode Multijoueur :</strong> Invite un ami en lui envoyant ton code de session.</span>
               </li>
             </ul>
@@ -80,19 +69,19 @@ const GAME_RULES: Record<string, GameRules> = {
         content: (
           <ul className="space-y-4">
             <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+              <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
               <span><strong className="text-gray-900">Navigue :</strong> Fais défiler les différentes descriptions du Pokémon à l'aide des flèches &lt; et &gt;.</span>
             </li>
             <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+              <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
               <span><strong className="text-gray-900">Devine :</strong> Tape ta réponse dans la barre de recherche. Une liste déroulante te suggère automatiquement les noms correspondants.</span>
             </li>
             <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+              <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
               <span><strong className="text-gray-900">Tentatives :</strong> Tu disposes de 3 essais maximum par Pokémon.</span>
             </li>
             <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+              <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
               <span><strong className="text-gray-900">Transition :</strong> La manche passe automatiquement au Pokémon suivant dès que tu trouves la bonne réponse, que tu épuises tes 3 essais, ou que le chronomètre tombe à zéro.</span>
             </li>
           </ul>
@@ -108,24 +97,24 @@ const GAME_RULES: Record<string, GameRules> = {
             <div className="overflow-x-auto mt-6">
               <table className="w-full text-sm text-left">
                 <thead>
-                  <tr className="border-b-2 border-gray-100 text-gray-900">
+                  <tr className="border-b-2 border-gray-900 text-gray-900">
                     <th className="py-3 px-2 font-semibold">Indice dévoilé</th>
                     <th className="py-3 px-2 font-semibold">Points perdus</th>
                     <th className="py-3 px-2 font-semibold">Temps perdu</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
-                  <tr className="hover:bg-gray-50/50">
+                <tbody className="divide-y divide-gray-200">
+                  <tr className="hover:bg-gray-100">
                     <td className="py-3 px-2">Type 1 & 2</td>
                     <td className="py-3 px-2 text-red-500 font-medium">-10 pts</td>
                     <td className="py-3 px-2 text-orange-500">-10 sec</td>
                   </tr>
-                  <tr className="hover:bg-gray-50/50">
+                  <tr className="hover:bg-gray-100">
                     <td className="py-3 px-2">Génération</td>
                     <td className="py-3 px-2 text-red-500 font-medium">-10 pts</td>
                     <td className="py-3 px-2 text-orange-500">-10 sec</td>
                   </tr>
-                  <tr className="hover:bg-gray-50/50">
+                  <tr className="hover:bg-gray-100">
                     <td className="py-3 px-2">Silhouette</td>
                     <td className="py-3 px-2 text-red-600 font-medium">-30 pts</td>
                     <td className="py-3 px-2 text-orange-600">-30 sec</td>
@@ -134,7 +123,7 @@ const GAME_RULES: Record<string, GameRules> = {
               </table>
             </div>
 
-            <p className="text-sm mt-4 text-gray-500">En multijoueur, le joueur avec le score final le plus élevé (celui qui a utilisé le moins d'indices et été le plus rapide) remporte la partie !</p>
+            <p className="text-sm mt-4 text-gray-500">En multijoueur, le joueur avec le score final le plus élevé remporte la partie !</p>
           </div>
         ),
       },
@@ -145,15 +134,15 @@ const GAME_RULES: Record<string, GameRules> = {
             <p>Une fois tous les Pokémon passés, les scores sont comparés et le grand vainqueur est couronné ! Depuis cet écran, tu peux :</p>
             <ul className="space-y-3 mt-4">
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Relancer :</strong> Rejouer immédiatement avec les mêmes paramètres.</span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Retourner au lobby :</strong> Modifier les règles, le temps ou les générations.</span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Quitter :</strong> Revenir au menu principal.</span>
               </li>
             </ul>
@@ -184,15 +173,15 @@ const GAME_RULES: Record<string, GameRules> = {
         content: (
           <ul className="space-y-4">
             <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
+              <div className="w-2 h-2 bg-yellow-500 mt-1.5 flex-shrink-0" />
               <span><strong className="text-gray-900">Observe :</strong> Un tableau d'interactions s'affiche (faiblesses x2 et x4, résistances x2 et x4, dégâts normaux et immunités). <br/><span className="text-sm text-gray-500 mt-1 block">⚠️ Attention, la paire générée peut être inédite et ne correspondre à aucun Pokémon existant dans le jeu officiel !</span></span>
             </li>
             <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
+              <div className="w-2 h-2 bg-yellow-500 mt-1.5 flex-shrink-0" />
               <span><strong className="text-gray-900">Devine :</strong> Saisis les deux types qui composent cette paire dans le champ de réponse.</span>
             </li>
             <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
+              <div className="w-2 h-2 bg-yellow-500 mt-1.5 flex-shrink-0" />
               <span><strong className="text-gray-900">Transition :</strong> La manche se termine instantanément dès que tu as deviné correctement les deux types.</span>
             </li>
           </ul>
@@ -206,15 +195,15 @@ const GAME_RULES: Record<string, GameRules> = {
             <p>Depuis l'écran de fin, tu peux :</p>
             <ul className="space-y-3 mt-4">
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-yellow-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Relancer.</strong></span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-yellow-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Retourner au lobby.</strong></span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-yellow-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Revenir au menu principal.</strong> </span>
               </li>
             </ul>
@@ -247,11 +236,11 @@ const GAME_RULES: Record<string, GameRules> = {
             <p className="font-medium text-gray-900">Avant de lancer le jeu, l'hôte de la partie doit configurer la session :</p>
             <ul className="space-y-3 mt-2">
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-red-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Générations :</strong> Sélectionne les générations autorisées (ex: jouer uniquement les Pokémon de la 1ère génération).</span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-red-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Mode Solo ou Multijoueur :</strong> Invite un ami en lui envoyant ton code de session.</span>
               </li>
             </ul>
@@ -264,19 +253,19 @@ const GAME_RULES: Record<string, GameRules> = {
         content: (
           <ul className="space-y-4">
             <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+              <div className="w-2 h-2 bg-red-500 mt-1.5 flex-shrink-0" />
               <span><strong className="text-gray-900">Observe :</strong> Analyse la petite zone visible du Pokémon masqué.</span>
             </li>
             <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+              <div className="w-2 h-2 bg-red-500 mt-1.5 flex-shrink-0" />
               <span><strong className="text-gray-900">Devine :</strong> Tape ta réponse dans la barre de recherche. Une liste déroulante te suggère des noms et des filtres sont à ta disposition pour affiner tes choix.</span>
             </li>
             <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+              <div className="w-2 h-2 bg-red-500 mt-1.5 flex-shrink-0" />
               <span><strong className="text-gray-900">Tentatives et Pénalités :</strong> Tu disposes de 4 essais maximum. À chaque mauvaise tentative, le carré visible s'agrandit pour t'aider, mais <strong className="text-red-600">10 secondes de pénalité</strong> s'ajoutent à ton chronomètre !</span>
             </li>
             <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+              <div className="w-2 h-2 bg-red-500 mt-1.5 flex-shrink-0" />
               <span><strong className="text-gray-900">Transition :</strong> La manche se termine automatiquement lorsque tu trouves la bonne réponse, que tu épuises tes 4 essais, ou que le temps est écoulé.</span>
             </li>
           </ul>
@@ -286,19 +275,19 @@ const GAME_RULES: Record<string, GameRules> = {
         title: "3. Fin de partie",
         content: (
           <div className="space-y-4">
-            <p>En multijoueur, le joueur qui parvient à identifier le Pokémon le plus rapidement (en tenant compte des pénalités de temps liées aux mauvaises tentatives) remporte la manche.</p>
+            <p>En multijoueur, le joueur qui parvient à identifier le Pokémon le plus rapidement remporte la manche.</p>
             <p>Une fois toutes les manches terminées, le grand vainqueur est couronné ! Depuis l'écran de fin, tu peux :</p>
             <ul className="space-y-3 mt-4">
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-red-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Relancer :</strong> Rejouer immédiatement avec les mêmes paramètres.</span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-red-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Retourner au lobby :</strong> Modifier les règles, le temps ou les générations.</span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 bg-red-500 mt-1.5 flex-shrink-0" />
                 <span><strong className="text-gray-900">Quitter :</strong> Revenir au menu principal.</span>
               </li>
             </ul>
@@ -309,203 +298,237 @@ const GAME_RULES: Record<string, GameRules> = {
   },
 };
 
-// Mêmes variants que HomePage — la direction est commune
-const chenVariants = {
-  initial: (dir: string) => ({
-    x: dir === "forward" ? 120 : -120,
-    opacity: 0,
-  }),
-  animate: { x: 0, opacity: 1, transition: { duration: 0.45, ease: "easeOut" as const } },
-  exit: (dir: string) => ({
-    x: dir === "backward" ? 120 : -120,
-    opacity: 0,
-    transition: { duration: 0.35, ease: "easeIn" as const },
-  }),
+const GAME_COLORS: Record<string, { primary: string; light: string; dark: string; deep: string }> = {
+  pokedesc: {
+    primary: colors.brand.blue,
+    light: colors.brand.blueLight,
+    dark: colors.brand.blueDark,
+    deep: colors.brand.blueDeep,
+  },
+  types: {
+    primary: colors.brand.yellow,
+    light: colors.brand.yellowLight,
+    dark: colors.brand.yellowDark,
+    deep: colors.brand.yellowDark,
+  },
+  dezoom: {
+    primary: colors.brand.red,
+    light: colors.brand.redLight,
+    dark: colors.brand.redDark,
+    deep: colors.brand.redDeep,
+  },
 };
 
-const cardsVariants = {
-  initial: { y: -40, opacity: 0 },
-  animate: { y: 0, opacity: 1, transition: { duration: 0.45, ease: "easeOut" as const } },
-  exit: { y: 40, opacity: 0, transition: { duration: 0.3, ease: "easeIn" as const } },
-};
+/** Panneau de navigation des règles */
+function RulesNavPanel({
+  activeGame,
+  activeRules,
+  activePage,
+  currentPageIndex,
+  totalPages,
+  onPrev,
+  onNext,
+}: {
+  activeGame: string;
+  activeRules: GameRules;
+  activePage: GameRulesPage;
+  currentPageIndex: number;
+  totalPages: number;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  const gc = GAME_COLORS[activeGame];
+  return (
+    <div className="flex flex-col flex-1 p-4 sm:p-6 gap-6 min-h-0">
+      <h3 className="font-heading text-lg sm:text-xl font-semibold" style={{ color: activeRules.color }}>
+        {activePage.title}
+      </h3>
+
+      {/* Contenu avec scroll si nécessaire */}
+      <div className="flex-1 overflow-y-auto font-heading text-sm sm:text-base leading-relaxed text-gray-700 min-h-0 pr-2 custom-scrollbar">
+        {activePage.content}
+      </div>
+
+      {/* Navigation ◀ ▶ */}
+      <div className="flex items-center justify-between gap-4 mt-2 pt-4 border-t border-gray-100">
+        <PixelButton
+          colorBorder={gc.deep} colorLight={gc.light} colorDark={gc.dark} color={gc.primary}
+          onClick={onPrev} disabled={currentPageIndex === 0}
+          className="w-12 h-12 flex items-center justify-center transition-transform active:scale-95" clipPath={pixelClipPathSm}
+        >
+          <span className="font-heading text-white text-xl pb-1">◀</span>
+        </PixelButton>
+
+        {totalPages > 1 && (
+          <div className="flex flex-col items-center">
+            <span className="font-heading font-bold text-lg tabular-nums text-gray-800">
+              {currentPageIndex + 1} <span className="text-gray-400 mx-1">/</span> {totalPages}
+            </span>
+          </div>
+        )}
+
+        <PixelButton
+          colorBorder={gc.deep} colorLight={gc.light} colorDark={gc.dark} color={gc.primary}
+          onClick={onNext} disabled={currentPageIndex === totalPages - 1}
+          className="w-12 h-12 flex items-center justify-center transition-transform active:scale-95" clipPath={pixelClipPathSm}
+        >
+          <span className="font-heading text-white text-xl pb-1">▶</span>
+        </PixelButton>
+      </div>
+    </div>
+  );
+}
+
+const GAMES = [
+  {
+    key: "pokedesc" as const,
+    title: "POKÉDESC",
+    description: "Lis les descriptions du Pokédex et sois le plus rapide à deviner !",
+    color: colors.brand.blue,
+    secondColor: colors.brand.blueDeep,
+    colorLight: colors.brand.blueLight,
+    colorDark: colors.brand.blueDark,
+    image: pokedescLogo,
+    to: "/pokedesc",
+  },
+  {
+    key: "types" as const,
+    title: "TYPUZZLE",
+    description: "Devine la paire de types cachée derrière le tableau d'interactions !",
+    color: colors.brand.yellow,
+    secondColor: colors.brand.yellowDark,
+    colorLight: colors.brand.yellowLight,
+    colorDark: colors.brand.yellowWarm,
+    image: typeLogo,
+    to: "/types",
+  },
+  {
+    key: "dezoom" as const,
+    title: "DEX-ZOOM",
+    description: "Identifie le Pokémon caché avant que le dézoom ne le révèle !",
+    color: colors.brand.red,
+    secondColor: colors.brand.redDeep,
+    colorLight: colors.brand.redLight,
+    colorDark: colors.brand.redDark,
+    image: dezoomLogo,
+    to: "/dezoom",
+  },
+];
 
 export default function ReglesPage() {
-  const { direction, setDirection } = useNavDirectionStore();
-  const navigate = useNavigate();
-  const [openModal, setOpenModal] = useState<keyof typeof GAME_RULES | null>(null);
+  const { direction } = useNavDirectionStore();
+  const [activeGame, setActiveGame] = useState<keyof typeof GAME_RULES>("pokedesc");
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
-  const handleOpenModal = (gameKey: keyof typeof GAME_RULES) => {
-    setOpenModal(gameKey);
+  const handleSelectGame = (gameKey: keyof typeof GAME_RULES) => {
+    setActiveGame(gameKey);
     setCurrentPageIndex(0);
   };
 
-  const handleCloseModal = () => {
-    setOpenModal(null);
-    setCurrentPageIndex(0);
-  };
+  const activeRules = GAME_RULES[activeGame];
+  const activePage = activeRules.pages[currentPageIndex];
+  const totalPages = activeRules.pages.length;
+  const gc = GAME_COLORS[activeGame];
 
-  const activeRules = openModal ? GAME_RULES[openModal] : null;
-  const activePage = activeRules ? activeRules.pages[currentPageIndex] : null;
-  const totalPages = activeRules ? activeRules.pages.length : 0;
+  const goToPrev = () => { if (currentPageIndex > 0) setCurrentPageIndex(currentPageIndex - 1); };
+  const goToNext = () => { if (currentPageIndex < totalPages - 1) setCurrentPageIndex(currentPageIndex + 1); };
 
-  const goToPreviousPage = () => {
-    if (currentPageIndex > 0) {
-      setCurrentPageIndex(currentPageIndex - 1);
-    }
-  };
+  return (
+    // Conteneur principal avec des marges adaptées
+    <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row py-6 px-4 sm:px-6 gap-6 xl:gap-8 h-full">
 
-  const goToNextPage = () => {
-    if (currentPageIndex < totalPages - 1) {
-      setCurrentPageIndex(currentPageIndex + 1);
-    }
-  };
-
-return (
-  /* Augmentation des marges latérales (px-12 et lg:px-24) */
-  <div className="space-y-6 py-10 px-8 sm:px-12 lg:px-24">
-    {/* gap-4 pour réduire l'espace entre Chen et les cartes */}
-    <div className="flex items-stretch min-h-screen gap-4">
-      
-      {/* Gauche — Chen (35%) */}
-      <motion.div
-        /* w-[35%] fixe la largeur, flex-shrink-0 empêche la compression */
-        className="hidden md:flex flex-col w-[35%] flex-shrink-0 items-center justify-start h-screen pt-8"
-        custom={direction}
-        variants={chenVariants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-      >
-        <img
-          src={oak}
-          alt="Professeur Chen"
-          /* w-full pour qu'il occupe bien l'espace des 35% */
-          className="w-full max-w-sm h-auto object-contain"
-        />
-      </motion.div>
-
-      {/* Droite — GameCards (65%) */}
-      <motion.div
-        /* w-[65%] fixe la largeur */
-        className="w-[65%] space-y-6 mt-10"
-        custom={direction}
-        variants={cardsVariants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-      >
-        <GameCard
-          title="POKÉDESC"
-          description="Découvre les règles ici !"
-          color={colors.brand.blue}
-          secondColor={colors.brand.blueDeep}
-          colorLight={colors.brand.blueLight}
-          colorDark={colors.brand.blueDark}
-          image={pokedescLogo}
-          to="/pokedesc"
-          onClick={() => handleOpenModal("pokedesc")}
-        />
-
-        <GameCard
-          title="TYPUZZLE"
-          description="Découvre les règles ici !"
-          color={colors.brand.yellow}
-          secondColor={colors.brand.yellowDark}
-          colorLight={colors.brand.yellowLight}
-          colorDark={colors.brand.yellowWarm}
-          image={typeLogo}
-          to="/types"
-          onClick={() => handleOpenModal("types")}
-        />
-
-        <GameCard
-          title="DEX-ZOOM"
-          description="Découvre les règles ici !"
-          color={colors.brand.red}
-          secondColor={colors.brand.redDeep}
-          colorLight={colors.brand.redLight}
-          colorDark={colors.brand.redDark}
-          image={dezoomLogo}
-          to="/dezoom"
-          onClick={() => handleOpenModal("dezoom")}
-        />
-      </motion.div>
-    </div>
-  
-
-{/* Modal des règles */}
-      <Dialog open={openModal !== null} onOpenChange={(open) => { if (!open) handleCloseModal(); }}>
-        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col gap-0 p-0 overflow-hidden bg-white sm:rounded-xl">
-          {activeRules && activePage && (
-            <>
-              {/* Header fixe */}
-              <DialogHeader className="px-6 py-5 border-b border-gray-100 bg-white z-10 flex-shrink-0">
-                <DialogTitle
-                  className="text-2xl font-heading tracking-wide"
-                  style={{ color: activeRules.color }}
+      {/* ── Gauche — Menu de sélection ───────────────────────── */}
+      {/* On augmente la largeur à lg:w-80 (320px) ou xl:w-96 (384px) pour éviter le rognage */}
+      <div className="w-full lg:w-80 xl:w-96 flex-shrink-0 flex flex-col">
+        <Card
+          showHeader
+          headerColor={activeRules.color}
+          borderColor={gc.deep}
+          pokeballColor={gc.light}
+          pokeballOpacity={0.15}
+          pokeballSize={160}
+          headerClassName="py-4"
+          animation={false}
+          header={
+            <span className="font-display text-xl tracking-wide text-white drop-shadow-sm">Sélection du jeu</span>
+          }
+        >
+          <div className="flex flex-col gap-3 p-3 sm:p-4">
+            {GAMES.map((game) => {
+              const isActive = activeGame === game.key;
+              return (
+                <div 
+                  key={game.key} 
+                  className={`flex items-center gap-2 sm:gap-3 transition-all duration-200 cursor-pointer ${isActive ? 'scale-[1.02]' : 'hover:scale-[1.01] opacity-90 hover:opacity-100'}`}
+                  onClick={() => handleSelectGame(game.key)}
                 >
-                  {activeRules.title}
-                </DialogTitle>
-                <p className="text-sm text-gray-500 mt-1 font-medium">
-                  Étape {currentPageIndex + 1} sur {totalPages}
-                </p>
-              </DialogHeader>
-
-              {/* Contenu scrollable (sans animation) */}
-              <div className="flex-1 overflow-y-auto px-6 py-6 bg-white">
-                <h3 className="text-lg font-semibold mb-5" style={{ color: activeRules.color }}>
-                  {activePage.title}
-                </h3>
-                <div className="text-base leading-relaxed text-gray-700">
-                  {activePage.content}
-                </div>
-              </div>
-
-              {/* Footer fixe (Navigation) */}
-              {totalPages > 1 && (
-                <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between flex-shrink-0">
-                  <Button
-                    variant="ghost"
-                    className="text-gray-500 hover:text-gray-900 hover:bg-gray-200 px-3 py-2"
-                    onClick={goToPreviousPage}
-                    disabled={currentPageIndex === 0}
+                  {/* Flèche d'indication améliorée */}
+                  <span
+                    className={`font-heading font-bold text-lg w-6 text-center shrink-0 transition-all duration-300 ${isActive ? 'translate-x-0 opacity-100' : '-translate-x-2 opacity-0'}`}
+                    style={{ color: game.color }}
                   >
-                    <ChevronLeft className="w-4 h-4 mr-1" />
-                    Précédent
-                  </Button>
-
-                  <div className="flex gap-2">
-                    {Array.from({ length: totalPages }).map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setCurrentPageIndex(i)}
-                        className={`h-1.5 rounded-full transition-colors ${
-                          i === currentPageIndex
-                            ? "w-6 bg-current"
-                            : "w-1.5 bg-gray-200 hover:bg-gray-300"
-                        }`}
-                        style={i === currentPageIndex ? { color: activeRules.color } : undefined}
-                        aria-label={`Aller à la page ${i + 1}`}
-                      />
-                    ))}
+                    ▶
+                  </span>
+                  
+                  {/* Le conteneur w-full et min-w-0 empêche le contenu de déborder de son parent flex */}
+                  <div className="flex-1 w-full min-w-0 pointer-events-none">
+                    <GameCard
+                      title={game.title}
+                      description={game.description}
+                      color={game.color}
+                      secondColor={game.secondColor}
+                      colorLight={game.colorLight}
+                      colorDark={game.colorDark}
+                      image={game.image}
+                      to="#" // Empêche la navigation réelle si le composant GameCard utilise un <Link> en interne
+                      onClick={() => handleSelectGame(game.key)}
+                    />
                   </div>
-
-                  <Button
-                    variant="ghost"
-                    className="text-gray-500 hover:text-gray-900 hover:bg-gray-200 px-3 py-2"
-                    onClick={goToNextPage}
-                    disabled={currentPageIndex === totalPages - 1}
-                  >
-                    Suivant
-                    <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
                 </div>
-              )}
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+              );
+            })}
+          </div>
+        </Card>
+      </div>
+
+      {/* ── Droite — Règles toujours visibles ─────────────────── */}
+      <div className="flex-1 w-full min-w-0 flex flex-col h-full">
+        <Card
+          showHeader
+          headerColor={activeRules.color}
+          borderColor={gc.deep}
+          pokeballColor={gc.light}
+          pokeballOpacity={0.1}
+          pokeballSize={220}
+          headerClassName="py-5"
+          animation={false}
+          header={
+            <div className="flex flex-col items-center gap-1.5 w-full">
+              <span className="font-display text-2xl tracking-wider text-white drop-shadow-md text-center">
+                {activeRules.title}
+              </span>
+              <div className="flex items-center gap-2">
+                 <span className="h-1 w-8 rounded-full bg-white/30"></span>
+                 <span className="font-heading text-sm text-white/90 font-medium">
+                   Page {currentPageIndex + 1} sur {totalPages}
+                 </span>
+                 <span className="h-1 w-8 rounded-full bg-white/30"></span>
+              </div>
+            </div>
+          }
+        >
+          <RulesNavPanel
+            activeGame={activeGame as string}
+            activeRules={activeRules}
+            activePage={activePage}
+            currentPageIndex={currentPageIndex}
+            totalPages={totalPages}
+            onPrev={goToPrev}
+            onNext={goToNext}
+          />
+        </Card>
+      </div>
+      
     </div>
   );
 }

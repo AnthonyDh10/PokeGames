@@ -5,7 +5,7 @@ const THEME = {
   primary: colors.brand.yellow,
   primaryLight: colors.brand.yellowLight,
   primaryDark: colors.brand.yellowWarm,
-  textOnColor: colors.ui.textPrimary,
+  textOnColor: colors.ui.textMuted,
   borderColor: colors.brand.yellowDark,
 }
 
