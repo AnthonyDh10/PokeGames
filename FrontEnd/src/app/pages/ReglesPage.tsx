@@ -8,12 +8,13 @@ import Card from "../components/Card";
 import PokéDescRulesCard from "../components/PokéDescRulesCard";
 import TypuzzleRulesCard from "../components/TypuzzleRulesCard";
 import DézoomRulesCard from "../components/DézoomRulesCard";
+import MultiplayerRulesCard from "../components/MultiplayerRulesCard";
 
 const GAMES = [
   {
     key: "pokedesc" as const,
     title: "POKÉDESC",
-    description: "Lis les descriptions du Pokédex et sois le plus rapide à deviner !",
+    description: <span className="font-heading">Devine le Pokémon décrit !</span>,
     color: colors.brand.blue,
     secondColor: colors.brand.blueDeep,
     colorLight: colors.brand.blueLight,
@@ -23,8 +24,8 @@ const GAMES = [
   },
   {
     key: "types" as const,
-    title: "TYPUZZLE",
-    description: "Devine la paire de types cachée derrière le tableau d'interactions !",
+    title: <span style={{color: colors.ui.textMuted}}>TYPUZZLE</span>,
+    description: <span className="font-heading" style={{color: colors.ui.textMuted}}>Devine la paire de types cachée !</span>,
     color: colors.brand.yellow,
     secondColor: colors.brand.yellowDark,
     colorLight: colors.brand.yellowLight,
@@ -35,7 +36,7 @@ const GAMES = [
   {
     key: "dezoom" as const,
     title: "DEX-ZOOM",
-    description: "Identifie le Pokémon caché avant que le dézoom ne le révèle !",
+    description: <span className="font-heading">Identifie le Pokémon de l'image !</span>,
     color: colors.brand.red,
     secondColor: colors.brand.redDeep,
     colorLight: colors.brand.redLight,
@@ -46,36 +47,22 @@ const GAMES = [
 ];
 
 export default function ReglesPage() {
-  const [activeGame, setActiveGame] = useState<"pokedesc" | "types" | "dezoom">("pokedesc");
+  const [activeGame, setActiveGame] = useState<"pokedesc" | "types" | "dezoom" | "multiplayer">("pokedesc");
+  const handleSelectGame = (gameKey: "pokedesc" | "types" | "dezoom" | "multiplayer") => setActiveGame(gameKey);
 
-  const handleSelectGame = (gameKey: "pokedesc" | "types" | "dezoom") => {
-    setActiveGame(gameKey);
+  const RULE_CARDS: Record<typeof activeGame, JSX.Element> = {
+    pokedesc: <PokéDescRulesCard />,
+    types: <TypuzzleRulesCard />,
+    dezoom: <DézoomRulesCard />,
+    multiplayer: <MultiplayerRulesCard />,
   };
 
-  const renderGameCard = () => {
-    switch (activeGame) {
-      case "pokedesc":
-        return <PokéDescRulesCard />;
-      case "types":
-        return <TypuzzleRulesCard />;
-      case "dezoom":
-        return <DézoomRulesCard />;
-      default:
-        return <PokéDescRulesCard />;
-    }
-  };
-
-  const getGameColor = (gameKey: string) => {
-    switch (gameKey) {
-      case "pokedesc":
-        return colors.brand.blue;
-      case "types":
-        return colors.brand.yellow;
-      case "dezoom":
-        return colors.brand.red;
-      default:
-        return colors.brand.blue;
-    }
+  // Couleurs simplifiées pour la Card (tons de gris)
+  const CARD_COLORS = {
+    color: colors.ui.grayMid,
+    secondColor: colors.ui.grayBorderDark,
+    colorLight: colors.brand.white,
+    colorDark: colors.ui.grayDark,
   };
 
   return (
@@ -87,15 +74,16 @@ export default function ReglesPage() {
       <div className="w-full lg:w-80 xl:w-96 flex-shrink-0 flex flex-col">
         <Card
           showHeader
-          headerColor={getGameColor(activeGame)}
-          borderColor={getGameColor(activeGame)}
-          pokeballColor={getGameColor(activeGame)}
+          headerColor={CARD_COLORS.colorLight}
+          borderColor={CARD_COLORS.secondColor}
+          pokeballColor={CARD_COLORS.color}
+          bodyColor={CARD_COLORS.colorLight}
           pokeballOpacity={0.15}
           pokeballSize={160}
           headerClassName="py-4"
           animation={false}
           header={
-            <span className="font-display text-xl tracking-wide text-white drop-shadow-sm">Sélection du jeu</span>
+            <span className="font-display text-xl tracking-wide drop-shadow-sm" style={{color: CARD_COLORS.secondColor}}>Choisis un jeu</span>
           }
         >
           <div className="flex flex-col gap-3 p-3 sm:p-4">
@@ -110,7 +98,7 @@ export default function ReglesPage() {
                   {/* Flèche d'indication améliorée */}
                   <span
                     className={`font-heading font-bold text-lg w-6 text-center shrink-0 transition-all duration-300 ${isActive ? 'translate-x-0 opacity-100' : '-translate-x-2 opacity-0'}`}
-                    style={{ color: game.color }}
+                    style={{ color: CARD_COLORS.secondColor }}
                   >
                     ▶
                   </span>
@@ -132,13 +120,44 @@ export default function ReglesPage() {
                 </div>
               );
             })}
+
+            {/* Section multijoueur séparée par une ligne fine grise */}
+            <div className="border-t border-gray-200 mt-3 pt-3">
+              <div className="pt-3">
+                <div
+                  className={`flex items-center gap-2 sm:gap-3 transition-all duration-200 cursor-pointer ${activeGame === 'multiplayer' ? 'scale-[1.02]' : 'hover:scale-[1.01] opacity-90 hover:opacity-100'}`}
+                  onClick={() => handleSelectGame('multiplayer')}
+                >
+                  <span
+                    className={`font-heading font-bold text-lg w-6 text-center shrink-0 transition-all duration-300 ${activeGame === 'multiplayer' ? 'translate-x-0 opacity-100' : '-translate-x-2 opacity-0'}`}
+                    style={{ color: CARD_COLORS.secondColor }}
+                  >
+                    ▶
+                  </span>
+
+                  <div className="flex-1 w-full min-w-0 pointer-events-none">
+                    <GameCard
+                      title={<span style={{ color: colors.ui.textPrimary }}>MULTI</span>}
+                      description={<span className="font-heading" style={{ color: colors.ui.textMuted }}>Jeu en multijoueur</span>}
+                      color={CARD_COLORS.color}
+                      secondColor={CARD_COLORS.secondColor}
+                      colorLight={CARD_COLORS.colorLight}
+                      colorDark={CARD_COLORS.colorDark}
+                      text_color={colors.ui.textPrimary}
+                      to="#"
+                      onClick={() => handleSelectGame('multiplayer')}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </Card>
       </div>
 
       {/* ── Droite — Règles toujours visibles ─────────────────── */}
       <div className="flex-1 w-full min-w-0 flex flex-col h-full">
-        {renderGameCard()}
+        {RULE_CARDS[activeGame]}
       </div>
       
     </div>
