@@ -148,8 +148,9 @@ export default function PokeDescPage() {
 
       const penalty = HINT_PENALTIES[hintKey]
       if (penalty && timerDurationRef.current !== -1) {
-        triggerHintAnimation(hintKey, penalty)
-        triggerTimerAnimation(penalty)
+        const penaltySeconds = Math.round((penalty * timerDurationRef.current) / 100)
+        triggerHintAnimation(hintKey, penaltySeconds)
+        triggerTimerAnimation(penaltySeconds)
       }
 
       const hintData = await getHints(currentPokemonId)
@@ -174,7 +175,7 @@ export default function PokeDescPage() {
         isInSameEvolutionChain: result.isInSameEvolutionChain,
       })
       if (result.isCorrect) {
-        setCurrentScore(result.pointsEarned)
+        setCurrentScore((prev) => prev + result.pointsEarned)
         stopTimer()
         setRevealedPokemonSprite(currentPokemonSprite)
         setIsFinalPokemon(result.isGameFinished)

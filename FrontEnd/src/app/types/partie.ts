@@ -49,6 +49,7 @@ export interface GuessResultDto {
 
 export interface TimerResponse {
   timeRemaining: number
+  timerDurationSeconds: number
 }
 
 export interface RematchStatusDto {

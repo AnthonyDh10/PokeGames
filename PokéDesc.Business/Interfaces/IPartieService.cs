@@ -50,6 +50,11 @@ public interface IPartieService
     double GetRemainingTime(string partieId, string dresseurId);
 
     /// <summary>
+    /// Récupère la durée totale du timer de la partie (telle que configurée au démarrage).
+    /// </summary>
+    int GetTimerDuration(string partieId);
+
+    /// <summary>
     /// Réinitialise le timer pour un joueur.
     /// </summary>
     void ResetTimer(string partieId, string dresseurId);

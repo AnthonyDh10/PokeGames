@@ -92,8 +92,9 @@ export function isHintLocked(
 ): boolean {
   if (usedHints.includes(hintKey)) return false
   if (timerDurationSeconds === -1) return false
-  const penalty = HINT_PENALTIES[hintKey] ?? 0
-  return penalty > timeRemaining
+  const penaltyPct = HINT_PENALTIES[hintKey] ?? 0
+  const penaltySeconds = (penaltyPct * timerDurationSeconds) / 100
+  return penaltySeconds > timeRemaining
 }
 
 export function filterHintPokemons(

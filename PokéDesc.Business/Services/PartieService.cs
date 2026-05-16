@@ -16,29 +16,29 @@ public class PartieService : IPartieService
     // Configuration des coûts des indices
     private static readonly Dictionary<string, int> HintCosts = new()
     {
-        { "Type1", 15 },
-        { "Type2", 15 },
-        { "Generation", 10 },
+        { "Type1", 20 },
+        { "Type2", 20 },
+        { "Generation", 15 },
         { "Category", 10 },
-        { "Stats", 20 },
+        { "Stats", 10 },
         { "Height", 5 },
         { "Weight", 5 },
-        { "Abilities", 25 },
-        { "Sprite", 30 }
+        { "Abilities", 10 },
+        { "Sprite", 40 }
     };
     
-    // Pénalités de temps (en secondes) pour chaque indice
+    // Pénalités de temps en % de la durée totale du timer de la partie
     private static readonly Dictionary<string, double> HintTimePenalties = new()
     {
-        { "Type1", 5.0 },
-        { "Type2", 5.0 },
-        { "Generation", 3.0 },
-        { "Category", 3.0 },
-        { "Stats", 7.0 },
-        { "Height", 2.0 },
-        { "Weight", 2.0 },
-        { "Abilities", 8.0 },
-        { "Sprite", 30.0 }
+        { "Type1", 20.0 },
+        { "Type2", 20.0 },
+        { "Generation", 15.0 },
+        { "Category", 5.0 },
+        { "Stats", 5.0 },
+        { "Height", 5.0 },
+        { "Weight", 5.0 },
+        { "Abilities", 5.0 },
+        { "Sprite", 50.0 }
     };
 
     private const int MaxAttempts = 3;
@@ -226,22 +226,22 @@ public class PartieService : IPartieService
             usedHints.Add(hintType);
             
             // Appliquer la pénalité de temps (sauf si timer infini)
-            if (HintTimePenalties.TryGetValue(hintType, out double timePenalty))
+            // La pénalité est un pourcentage de la durée totale du timer de la partie
+            if (HintTimePenalties.TryGetValue(hintType, out double penaltyPct) && partie.TimerDurationSeconds > 0)
             {
+                double timePenaltySeconds = partie.TimerDurationSeconds * penaltyPct / 100.0;
                 if (isJ1)
                 {
-                    // Ne pas appliquer de pénalité si le timer est infini (-1)
                     if (partie.TimeRemainingJ1 >= 0)
                     {
-                        partie.TimeRemainingJ1 = Math.Max(0, partie.TimeRemainingJ1 - timePenalty);
+                        partie.TimeRemainingJ1 = Math.Max(0, partie.TimeRemainingJ1 - timePenaltySeconds);
                     }
                 }
                 else
                 {
-                    // Ne pas appliquer de pénalité si le timer est infini (-1)
                     if (partie.TimeRemainingJ2 >= 0)
                     {
-                        partie.TimeRemainingJ2 = Math.Max(0, partie.TimeRemainingJ2 - timePenalty);
+                        partie.TimeRemainingJ2 = Math.Max(0, partie.TimeRemainingJ2 - timePenaltySeconds);
                     }
                 }
             }
@@ -529,9 +529,21 @@ public class PartieService : IPartieService
         return Math.Max(0, timeRemaining - elapsed);
     }
 
+    public int GetTimerDuration(string partieId)
+    {
+        if (!_gameStore.TryGetValue(partieId, out var partie))
+            return -1;
+        return partie.TimerDurationSeconds;
+    }
+
     public async Task<Partie> UpdateGameSettingsAsync(string partieId, int nbPokemons, List<int>? generations, int? timerDuration)
     {
         var partie = await GetGameAsync(partieId);
+
+        // Ne pas modifier les paramètres si la partie est déjà en cours
+        // (protège TimerDurationSeconds contre une mise à jour tardive du lobby)
+        if (partie.Statut == "EnCours")
+            return partie;
 
         // Valider les paramètres
         if (nbPokemons < 1 || nbPokemons > 6)

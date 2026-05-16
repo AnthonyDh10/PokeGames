@@ -141,7 +141,8 @@ public class PartieController : ControllerBase
         try
         {
             var remainingTime = _partieService.GetRemainingTime(partieId, dresseurId);
-            return Ok(new { TimeRemaining = remainingTime });
+            var timerDurationSeconds = _partieService.GetTimerDuration(partieId);
+            return Ok(new { TimeRemaining = remainingTime, TimerDurationSeconds = timerDurationSeconds });
         }
         catch (Exception ex)
         {

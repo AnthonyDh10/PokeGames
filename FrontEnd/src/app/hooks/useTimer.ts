@@ -53,6 +53,12 @@ export function useTimer({
       try {
         const result = await getTimer(partieId, sessionId)
         setTimeRemaining(result.timeRemaining)
+        // Synchronise timerDurationRef avec la valeur serveur pour garantir
+        // que les animations affichent les secondes exactes mêmes si la partie
+        // a été reconfigurée après le premier chargement.
+        if (result.timerDurationSeconds !== undefined) {
+          timerDurationRef.current = result.timerDurationSeconds
+        }
         if (result.timeRemaining <= 0 && !isTimeoutRef.current && timerDurationRef.current !== -1) {
           isTimeoutRef.current = true
           clearInterval(intervalRef.current!)
