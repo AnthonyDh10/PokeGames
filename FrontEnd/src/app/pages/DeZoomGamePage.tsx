@@ -231,7 +231,7 @@ export default function DeZoomGamePage() {
 
               {/* Filtres */}
               <div className="border-t border-gray-100 pt-4 space-y-2">
-                <p className="font-body text-xs font-semibold text-gray-400 uppercase tracking-wide">Filtres</p>
+                <p className="font-heading text-xs font-semibold text-gray-400 uppercase tracking-wide">Filtres</p>
 
                 <div className="flex gap-2">
                   <PokemonSearchInput
