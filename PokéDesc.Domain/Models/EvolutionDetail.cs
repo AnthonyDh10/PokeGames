@@ -4,8 +4,8 @@ namespace PokéDesc.Domain.Models;
 
 public class PokeApiReference
 {
-    public string Name { get; set; }
-    public string Url { get; set; }
+    public string? Name { get; set; }
+    public string? Url { get; set; }
 }
 
 public class EvolutionDetail
@@ -39,7 +39,7 @@ public class EvolutionDetail
 
 public class EvolutionTrigger
 {
-    public string Name { get; set; }
-    public string Url { get; set; }
+    public string? Name { get; set; }
+    public string? Url { get; set; }
 }
 

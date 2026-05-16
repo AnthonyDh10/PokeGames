@@ -105,7 +105,8 @@ public class TypesGameService : ITypesGameService
                 return new TypesGuessResult { IsCorrect = false, Message = "Vous devez sélectionner deux types !" };
             }
 
-            var secretSet = new HashSet<int> { state.Type1Id, state.Type2Id };
+            var secretSet = new HashSet<int> { state.Type1Id };
+            if (state.Type2Id.HasValue) secretSet.Add(state.Type2Id.Value);
             var guessSet = new HashSet<int> { type1Id, type2Id.Value };
             bool isCorrect = secretSet.SetEquals(guessSet);
 
