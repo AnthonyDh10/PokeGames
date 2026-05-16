@@ -23,12 +23,12 @@ export const HINT_POINT_COSTS: Record<string, number> = {
   Type1: 20,
   Type2: 20,
   Generation: 15,
-  Category: 10,
-  Stats: 10,
+  Category: 5,
+  Stats: 5,
   Height: 5,
   Weight: 5,
-  Abilities: 10,
-  Sprite: 40,
+  Abilities: 5,
+  Sprite: 50,
 }
 
 export type HintConfig = {

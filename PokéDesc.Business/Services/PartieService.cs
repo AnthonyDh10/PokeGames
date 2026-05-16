@@ -19,12 +19,12 @@ public class PartieService : IPartieService
         { "Type1", 20 },
         { "Type2", 20 },
         { "Generation", 15 },
-        { "Category", 10 },
-        { "Stats", 10 },
+        { "Category", 5 },
+        { "Stats", 5 },
         { "Height", 5 },
         { "Weight", 5 },
-        { "Abilities", 10 },
-        { "Sprite", 40 }
+        { "Abilities", 5 },
+        { "Sprite", 50 }
     };
     
     // Pénalités de temps en % de la durée totale du timer de la partie
