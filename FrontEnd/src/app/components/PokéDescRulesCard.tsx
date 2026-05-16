@@ -88,7 +88,7 @@ const POKEDESC_RULES: GameRulesPage[] = [
     title: <p className="font-heading text-center" style={{ color: colors.brand.blueDark, fontSize: "1.5rem" }}>3. Indices et Pénalités</p>,
     content: (
       <div className="font-heading space-y-4" style={{ color: colors.ui.textMuted, fontSize: "1.25rem" }}>
-        <p className="font-heading" style={{fontSize: "1.25rem"}}>Une capture parfaite rapporte <strong style={{color : colors.brand.blueDark, fontSize: "1.3rem"}}>100 points</strong>. Mais si tu bloques, tu peux révéler des indices. Attention, cela te coûtera des points et un pourcentage de ton temps total !</p>
+        <p className="font-heading" style={{fontSize: "1.25rem"}}>Une capture parfaite rapporte <strong style={{color : colors.brand.blueDark, fontSize: "1.25rem"}}>100 points</strong>. Mais si tu bloques, tu peux révéler des indices. Mais cela te coûtera des points et un pourcentage de ton temps total !</p>
         
         <div className="overflow-x-auto mt-4 border border-gray-200">
           <table className="w-full text-sm text-left ">
