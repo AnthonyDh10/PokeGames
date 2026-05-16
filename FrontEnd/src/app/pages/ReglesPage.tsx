@@ -137,8 +137,8 @@ export default function ReglesPage() {
 
                   <div className="flex-1 w-full min-w-0 pointer-events-none">
                     <GameCard
-                      title={<span style={{ color: colors.ui.textPrimary }}>MULTI</span>}
-                      description={<span className="font-heading" style={{ color: colors.ui.textMuted }}>Jeu en multijoueur</span>}
+                      title={<span style={{ color: colors.ui.textMuted }}>MULTI</span>}
+                      description={<span className="font-heading" style={{ color: colors.ui.textMuted }}>Joue avec un ami en temps réel</span>}
                       color={CARD_COLORS.color}
                       secondColor={CARD_COLORS.secondColor}
                       colorLight={CARD_COLORS.colorLight}
