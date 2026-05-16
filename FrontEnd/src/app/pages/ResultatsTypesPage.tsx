@@ -8,6 +8,7 @@ import GameResultsLayout from '../components/GameResultsLayout'
 import ResultsActions from '../components/ResultsActions'
 import Card from '../components/Card'
 import SubCard from '../components/SubCard'
+import WinnerCard from '../components/WinnerCard'
 import { colors } from '../design/colors'
 import type { TypesGameResultsDto } from '../types/typesGame'
 import acierImg from '../components/images/acier.png'
@@ -230,118 +231,107 @@ export default function ResultatsTypesPage() {
       : results.correctType1NameFr)
     : null
 
-  const scoresSection = (
-    <Card
-      borderColor={colors.brand.yellowDark}
-      className="border-4 bg-slate-50 overflow-hidden shadow-[8px_8px_0px_rgba(0,0,0,0.1)]"
-      pokeballOpacity={0}
-    >
-      <div className="p-6">
-        {!isSolo && !results.bothFinished && (
-            <p className="text-orange-500 font-medium text-center">
-              ⏳ En attente de la fin de partie de l'adversaire...
-            </p>
-        )}
-        
-        <h3 className="font-heading text-center text-xl mb-6 uppercase tracking-widest" style={{ color: colors.brand.yellowWarm }}>
-          SCORES FINAUX
-        </h3>
-        
-        <div className={`grid ${isSolo ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-2'} gap-6`}>
-          {/* Joueur 1 */}
-          <div className="flex flex-col space-y-3 w-full">
-            <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.yellowWarm }}>
-              {myName}
-            </div>
-            
-            {myResult.elapsedSeconds !== undefined ? (
-              <>
-                <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.yellowWarm }}>
-                  <span className="font-heading font-bold text-sm text-gray-600">TEMPS</span>
-                  <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.yellowWarm }}>
-                    {formatElapsed(myResult.elapsedSeconds)}
-                  </span>
-                </div>
-                
-                <div className="grid grid-cols-1 gap-2">
-                  <div 
-                    className="p-2 bg-white border-2 transition-transform hover:-translate-y-0.5"
-                    style={{ borderColor: colors.brand.yellowWarm, boxShadow: `3px 3px 0px ${colors.brand.yellowWarm}` }}
-                  >
-                    <div className="text-[10px] text-gray-500 mb-1">TENTATIVE(S)</div>
-                    <div className="font-bold text-lg text-gray-800">{myResult.attemptCount}</div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="text-gray-400 italic py-4">—</div>
-            )}
-          </div>
+const scoresSection = (
+    <div className="flex flex-col gap-6">
+      <Card
+        borderColor={colors.brand.yellowDark}
+        className="border-4 bg-slate-50 overflow-hidden shadow-[8px_8px_0px_rgba(0,0,0,0.1)]"
+        pokeballOpacity={0}
+      >
+        <div className="p-6">
+          <h3 className="font-heading text-center text-xl mb-6 uppercase tracking-widest" style={{ color: colors.brand.yellowDark }}>
+            SCORES FINAUX
+          </h3>
           
-          {/* Joueur 2 (si multijoueur) */}
-          {!isSolo && (
+          <div className={`grid ${isSolo ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-2'} gap-6`}>
+            {/* Joueur 1 */}
             <div className="flex flex-col space-y-3 w-full">
-              <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.yellowWarm }}>
-                {opponentName}
+              <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.yellowDark }}>
+                {myName}
               </div>
               
-              {opponentResult?.elapsedSeconds !== undefined ? (
+              {myResult.elapsedSeconds !== undefined ? (
                 <>
-                  <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.yellowWarm }}>
-                    <span className="font-heading font-bold text-sm text-gray-600">TEMPS</span>
-                    <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.yellowWarm }}>
-                      {formatElapsed(opponentResult.elapsedSeconds)}
+                  <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.yellowDark }}>
+                    <span className={`font-heading font-bold text-sm ${myResult.wasCorrect ? 'text-gray-600' : 'text-red-500'}`}>
+                      {myResult.wasCorrect ? 'TEMPS' : 'X ÉCHEC'}
                     </span>
+                    {myResult.wasCorrect && (
+                      <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.yellowDark }}>
+                        {formatElapsed(myResult.elapsedSeconds)}
+                      </span>
+                    )}
                   </div>
                   
                   <div className="grid grid-cols-1 gap-2">
                     <div 
                       className="p-2 bg-white border-2 transition-transform hover:-translate-y-0.5"
-                      style={{ borderColor: colors.brand.yellowWarm, boxShadow: `3px 3px 0px ${colors.brand.yellowWarm}` }}
+                      style={{ borderColor: colors.brand.yellowDark, boxShadow: `3px 3px 0px ${colors.brand.yellowDark}` }}
                     >
                       <div className="text-[10px] text-gray-500 mb-1">TENTATIVE(S)</div>
-                      <div className="font-bold text-lg text-gray-800">{opponentResult.attemptCount}</div>
+                      <div className="font-bold text-lg text-gray-800">{myResult.attemptCount}</div>
                     </div>
                   </div>
                 </>
               ) : (
-                <div className="font-heading animate-pulse text-orange-500 py-4">⏳ EN ATTENTE...</div>
+                <div className="text-gray-400 italic py-4">—</div>
               )}
             </div>
-          )}
-        </div>
-        
-        {correctAnswer && (
-          <div className="mt-6 pt-6 border-t border-gray-300 text-center">
-            <p className="text-sm font-heading uppercase tracking-widest text-gray-600 mb-3">
-              Réponse 
-            </p>
-            <div className="flex justify-center gap-3 items-center">
-              {results.correctType1NameFr && (
-                <TypeImage name={results.correctType1NameFr} className="h-12" />
-              )}
-              {results.correctType2NameFr && (
-                <>
-                  <TypeImage name={results.correctType2NameFr} className="h-12" />
-                </>
-              )}
-            </div>
+            
+            {/* Joueur 2 (si multijoueur) */}
+            {!isSolo && (
+              <div className="flex flex-col space-y-3 w-full">
+                <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.yellowWarm }}>
+                  {opponentName}
+                </div>
+                
+                {opponentResult?.elapsedSeconds !== undefined ? (
+                  <>
+                    <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.yellowWarm }}>
+                      <span className={`font-heading font-bold text-sm ${!results.bothFinished ? 'text-gray-500 animate-pulse' : (opponentResult.wasCorrect ? 'text-gray-600' : 'text-red-500')}`}>
+                        {!results.bothFinished ? 'EN ATTENTE...' : (opponentResult.wasCorrect ? 'TEMPS' : 'X ÉCHEC')}
+                      </span>
+                      {results.bothFinished && opponentResult.wasCorrect && (
+                        <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.yellowWarm }}>
+                          {formatElapsed(opponentResult.elapsedSeconds)}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-2">
+                      <div 
+                        className="p-2 bg-white border-2 transition-transform hover:-translate-y-0.5"
+                        style={{ borderColor: colors.brand.yellowWarm, boxShadow: `3px 3px 0px ${colors.brand.yellowWarm}` }}
+                      >
+                        <div className="text-[10px] text-gray-500 mb-1">TENTATIVE(S)</div>
+                        <div className="font-bold text-lg text-gray-800">
+                          {!results.bothFinished ? '...' : opponentResult.attemptCount}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="font-heading animate-pulse text-orange-500 py-4">⏳ EN ATTENTE...</div>
+                )}
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </Card>
+        </div>
+      </Card>
+      {!isSolo && (
+        <WinnerCard
+          winner={iWon ? myName : (opponentWon ? opponentName : null)}
+          isSolo={isSolo}
+          bothFinished={results.bothFinished}
+          borderColor={colors.brand.yellowDark}
+          mainColor={colors.brand.yellow}
+        />
+      )}
+    </div>
   )
 
   const detailsSection = (
     <>
-      {isDraw && (
-        <Card className="bg-orange-50 border-2 border-orange-400">
-          <div className="p-4 text-center text-orange-600 font-semibold text-lg">
-            🤝 Égalité ! Même temps pour les deux joueurs !
-          </div>
-        </Card>
-      )}
-
       <Card
         pokeballOpacity={0}
         headerColor={colors.brand.yellowLight}
@@ -349,6 +339,24 @@ export default function ResultatsTypesPage() {
         showHeader={false}
         borderColor={colors.brand.yellowDark}
       >
+        {correctAnswer && (
+            <div className="mt-4 text-center">
+              <p className="text-sm font-heading uppercase tracking-widest mb-3" style={{color: colors.brand.yellowDark}}>
+                Réponse 
+              </p>
+              <div className="flex justify-center gap-3 items-center">
+                {results.correctType1NameFr && (
+                  <TypeImage name={results.correctType1NameFr} className="h-12" />
+                )}
+                {results.correctType2NameFr && (
+                  <>
+                    <TypeImage name={results.correctType2NameFr} className="h-12" />
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+          
         <div className="p-4 md:p-6">
           <div className="grid grid-cols-1 gap-4">
             {INTERACTION_ORDER.map((key) => {

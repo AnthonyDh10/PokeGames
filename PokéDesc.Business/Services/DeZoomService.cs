@@ -109,12 +109,14 @@ public class DeZoomService : IDeZoomService
                 if (isJ1)
                 {
                     state.IsGuessedJ1 = true;
+                    state.WasCorrectJ1 = true;
                     state.ElapsedSecondsJ1 = elapsedSeconds;
                     state.AttemptCountJ1 = attemptCount;
                 }
                 else
                 {
                     state.IsGuessedJ2 = true;
+                    state.WasCorrectJ2 = true;
                     state.ElapsedSecondsJ2 = elapsedSeconds;
                     state.AttemptCountJ2 = attemptCount;
                 }
@@ -127,10 +129,25 @@ public class DeZoomService : IDeZoomService
                 };
             }
 
+            // Mauvaise réponse : stocker la tentative, et finir la partie si 3 tentatives épuisées
             if (isJ1)
+            {
                 state.AttemptCountJ1 = attemptCount;
+                if (attemptCount >= 3)
+                {
+                    state.IsGuessedJ1 = true;
+                    state.ElapsedSecondsJ1 = elapsedSeconds;
+                }
+            }
             else
+            {
                 state.AttemptCountJ2 = attemptCount;
+                if (attemptCount >= 3)
+                {
+                    state.IsGuessedJ2 = true;
+                    state.ElapsedSecondsJ2 = elapsedSeconds;
+                }
+            }
 
             return new DeZoomGuessResult
             {
@@ -180,6 +197,7 @@ public class DeZoomService : IDeZoomService
                 {
                     DresseurId = state.DresseurId2,
                     HasFinished = state.IsGuessedJ2,
+                    WasCorrect = state.WasCorrectJ2,
                     ElapsedSeconds = state.ElapsedSecondsJ2,
                     AttemptCount = state.AttemptCountJ2,
                 }
@@ -193,6 +211,7 @@ public class DeZoomService : IDeZoomService
                 {
                     DresseurId = state.DresseurId1,
                     HasFinished = state.IsGuessedJ1,
+                    WasCorrect = state.WasCorrectJ1,
                     ElapsedSeconds = state.ElapsedSecondsJ1,
                     AttemptCount = state.AttemptCountJ1,
                 },

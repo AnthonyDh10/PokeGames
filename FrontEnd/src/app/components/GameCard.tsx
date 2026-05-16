@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { PokeballDecor } from "./Pokeball";
 
 interface GameCardProps {
-  title: string;
+  title: ReactNode;
   description: ReactNode;
   /** Couleur de fond de la carte — utiliser `colors.brand.xxx` depuis design/colors.ts */
   color: string;
@@ -103,7 +103,7 @@ export default function GameCard({
               {image ? (
                 <img
                   src={image}
-                  alt={title}
+                  alt={typeof title === "string" ? title : ""}
                   style={{ imageRendering: "pixelated" }}
                   className="w-32 md:w-40 h-auto object-contain"
                 />

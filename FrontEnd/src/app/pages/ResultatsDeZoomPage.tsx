@@ -8,6 +8,7 @@ import GameResultsLayout from '../components/GameResultsLayout'
 import ResultsActions from '../components/ResultsActions'
 import Card from '../components/Card'
 import SubCard from '../components/SubCard'
+import WinnerCard from '../components/WinnerCard'
 import { colors } from '../design/colors'
 import type { DeZoomGameResultsDto } from '../types/dezoom'
 
@@ -88,7 +89,7 @@ export default function ResultatsDeZoomPage() {
     setIsRelaunching(true)
     try {
       const newPartie = await createPartie(sessionId)
-      await startPartie(newPartie.id, true, { nbPokemons: 1, generations: results.generations ?? [1, 2, 3, 4, 5, 6, 7, 8, 9], timerDuration: -1 })
+      await startPartie(newPartie.id, true, { nbPokemons: 1, generations: results.generations ?? [1, 2, 3, 4, 5, 6, 7, 8, 9], timerDuration: -1 }, 'DeZoom')
       navigate(`/dezoom/${newPartie.id}`)
     } catch {
       setErrorMessage('Erreur lors du relancement de la partie.')
@@ -255,24 +256,20 @@ export default function ResultatsDeZoomPage() {
     )
   }
 
-  const scoresSection = (
-    <Card
-      borderColor={colors.brand.redDeep}
-      className="border-4 bg-slate-50 overflow-hidden shadow-[8px_8px_0px_rgba(0,0,0,0.1)]"
-      pokeballOpacity={0}
-    >
+const scoresSection = (
+    <div className="flex flex-col gap-6">
+      <Card
+        borderColor={colors.brand.redDeep}
+        className="border-4 bg-slate-50 overflow-hidden shadow-[8px_8px_0px_rgba(0,0,0,0.1)]"
+        pokeballOpacity={0}
+      >
       <div className="p-6">
-        {!isSolo && !results.bothFinished && (
-          <p className="text-center font-medium" style={{ color: colors.brand.red }}>
-            ⏳ En attente de la fin de partie de l'adversaire...
-          </p>
-        )}
-
         <h3 className="font-heading text-center text-xl mb-6 uppercase tracking-widest" style={{ color: colors.brand.redDark }}>
           SCORES FINAUX
         </h3>
 
         <div className={`grid ${isSolo ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-2'} gap-6`}>
+          {/* --- SECTION JOUEUR --- */}
           <div className="flex flex-col space-y-3 w-full">
             <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.redDark }}>
               {myName}
@@ -281,10 +278,14 @@ export default function ResultatsDeZoomPage() {
             {myResult.elapsedSeconds !== undefined ? (
               <>
                 <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.redDark }}>
-                  <span className="font-heading font-bold text-sm text-gray-600">TEMPS</span>
-                  <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.redDark }}>
-                    {formatElapsed(myResult.elapsedSeconds)}
+                  <span className={`font-heading font-bold text-sm ${myResult.wasCorrect ? 'text-gray-600' : 'text-red-500'}`}>
+                    {myResult.wasCorrect ? 'TEMPS' : 'X ÉCHEC'}
                   </span>
+                  {myResult.wasCorrect && (
+                    <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.redDark }}>
+                      {formatElapsed(myResult.elapsedSeconds)}
+                    </span>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 gap-2">
@@ -302,6 +303,7 @@ export default function ResultatsDeZoomPage() {
             )}
           </div>
 
+          {/* --- SECTION ADVERSAIRE --- */}
           {!isSolo && (
             <div className="flex flex-col space-y-3 w-full">
               <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.redDark }}>
@@ -311,10 +313,14 @@ export default function ResultatsDeZoomPage() {
               {opponentResult?.elapsedSeconds !== undefined ? (
                 <>
                   <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: colors.brand.redDark }}>
-                    <span className="font-heading font-bold text-sm text-gray-600">TEMPS</span>
-                    <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.redDark }}>
-                      {formatElapsed(opponentResult.elapsedSeconds)}
+                    <span className={`font-heading font-bold text-sm ${!results.bothFinished ? 'text-gray-500 animate-pulse' : (opponentResult.wasCorrect ? 'text-gray-600' : 'text-red-500')}`}>
+                      {!results.bothFinished ? 'EN ATTENTE...' : (opponentResult.wasCorrect ? 'TEMPS' : 'X ÉCHEC')}
                     </span>
+                    {results.bothFinished && opponentResult.wasCorrect && (
+                      <span className="font-heading text-2xl font-bold" style={{ color: colors.brand.redDark }}>
+                        {formatElapsed(opponentResult.elapsedSeconds)}
+                      </span>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 gap-2">
@@ -323,7 +329,9 @@ export default function ResultatsDeZoomPage() {
                       style={{ borderColor: colors.brand.redDark, boxShadow: `3px 3px 0px ${colors.brand.redDark}` }}
                     >
                       <div className="text-[10px] text-gray-500 mb-1">TENTATIVE(S)</div>
-                      <div className="font-bold text-lg text-gray-800">{opponentResult.attemptCount}</div>
+                      <div className="font-bold text-lg text-gray-800">
+                        {!results.bothFinished ? '...' : opponentResult.attemptCount}
+                      </div>
                     </div>
                   </div>
                 </>
@@ -335,6 +343,16 @@ export default function ResultatsDeZoomPage() {
         </div>
       </div>
     </Card>
+      {!isSolo && (
+        <WinnerCard
+          winner={iWon ? myName : (opponentWon ? opponentName : null)}
+          isSolo={isSolo}
+          bothFinished={results.bothFinished}
+          borderColor={colors.brand.redDeep}
+          mainColor={colors.brand.red}
+        />
+      )}
+    </div>
   )
 
   const detailsSection = (
@@ -375,7 +393,7 @@ export default function ResultatsDeZoomPage() {
     <GameResultsLayout
       title="DEX-ZOOM"
       sessionCode={state?.sessionCode}
-      pokeballColor={colors.brand.red}
+      pokeballColor='white'
       bodyColor={colors.brand.red}
       textColor="white"
       scores={scoresSection}

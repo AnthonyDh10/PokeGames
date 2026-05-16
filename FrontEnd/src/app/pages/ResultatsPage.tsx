@@ -9,8 +9,11 @@ import Card from '../components/Card'
 import GameResultsLayout from '../components/GameResultsLayout'
 import ResultsActions from '../components/ResultsActions'
 import HPBar from '../components/HPBar'
+import WinnerCard from '../components/WinnerCard'
 import { colors } from '../design/colors'
 import type { PartieDto, CompletedPokemonDto } from '../types/partie'
+import dittoGif from '../components/images/ditto-gif.gif'
+
 
 const HINT_LABELS: Record<string, string> = {
   Type1: 'Type 1', Type2: 'Type 2', Generation: 'Génération', Category: 'Catégorie',
@@ -174,13 +177,28 @@ export default function ResultatsPage() {
 
   // --- RENDU DES SECTIONS ---
 
+  const j1Wins = !isSolo && partie.scoreJ1 > partie.scoreJ2
+  const j2Wins = !isSolo && partie.scoreJ2 > partie.scoreJ1
+  const winnerName = j1Wins ? player1Name : (j2Wins ? player2Name : null)
+
   const scoresSection = (
-    <FinalScoreBars 
-      partie={partie} 
-      player1Name={player1Name} 
-      player2Name={player2Name} 
-      isSolo={isSolo} 
-    />
+    <div className="flex flex-col gap-6">
+      <FinalScoreBars 
+        partie={partie} 
+        player1Name={player1Name} 
+        player2Name={player2Name} 
+        isSolo={isSolo} 
+      />
+      {!isSolo && (
+        <WinnerCard
+          winner={winnerName}
+          isSolo={isSolo}
+          bothFinished={gameFullyComplete}
+          borderColor={colors.brand.blueDeep}
+          mainColor={colors.brand.blue}
+        />
+      )}
+    </div>
   )
 
   return (
@@ -197,8 +215,8 @@ export default function ResultatsPage() {
             borderColor={colors.brand.blueDeep}
           >
             <div className="p-10 text-center">
-              <h3 className="font-heading text-xl uppercase tracking-widest text-orange-500 animate-pulse">
-                ⏳ En attente que le second joueur finisse...
+              <h3 className="font-heading text-xl uppercase tracking-widest text-orange-500">
+                <img src={dittoGif} alt="" className="w-full h-full" />    
               </h3>
             </div>
           </Card>
