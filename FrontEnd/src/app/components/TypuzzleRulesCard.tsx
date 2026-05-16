@@ -42,14 +42,6 @@ const TYPUZZLE_RULES: GameRulesPage[] = [
         <ul className="space-y-3 mt-2" style={{ color: colors.ui.textMuted, fontSize: "1.25rem" }}>
           <li className="flex items-start gap-3">
             <div className="w-2 h-2 bg-yellow-500 mt-1.5 flex-shrink-0" />
-            <span><strong className="text-gray-900">Nombre de puzzles :</strong> Choisis combien de paires de types tu devras deviner à la suite.</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <div className="w-2 h-2 bg-yellow-500 mt-1.5 flex-shrink-0" />
-            <span><strong className="text-gray-900">Chronomètre :</strong> Règle la pression ! Plus le temps est court, plus la réflexion devra être rapide.</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <div className="w-2 h-2 bg-yellow-500 mt-1.5 flex-shrink-0" />
             <span><strong className="text-gray-900">Multijoueur :</strong> Entraîne-toi en solo ou invite un ami avec ton code de session pour un duel de rapidité.</span>
           </li>
         </ul>
