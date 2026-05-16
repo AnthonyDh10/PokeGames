@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { PokeballDecor } from "./Pokeball";
 
 interface GameCardProps {

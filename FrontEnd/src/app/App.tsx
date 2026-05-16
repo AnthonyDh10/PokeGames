@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { colors } from "./design/colors";
-import { Routes, Route, useLocation } from "react-router";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";

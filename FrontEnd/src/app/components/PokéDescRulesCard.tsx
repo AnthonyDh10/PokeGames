@@ -1,137 +1,154 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { colors } from "../design/colors";
 import Card from "./Card";
 import PixelButton, { pixelClipPathSm } from "./PixelButton";
+import pokedescLogo from "./images/pokedesc-logo.png";
 
 interface GameRulesPage {
-  title: string;
+  title: React.ReactNode;
   content: React.ReactNode;
 }
 
 const POKEDESC_RULES: GameRulesPage[] = [
   {
-    title: "Le but du jeu",
+    title: <p className="font-heading text-center" style={{ color: colors.brand.blueDark, fontSize: "1.5rem" }}>L'objectif du Dresseur</p>,
     content: (
       <div className="space-y-4">
-        <p>
-          Lis les descriptions issues du Pokédex et sois le plus rapide pour deviner quel Pokémon s'y cache !
+        <p className="font-heading" style={{ color: colors.ui.textMuted, fontSize: "1.25rem" }}>
+          Bienvenue dans le monde fascinant des Pokémon ! Ton but ? Lire les données du Pokédex et être le plus rapide pour deviner quel Pokémon s'y cache.
         </p>
-        <p>
-          En multijoueur, affronte ton ami pour trouver la réponse le plus rapidement possible tout en utilisant le moins d'indices.
+        <p className="font-heading" style={{ color: colors.ui.textMuted, fontSize: "1.25rem" }}>
+          En multijoueur, affronte tes rivaux pour trouver la réponse avant eux et avec le meilleur score, tout en gérant tes indices avec stratégie !
         </p>
+        <div className="flex justify-center mt-16">
+          <img
+            src={pokedescLogo}
+            alt="PokéDesc logo"
+            className="w-full max-w-full object-contain"
+            style={{ maxHeight: "200px" }}
+            loading="lazy"
+          />
+        </div>
+
       </div>
     ),
   },
   {
-    title: "1. Préparation de la partie (Lobby)",
+    title: <p className="font-heading text-center" style={{ color: colors.brand.blueDark, fontSize: "1.5rem" }}>1. Préparation</p>,
     content: (
       <div className="space-y-4">
-        <p className="font-medium text-gray-900">Avant de lancer le jeu, l'hôte de la partie doit configurer la session :</p>
-        <ul className="space-y-3 mt-2">
+        <p className="font-heading mb-8" style={{ color: colors.ui.textMuted, fontSize: "1.25rem" }}>Avant de partir à l'aventure, l'hote configure la partie</p>
+        <ul className="space-y-3 mt-2" style={{ color: colors.ui.textMuted, fontSize: "1.25rem" }}>
           <li className="flex items-start gap-3">
             <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
-            <span><strong className="text-gray-900">Nombre de Pokémon :</strong> Choisis la longueur de la partie (de 1 à 6 manches).</span>
+            <span><strong className="text-gray-900">Nombre de Pokémon :</strong> Choisis le nombre de Pokémon que tu vas rencontrer dans la partie (de 1 à 6 manches de suite).</span>
           </li>
           <li className="flex items-start gap-3">
             <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
-            <span><strong className="text-gray-900">Chronomètre :</strong> Définis le temps accordé par Pokémon (30s, 60s, 120s ou sans limite).</span>
+            <span><strong className="text-gray-900">Chronomètre :</strong> Définis le temps avant que le Pokémon ne s'enfuie. (30s, 60s, 120s ou temps infini).</span>
           </li>
           <li className="flex items-start gap-3">
             <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
-            <span><strong className="text-gray-900">Générations :</strong> Sélectionne les générations autorisées.</span>
+            <span><strong className="text-gray-900">Générations :</strong> Choisis ta région préférée ou mélange-les toutes.</span>
           </li>
           <li className="flex items-start gap-3">
             <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
-            <span><strong className="text-gray-900">Mode Multijoueur :</strong> Invite un ami en lui envoyant ton code de session.</span>
+            <span><strong className="text-gray-900">Multijoueur :</strong> Joue seul ou invite un ami en lui partageant le code de session.</span>
           </li>
         </ul>
-        <p className="text-sm italic text-gray-500 mt-4">Seul l'hôte peut modifier les paramètres.</p>
+        <p className="font-heading text-sm italic text-gray-500 mt-8">Seul l'hote de la partie peut modifier ces paramètres.</p>
       </div>
     ),
   },
   {
-    title: "2. Déroulement d'une manche",
+    title: <p className="font-heading text-center" style={{ color: colors.brand.blueDark, fontSize: "1.5rem" }}>2. Déroulement du combat</p>,
     content: (
-      <ul className="space-y-4">
+      <ul className="space-y-4 mt-2" style={{ color: colors.ui.textMuted, fontSize: "1.25rem" }}>
         <li className="flex items-start gap-3">
           <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
-          <span><strong className="text-gray-900">Navigue :</strong> Fais défiler les différentes descriptions du Pokémon à l'aide des flèches &lt; et &gt;.</span>
+          <span><strong className="text-gray-900">Fouille les données :</strong> Utilise les flèches ◀ et ▶ pour faire défiler les descriptions du Pokédex du Pokémon à deviner.</span>
         </li>
         <li className="flex items-start gap-3">
           <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
-          <span><strong className="text-gray-900">Devine :</strong> Tape ta réponse dans la barre de recherche. Une liste déroulante te suggère automatiquement les noms correspondants.</span>
+          <span><strong className="text-gray-900">Lance ton attaque :</strong> Tape ta réponse ! La liste déroulante t'aidera à compléter le nom.</span>
         </li>
         <li className="flex items-start gap-3">
           <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
-          <span><strong className="text-gray-900">Tentatives :</strong> Tu disposes de 3 essais maximum par Pokémon.</span>
+          <span><strong className="text-gray-900">Poké Balls restantes :</strong> Tu n'as droit qu'à 3 tentatives par Pokémon. Utilise-les bien !</span>
         </li>
         <li className="flex items-start gap-3">
           <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
-          <span><strong className="text-gray-900">Transition :</strong> La manche passe automatiquement au Pokémon suivant dès que tu trouves la bonne réponse, que tu épuises tes 3 essais, ou que le chronomètre tombe à zéro.</span>
+          <span><strong className="text-gray-900">Fuite :</strong> On passe au Pokémon suivant si tu trouves la réponse, si tu rates 3 fois, ou si le temps tombe à zéro.</span>
         </li>
       </ul>
     ),
   },
   {
-    title: "3. Indices et Scores",
+    title: <p className="font-heading text-center" style={{ color: colors.brand.blueDark, fontSize: "1.5rem" }}>3. Indices et Pénalités</p>,
     content: (
-      <div className="space-y-4">
-        <p>Trouver un Pokémon du premier coup et sans aide te rapporte <strong className="text-gray-900">100 points</strong>.</p>
-        <p>Chaque indice filtre automatiquement ta liste déroulante de réponses, mais pénalise ton score et ton chronomètre :</p>
+      <div className="font-heading space-y-4" style={{ color: colors.ui.textMuted, fontSize: "1.25rem" }}>
+        <p className="font-heading" style={{fontSize: "1.25rem"}}>Une capture parfaite rapporte <strong style={{color : colors.brand.blueDark, fontSize: "1.3rem"}}>100 points</strong>. Mais si tu bloques, tu peux révéler des indices. Attention, cela te coûtera des points et un pourcentage de ton temps total !</p>
         
-        <div className="overflow-x-auto mt-6">
-          <table className="w-full text-sm text-left">
+        <div className="overflow-x-auto mt-4 border border-gray-200">
+          <table className="w-full text-sm text-left ">
             <thead>
-              <tr className="border-b-2 border-gray-900 text-gray-900">
-                <th className="py-3 px-2 font-semibold">Indice dévoilé</th>
-                <th className="py-3 px-2 font-semibold">Points perdus</th>
-                <th className="py-3 px-2 font-semibold">Temps perdu</th>
+              <tr className="bg-gray-100 border-b-2 border-gray-900 text-gray-900">
+                <th className="py-2 px-2 font-semibold">Indice dévoilé</th>
+                <th className="py-2 px-2 font-semibold">Points perdus</th>
+                <th className="py-2 px-2 font-semibold">Temps perdu</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              <tr className="hover:bg-gray-100">
-                <td className="py-3 px-2">Type 1 & 2</td>
-                <td className="py-3 px-2 text-red-500 font-medium">-10 pts</td>
-                <td className="py-3 px-2 text-orange-500">-10 sec</td>
+              <tr className="hover:bg-gray-50">
+                <td className="py-2 px-2 font-medium text-gray-900">Silhouette</td>
+                <td className="py-2 px-2 text-red-600 font-bold">-50 pts</td>
+                <td className="py-2 px-2 text-orange-600 font-bold">-50 %</td>
               </tr>
-              <tr className="hover:bg-gray-100">
-                <td className="py-3 px-2">Génération</td>
-                <td className="py-3 px-2 text-red-500 font-medium">-10 pts</td>
-                <td className="py-3 px-2 text-orange-500">-10 sec</td>
+              <tr className="hover:bg-gray-50">
+                <td className="py-2 px-2">Type 1 / Type 2 <span className="text-xs text-gray-500 italic">(chacun)</span></td>
+                <td className="py-2 px-2 text-red-500 font-medium">-20 pts</td>
+                <td className="py-2 px-2 text-orange-500">-20 %</td>
               </tr>
-              <tr className="hover:bg-gray-100">
-                <td className="py-3 px-2">Silhouette</td>
-                <td className="py-3 px-2 text-red-600 font-medium">-30 pts</td>
-                <td className="py-3 px-2 text-orange-600">-30 sec</td>
+              <tr className="hover:bg-gray-50">
+                <td className="py-2 px-2">Génération</td>
+                <td className="py-2 px-2 text-red-500 font-medium">-15 pts</td>
+                <td className="py-2 px-2 text-orange-500">-15 %</td>
+              </tr>
+              <tr className="hover:bg-gray-50">
+                <td className="py-2 px-2 text-xs">Catégorie / Stats / Talents / Taille / Poids</td>
+                <td className="py-2 px-2 text-red-400 font-medium">-5 pts</td>
+                <td className="py-2 px-2 text-orange-400">-5 %</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <p className="text-sm mt-4 text-gray-500">En multijoueur, le joueur avec le score final le plus élevé remporte la partie !</p>
-      </div>
-    ),
-  },
-  {
-    title: "4. Fin de partie",
-    content: (
-      <div className="space-y-4">
-        <p>Une fois tous les Pokémon passés, les scores sont comparés et le grand vainqueur est couronné ! Depuis cet écran, tu peux :</p>
-        <ul className="space-y-3 mt-4">
+        <p className="font-heading text-sm mt-4 italic" style={{ color: colors.ui.textMuted }}>
+          <strong  style={{ color: colors.brand.blueDark }}>Astuce de Dresseur :</strong> Révéler le Type 1, le Type 2 ou la Génération filtre automatiquement les propositions dans ta barre de recherche !
+        </p>
+
+              <div className="font-heading space-y-4" style={{ color: colors.ui.textMuted}}>
+        <p className="font-heading" style={{ fontSize: "1.25rem", color: colors.brand.blueDark }}>
+          En cas de mauvaise réponse, le Prof. Chen t'indiquera si le Pokémon que tu as proposé :
+        </p>
+        <ul className="space-y-3 mt-2">
           <li className="flex items-start gap-3">
-            <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
-            <span><strong className="text-gray-900">Relancer :</strong> Rejouer immédiatement avec les mêmes paramètres.</span>
+            <div className="w-2 h-2 bg-blue-700 mt-1.5 flex-shrink-0" />
+            <span>Partage le même <strong>Type</strong> que la cible (ou les types exacts).</span>
           </li>
           <li className="flex items-start gap-3">
-            <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
-            <span><strong className="text-gray-900">Retourner au lobby :</strong> Modifier les règles, le temps ou les générations.</span>
+            <div className="w-2 h-2 bg-blue-700 mt-1.5 flex-shrink-0" />
+            <span>Provient de la même <strong>Génération</strong>.</span>
           </li>
           <li className="flex items-start gap-3">
-            <div className="w-2 h-2 bg-blue-500 mt-1.5 flex-shrink-0" />
-            <span><strong className="text-gray-900">Quitter :</strong> Revenir au menu principal.</span>
+            <div className="w-2 h-2 bg-blue-700 mt-1.5 flex-shrink-0" />
+            <span>Fait partie de la même <strong>Famille d'évolution</strong> !</span>
           </li>
         </ul>
+        <p className="font-display mt-8 text-center">Bonne chance et attrape-les tous !</p>
       </div>
+    </div>
     ),
   },
 ];
@@ -145,6 +162,7 @@ const GAME_COLORS = {
 
 export default function PokéDescRulesCard() {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const navigate = useNavigate();
   const activePage = POKEDESC_RULES[currentPageIndex];
   const totalPages = POKEDESC_RULES.length;
 
@@ -169,7 +187,7 @@ export default function PokéDescRulesCard() {
       header={
         <div className="flex flex-col items-center gap-1.5 w-full">
           <span className="font-display text-2xl tracking-wider text-white drop-shadow-md text-center">
-            Règles — PokéDesc
+            Règles du Dresseur
           </span>
           <div className="flex items-center gap-2">
             <span className="h-1 w-8 rounded-full bg-white/30"></span>
@@ -198,7 +216,7 @@ export default function PokéDescRulesCard() {
             color={GAME_COLORS.primary}
             onClick={goToPrev}
             disabled={currentPageIndex === 0}
-            className="w-12 h-12 flex items-center justify-center transition-transform active:scale-95"
+            className="w-12 h-12 flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50"
             clipPath={pixelClipPathSm}
           >
             <span className="font-heading text-white text-xl pb-1">◀</span>
@@ -212,18 +230,32 @@ export default function PokéDescRulesCard() {
             </div>
           )}
 
-          <PixelButton
-            colorBorder={GAME_COLORS.deep}
-            colorLight={GAME_COLORS.light}
-            colorDark={GAME_COLORS.dark}
-            color={GAME_COLORS.primary}
-            onClick={goToNext}
-            disabled={currentPageIndex === totalPages - 1}
-            className="w-12 h-12 flex items-center justify-center transition-transform active:scale-95"
-            clipPath={pixelClipPathSm}
-          >
-            <span className="font-heading text-white text-xl pb-1">▶</span>
-          </PixelButton>
+          {currentPageIndex === totalPages - 1 ? (
+            <PixelButton
+              colorBorder={GAME_COLORS.deep}
+              colorLight={GAME_COLORS.light}
+              colorDark={GAME_COLORS.dark}
+              color={GAME_COLORS.primary}
+              onClick={() => navigate("/pokedesc")}
+              className="h-12 flex items-center justify-center transition-transform active:scale-95"
+              clipPath={pixelClipPathSm}
+            >
+              <span className="font-heading text-white mr-2 ml-2">  Commencer l'aventure  </span>
+            </PixelButton>
+          ) : (
+            <PixelButton
+              colorBorder={GAME_COLORS.deep}
+              colorLight={GAME_COLORS.light}
+              colorDark={GAME_COLORS.dark}
+              color={GAME_COLORS.primary}
+              onClick={goToNext}
+              disabled={currentPageIndex === totalPages - 1}
+              className="w-12 h-12 flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50"
+              clipPath={pixelClipPathSm}
+            >
+              <span className="font-heading text-white text-xl pb-1">▶</span>
+            </PixelButton>
+          )}
         </div>
       </div>
     </Card>

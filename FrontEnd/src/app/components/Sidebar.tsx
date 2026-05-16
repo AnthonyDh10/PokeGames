@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate, useLocation } from "react-router-dom";
 import { colors } from "../design/colors";
 import PixelButton, { pixelClipPathLg } from "./PixelButton";
 import Pokeball from "../components/images/pokéball_face.png";

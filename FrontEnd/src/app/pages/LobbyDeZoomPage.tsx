@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useLocation } from 'react-router'
+import { useLocation } from 'react-router-dom'
 import Card from '../components/Card'
 import SubCard from '../components/SubCard'
 import LobbyPage from '../components/LobbyPage'

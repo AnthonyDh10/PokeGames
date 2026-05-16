@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useSessionStore } from '../store/sessionStore'
 import { useChatStore } from '../store/chatStore'
 import { colors } from '../design/colors'

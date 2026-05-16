@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate, useParams, useLocation } from 'react-router'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useSessionStore } from '../store/sessionStore'
 import { useChatStore } from '../store/chatStore'
 import { getDeZoomResults, markDeZoomRematchReady } from '../services/dezoomService'

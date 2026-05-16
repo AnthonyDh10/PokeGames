@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import Pokeball from "../components/images/pokéball_face.png";
 import { colors } from "../design/colors";
 
