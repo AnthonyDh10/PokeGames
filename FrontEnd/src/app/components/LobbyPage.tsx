@@ -354,7 +354,7 @@ export default function LobbyPage({
       >
         <div className="relative p-6 overflow-hidden">
           <PokeballDecor
-            size={150}
+            size={280}
             opacity={0.1}
             color={theme.primary}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0"
@@ -478,7 +478,7 @@ export default function LobbyPage({
               colorDark={colors.ui.grayDark}
               color={colors.ui.grayMid}
             >
-              <span style={{ color: colors.ui.textMuted }} className="font-semibold font-heading">Annuler</span>
+              <span style={{ color: '#ffffff' }} className="font-semibold font-heading">Annuler</span>
             </PixelButton>
           </div>
         </div>

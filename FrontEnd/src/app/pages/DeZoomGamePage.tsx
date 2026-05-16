@@ -4,11 +4,10 @@ import { useSessionStore } from '../store/sessionStore'
 import { useChatStore } from '../store/chatStore'
 import { colors } from '../design/colors'
 import Card from '../components/Card'
-import GameHeader from '../components/GameHeader'
-import GameLayout from '../components/GameLayout'
 import PixelButton from '../components/PixelButton'
 import SubCard from '../components/SubCard'
 import PokemonSearchInput from '../components/PokemonSearchInput'
+import Timer from '../components/Timer'
 import { getDeZoomGame, submitDeZoomGuess } from '../services/dezoomService'
 import { getAllPokemons } from '../services/pokemonService'
 import { getPartie } from '../services/partieService'
@@ -24,9 +23,22 @@ function generationToNumber(nameEn: string): number | null {
   return match ? (ROMAN_GEN[match[1]] ?? null) : null
 }
 
+function formatGenerations(generations: number[], isShort: boolean = false): string {
+  if (!generations || generations.length === 0) return ''
+  const sorted = [...generations].sort((a, b) => a - b)
+  const prefix = isShort ? 'Gén' : 'Générations'
+  if (sorted.length === 9 && sorted[0] === 1 && sorted[8] === 9) return 'Toutes générations'
+  let isConsecutive = true
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] !== sorted[i - 1] + 1) { isConsecutive = false; break }
+  }
+  if (isConsecutive) return `${prefix} ${sorted[0]}-${sorted[sorted.length - 1]}`
+  return `${prefix} ${sorted.join(',')}`
+}
+
 const DISPLAY_SCALE = 4
 const SPRITE_DISPLAY = 96 * DISPLAY_SCALE // 384px
-const WINDOW_STEPS = [16, 24, 32, 96] // tailles en px sprite (3 étapes = 3 tentatives)
+const WINDOW_STEPS = [16, 24, 32, 48, 96] // tailles en px sprite
 
 export default function DeZoomGamePage() {
   const { partieId } = useParams<{ partieId: string }>()
@@ -139,8 +151,8 @@ export default function DeZoomGamePage() {
       setSelectedPokemon(null)
       setSearchTerm('')
 
-      // 3ème mauvaise tentative → naviguer après l'animation
-      if (newAttemptCount >= 3) {
+      // Dernière étape : sprite entièrement révélé → naviguer après l'animation
+      if (WINDOW_STEPS[newStepIndex] === 96) {
         if (timerRef.current) clearInterval(timerRef.current)
         setTimeout(() => {
           navigate(`/resultats-dezoom/${partieId}`, { state: { sessionCode } })
@@ -153,39 +165,93 @@ export default function DeZoomGamePage() {
     }
   }
 
-  if (!game && !isLoading && !errorMessage) return null
+  if (isLoading) {
+    return (
+      <div className="max-w-5xl mx-auto p-6">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
+          <p className="text-gray-500">Chargement...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (errorMessage) {
+    return (
+      <div className="max-w-5xl mx-auto p-6">
+        <div className="bg-white rounded-xl border-2 border-red-500 shadow-sm p-12 text-center">
+          <p className="text-red-600 font-medium mb-4">{errorMessage}</p>
+          <button
+            onClick={() => navigate('/dezoom')}
+            className="font-body font-semibold px-6 py-2.5 text-white rounded-xl hover:-translate-y-0.5 transition"
+            style={{ backgroundColor: colors.brand.red }}
+          >
+            Retour au menu
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!game) return null
 
   const windowSpritePx = WINDOW_STEPS[stepIndex]
   const windowDisplayPx = windowSpritePx * DISPLAY_SCALE
   const windowOffset = ((96 - windowSpritePx) / 2) * DISPLAY_SCALE
 
   return (
-    <GameLayout
-      columns="1+2"
-      isLoading={isLoading}
-      error={errorMessage}
-      onErrorBack={() => navigate('/dezoom')}
-      errorBackLabel="Retour au menu"
-      errorBackColor={colors.brand.red}
-      header={
-        <GameHeader
-          title="DEX-ZOOM : Devine le Pokémon !"
-          color={colors.brand.red}
-          attemptsUsed={attemptCount}
-          elapsed={elapsed}
-          selectedGenerations={selectedGenerations}
-        />
-      }
-      left={
-        <>
+    <div className="max-w-7xl mx-auto p-4 md:p-6 text-gray-900">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        {/* LEFT: Header + Response */}
+        <div className="md:col-span-1">
+          <Card
+            headerColor={colors.brand.red}
+            headerClassName="py-4"
+            header={
+              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: '#ffffff' }}>
+                DéZoom
+              </h1>
+            }
+            pokeballOpacity={0}
+            pokeballColor="white"
+          >
+            <div className="p-4 md:p-6 flex flex-col items-center gap-4">
+              <p className="font-heading text-sm text-center text-gray-500">
+                Identifie le Pokémon caché. Chaque mauvaise réponse révèle un peu plus !
+              </p>
+              <div className="flex flex-wrap gap-6 justify-center items-end">
+                <div className="text-center">
+                  <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Code</div>
+                  <div className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>{sessionCode}</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Tentatives</div>
+                  <div className="font-heading font-semibold" style={{ color: colors.ui.textPrimary }}>{attemptCount}</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-heading text-xs text-gray-500 uppercase tracking-wide">Temps</div>
+                  <Timer value={elapsed} mode="stopwatch" />
+                </div>
+              </div>
+              {selectedGenerations.length > 0 && selectedGenerations.length < 9 && (
+                <p className="font-heading text-xs" style={{ color: colors.ui.textMuted }}>
+                  {formatGenerations(selectedGenerations)}
+                </p>
+              )}
+            </div>
+          </Card>
+
           <Card
             pokeballOpacity={0}
-            showHeader={false}
+            headerColor={colors.brand.red}
+            headerClassName="py-4"
+            header={
+              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: '#ffffff' }}>
+                Ta réponse
+              </h1>
+            }
+            className="mt-4"
           >
             <div className="p-4 md:p-6 space-y-4">
-              <h1 className="font-heading text-center text-xl md:text-2xl tracking-wide" style={{ color: colors.brand.redDark, fontSize: '1.25rem' }}>
-                Réponse
-              </h1>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {wrongMessage && (
                   <p className="font-body text-red-600 text-sm">{wrongMessage}</p>
@@ -216,7 +282,7 @@ export default function DeZoomGamePage() {
 
                 <PixelButton
                   type="submit"
-                  disabled={isSubmitting || !selectedPokemon || attemptCount >= 3}
+                  disabled={isSubmitting || !selectedPokemon}
                   color={colors.brand.red}
                   colorLight={colors.brand.redLight}
                   colorDark={colors.brand.redDark}
@@ -263,18 +329,21 @@ export default function DeZoomGamePage() {
               </div>
             </div>
           </Card>
-        </>
-      }
-      right={
-        <Card
-          pokeballOpacity={0}
-          showHeader={false}
-        >
-          <div className="p-6 flex flex-col items-center justify-center gap-4">
+        </div>
 
-            <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.brand.redDark, fontSize: '1.25rem' }}>
-              Quel est ce Pokémon ?
-            </h1>
+        {/* RIGHT: Sprite avec masque */}
+        <div className="md:col-span-2">
+          <Card
+            pokeballOpacity={0}
+            headerColor={colors.brand.red}
+            headerClassName="py-4"
+            header={
+              <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: '#ffffff' }}>
+                Quel est ce Pokémon ?
+              </h1>
+            }
+          >
+            <div className="p-6 flex flex-col items-center justify-center gap-4">
               <div
                 style={{
                   position: 'relative',
@@ -286,7 +355,7 @@ export default function DeZoomGamePage() {
                 }}
               >
                 <img
-                  src={game?.spriteUrl ?? ''}
+                  src={game.spriteUrl}
                   alt="Pokémon mystère"
                   draggable={false}
                   style={{
@@ -306,16 +375,20 @@ export default function DeZoomGamePage() {
                     width: windowDisplayPx,
                     height: windowDisplayPx,
                     border: '2px solid red',
-                    boxShadow: '0 0 0 500px' + colors.brand.white ,
+                    boxShadow: '0 0 0 500px white',
                     transition: 'left 0.3s ease, top 0.3s ease, width 0.3s ease, height 0.3s ease',
                     pointerEvents: 'none',
                   }}
                 />
               </div>
 
+              <p className="font-body text-sm text-gray-400">
+                Fenêtre visible : {windowSpritePx}×{windowSpritePx} px
+              </p>
             </div>
           </Card>
-      }
-    />
+        </div>
+      </div>
+    </div>
   )
 }

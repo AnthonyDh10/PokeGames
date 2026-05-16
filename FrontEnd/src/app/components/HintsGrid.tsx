@@ -28,7 +28,7 @@ export default function HintsGrid({
       <div className="p-4 md:p-6">
         <h3
           className="font-heading text-center text-xl tracking-wide mb-4"
-          style={{ color: colors.brand.blue, fontSize: '1.25rem' }}
+          style={{ color: colors.brand.blue }}
         >
           INDICES DISPONIBLES
         </h3>

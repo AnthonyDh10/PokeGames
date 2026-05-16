@@ -5,7 +5,7 @@ const THEME = {
   primary: colors.brand.yellow,
   primaryLight: colors.brand.yellowLight,
   primaryDark: colors.brand.yellowWarm,
-  textOnColor: colors.ui.textMuted,
+  textOnColor: colors.ui.textPrimary,
   borderColor: colors.brand.yellowDark,
 }
 
@@ -15,7 +15,7 @@ export default function LobbyTypesPage() {
       gameRoute="/types"
       theme={THEME}
       startMode="Types"
-      explanationText={<span style={{ fontSize: '1.25rem' }}>Des résistances, faiblesses et immunités sont affichées. Devine le type ou la paire de types Pokémon qui correspond à ces interactions !</span>}
+      explanationText="Des résistances, faiblesses et immunités sont affichées. Devine le type ou la paire de types Pokémon qui correspond à ces interactions !"
     />
   )
 }

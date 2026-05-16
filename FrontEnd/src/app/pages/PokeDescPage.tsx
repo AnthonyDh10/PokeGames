@@ -9,7 +9,6 @@ import type { PokemonDto } from '../types/pokemon'
 import type { GuessResultDto } from '../types/partie'
 import { useTimer } from '../hooks/useTimer'
 import { useGameState } from '../hooks/useGameState'
-import GameLayout from '../components/GameLayout'
 import PokeDescHeader from '../components/PokeDescHeader'
 import DescriptionCard from '../components/DescriptionCard'
 import AnswerCard from '../components/AnswerCard'
@@ -222,30 +221,51 @@ export default function PokeDescPage() {
   }
 
   // --- États d'affichage ---
+  if (isLoading) {
+    return (
+      <div className="max-w-5xl mx-auto p-6">
+        <div className="bg-white border border-gray-200 shadow-px-sm p-12 text-center">
+          <p className="text-gray-500">Chargement...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (errorMessage) {
+    return (
+      <div className="max-w-5xl mx-auto p-6">
+        <div className="bg-white border-2 border-red-500 shadow-px-sm p-12 text-center">
+          <span className="text-5xl grayscale opacity-70 block mb-4">❌</span>
+          <p className="text-red-600 font-medium mb-4">Erreur : {errorMessage}</p>
+          <button
+            onClick={() => navigate('/pokedesc')}
+            className="font-heading font-semibold px-6 py-2.5 text-white rounded hover:-translate-y-0.5 transition"
+            style={{ backgroundColor: colors.brand.blue }}
+          >
+            Retour au menu
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <GameLayout
-      columns="1+1"
-      isLoading={isLoading}
-      error={errorMessage}
-      onErrorBack={() => navigate('/pokedesc')}
-      errorBackLabel="Retour au menu"
-      errorBackColor={colors.brand.blue}
-      header={
-        <PokeDescHeader
-          playerName={playerName}
-          currentScore={currentScore}
-          nbPokemons={partie?.nbPokemons ?? 1}
-          attemptsUsed={attemptsUsed}
-          selectedGenerations={partie?.selectedGenerations}
-          timeRemaining={timeRemaining}
-          timerDurationSeconds={partie?.timerDurationSeconds}
-          timerShake={timerShake}
-          timerFlash={timerFlash}
-          showTimePenalty={showTimePenalty}
-          currentTimePenalty={currentTimePenalty}
-        />
-      }
-      left={
+    <div className="max-w-5xl mx-auto p-4 md:p-6 text-gray-900">
+      <PokeDescHeader
+        playerName={playerName}
+        currentScore={currentScore}
+        nbPokemons={partie?.nbPokemons ?? 1}
+        attemptsUsed={attemptsUsed}
+        selectedGenerations={partie?.selectedGenerations}
+        timeRemaining={timeRemaining}
+        timerDurationSeconds={partie?.timerDurationSeconds}
+        timerShake={timerShake}
+        timerFlash={timerFlash}
+        showTimePenalty={showTimePenalty}
+        currentTimePenalty={currentTimePenalty}
+      />
+
+      <div className="grid md:grid-cols-2 gap-4">
         <div className="relative z-10 flex flex-col gap-4">
           <DescriptionCard
             descriptions={descriptions}
@@ -267,8 +287,7 @@ export default function PokeDescPage() {
             onSubmit={handleSubmitGuess}
           />
         </div>
-      }
-      right={
+
         <HintsGrid
           usedHints={usedHints}
           revealedHints={revealedHints}
@@ -278,33 +297,30 @@ export default function PokeDescPage() {
           onRequestHint={handleRequestHint}
           isHintLocked={isHintLocked}
         />
-      }
-      modals={
-        <>
-          <SuccessModal
-            show={showSuccessModal}
-            sprite={revealedPokemonSprite}
-            pokemonName={selectedPokemonName}
-            isFinalPokemon={isFinalPokemon}
-            onProceed={proceedAfterModal}
-          />
-          <FailureModal
-            show={showFailureModal}
-            sprite={revealedPokemonSprite}
-            pokemonName={allPokemons.find((p) => p.id === currentPokemonId)?.nameFr ?? 'Pokémon inconnu'}
-            isFinalPokemon={isFinalPokemon}
-            isTimeout={isTimeout}
-            onProceed={proceedAfterModal}
-          />
-          <ZoomDescriptionModal
-            show={showDescriptionModal}
-            descriptions={descriptions}
-            descriptionIndex={descriptionIndex}
-            onChangeIndex={setDescriptionIndex}
-            onClose={() => setShowDescriptionModal(false)}
-          />
-        </>
-      }
-    />
+      </div>
+
+      <SuccessModal
+        show={showSuccessModal}
+        sprite={revealedPokemonSprite}
+        pokemonName={selectedPokemonName}
+        isFinalPokemon={isFinalPokemon}
+        onProceed={proceedAfterModal}
+      />
+      <FailureModal
+        show={showFailureModal}
+        sprite={revealedPokemonSprite}
+        pokemonName={allPokemons.find((p) => p.id === currentPokemonId)?.nameFr ?? 'Pokémon inconnu'}
+        isFinalPokemon={isFinalPokemon}
+        isTimeout={isTimeout}
+        onProceed={proceedAfterModal}
+      />
+      <ZoomDescriptionModal
+        show={showDescriptionModal}
+        descriptions={descriptions}
+        descriptionIndex={descriptionIndex}
+        onChangeIndex={setDescriptionIndex}
+        onClose={() => setShowDescriptionModal(false)}
+      />
+    </div>
   )
 }

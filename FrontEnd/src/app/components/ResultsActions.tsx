@@ -123,7 +123,6 @@ export default function ResultsActions({
     <Card
       bodyColor={buttonColorDark}
       borderColor={buttonColorBorder}
-      pokeballColor={menuColor}
       borderThickness="4px"
       className="w-full py-4"
     >

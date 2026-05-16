@@ -11,7 +11,6 @@ public class TypesGameState
     // J1 — premier joueur à rejoindre
     public string? DresseurId1 { get; set; }
     public bool IsGuessedJ1 { get; set; }
-    public bool WasCorrectJ1 { get; set; }
     public int? ElapsedSecondsJ1 { get; set; }
     public int? AttemptCountJ1 { get; set; }
     public bool RematchReadyJ1 { get; set; }
@@ -19,7 +18,6 @@ public class TypesGameState
     // J2 — deuxième joueur à rejoindre
     public string? DresseurId2 { get; set; }
     public bool IsGuessedJ2 { get; set; }
-    public bool WasCorrectJ2 { get; set; }
     public int? ElapsedSecondsJ2 { get; set; }
     public int? AttemptCountJ2 { get; set; }
     public bool RematchReadyJ2 { get; set; }

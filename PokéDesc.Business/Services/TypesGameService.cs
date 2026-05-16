@@ -60,9 +60,11 @@ public class TypesGameService : ITypesGameService
             if (!_gameStore.TryGetValue(partieId, out var state))
             {
                 var random = new Random();
+                bool isMono = random.Next(10) < 3; // 30% mono
+
                 var shuffled = _types.OrderBy(_ => random.Next()).ToList();
                 int type1Id = shuffled[0].Id;
-                int type2Id = shuffled[1].Id;
+                int? type2Id = isMono ? null : shuffled[1].Id;
 
                 state = new TypesGameState
                 {
@@ -94,68 +96,55 @@ public class TypesGameService : ITypesGameService
             if (alreadyGuessed)
             {
                 var t1Cached = _types.First(t => t.Id == state.Type1Id);
-                var t2Cached = _types.First(t => t.Id == state.Type2Id);
-                var answer = $"{t1Cached.NameFr} / {t2Cached.NameFr}";
-                return new TypesGuessResult { IsCorrect = true, Message = $"Bravo ! C'était {answer}.", CorrectType1NameFr = t1Cached.NameFr, CorrectType2NameFr = t2Cached.NameFr };
+                var t2Cached = state.Type2Id.HasValue ? _types.First(t => t.Id == state.Type2Id.Value) : null;
+                var answer = t2Cached != null ? $"{t1Cached.NameFr} / {t2Cached.NameFr}" : t1Cached.NameFr;
+                return new TypesGuessResult { IsCorrect = true, Message = $"Bravo ! C'était {answer}.", CorrectType1NameFr = t1Cached.NameFr, CorrectType2NameFr = t2Cached?.NameFr };
             }
 
-            // La réponse doit toujours être une paire (type2Id ne peut pas être null)
-            if (type2Id == null)
+            bool isMono = state.Type2Id == null;
+            bool guessIsMono = type2Id == null;
+
+            bool isCorrect;
+            if (isMono && guessIsMono)
             {
-                return new TypesGuessResult { IsCorrect = false, Message = "Vous devez sélectionner deux types !" };
+                isCorrect = type1Id == state.Type1Id;
             }
-
-            var secretSet = new HashSet<int> { state.Type1Id, state.Type2Id };
-            var guessSet = new HashSet<int> { type1Id, type2Id.Value };
-            bool isCorrect = secretSet.SetEquals(guessSet);
+            else if (!isMono && !guessIsMono)
+            {
+                var secretSet = new HashSet<int> { state.Type1Id, state.Type2Id!.Value };
+                var guessSet = new HashSet<int> { type1Id, type2Id!.Value };
+                isCorrect = secretSet.SetEquals(guessSet);
+            }
+            else
+            {
+                isCorrect = false;
+            }
 
             if (isCorrect)
             {
                 if (isJ1)
                 {
                     state.IsGuessedJ1 = true;
-                    state.WasCorrectJ1 = true;
                     state.ElapsedSecondsJ1 = elapsedSeconds;
                     state.AttemptCountJ1 = attemptCount;
                 }
                 else
                 {
                     state.IsGuessedJ2 = true;
-                    state.WasCorrectJ2 = true;
                     state.ElapsedSecondsJ2 = elapsedSeconds;
                     state.AttemptCountJ2 = attemptCount;
                 }
 
                 var t1 = _types.First(t => t.Id == state.Type1Id);
-                var t2 = _types.First(t => t.Id == state.Type2Id);
-                var answerStr = $"{t1.NameFr} / {t2.NameFr}";
+                var t2 = state.Type2Id.HasValue ? _types.First(t => t.Id == state.Type2Id.Value) : null;
+                var answerStr = t2 != null ? $"{t1.NameFr} / {t2.NameFr}" : t1.NameFr;
                 return new TypesGuessResult
                 {
                     IsCorrect = true,
                     Message = $"Bravo ! C'était {answerStr}.",
                     CorrectType1NameFr = t1.NameFr,
-                    CorrectType2NameFr = t2.NameFr,
+                    CorrectType2NameFr = t2?.NameFr,
                 };
-            }
-
-            // Mauvaise réponse : stocker la tentative, et finir la partie si 3 tentatives épuisées
-            if (isJ1)
-            {
-                state.AttemptCountJ1 = attemptCount;
-                if (attemptCount >= 3)
-                {
-                    state.IsGuessedJ1 = true;
-                    state.ElapsedSecondsJ1 = elapsedSeconds;
-                }
-            }
-            else
-            {
-                state.AttemptCountJ2 = attemptCount;
-                if (attemptCount >= 3)
-                {
-                    state.IsGuessedJ2 = true;
-                    state.ElapsedSecondsJ2 = elapsedSeconds;
-                }
             }
 
             return new TypesGuessResult
@@ -174,14 +163,13 @@ public class TypesGameService : ITypesGameService
                 return new TypesGameResultsDto();
 
             var t1 = _types.First(t => t.Id == state.Type1Id);
-            var t2 = _types.First(t => t.Id == state.Type2Id);
+            var t2 = state.Type2Id.HasValue ? _types.First(t => t.Id == state.Type2Id.Value) : null;
 
             var player2 = state.DresseurId2 != null
                 ? new TypesPlayerResultDto
                 {
                     DresseurId = state.DresseurId2,
                     HasFinished = state.IsGuessedJ2,
-                    WasCorrect = state.WasCorrectJ2,
                     ElapsedSeconds = state.ElapsedSecondsJ2,
                     AttemptCount = state.AttemptCountJ2,
                 }
@@ -189,15 +177,14 @@ public class TypesGameService : ITypesGameService
 
             return new TypesGameResultsDto
             {
-                IsMono = false,
+                IsMono = state.Type2Id == null,
                 Interactions = BuildDto(state).Interactions,
                 CorrectType1NameFr = t1.NameFr,
-                CorrectType2NameFr = t2.NameFr,
+                CorrectType2NameFr = t2?.NameFr,
                 Player1 = new TypesPlayerResultDto
                 {
                     DresseurId = state.DresseurId1,
                     HasFinished = state.IsGuessedJ1,
-                    WasCorrect = state.WasCorrectJ1,
                     ElapsedSeconds = state.ElapsedSecondsJ1,
                     AttemptCount = state.AttemptCountJ1,
                 },
@@ -220,7 +207,7 @@ public class TypesGameService : ITypesGameService
         };
 
         var defType1 = _types.First(t => t.Id == state.Type1Id);
-        var defType2 = _types.First(t => t.Id == state.Type2Id);
+        TypeData? defType2 = state.Type2Id.HasValue ? _types.First(t => t.Id == state.Type2Id.Value) : null;
 
         foreach (var attacker in _types)
         {

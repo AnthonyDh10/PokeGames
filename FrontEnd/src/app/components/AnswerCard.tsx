@@ -108,7 +108,7 @@ export default function AnswerCard({
         <div className="p-4 md:p-6">
           <h3
             className="font-heading text-center text-xl tracking-wide mb-6"
-            style={{ color: colors.brand.blue, fontSize: '1.25rem' }}
+            style={{ color: colors.brand.blue }}
           >
             RÉPONSE
           </h3>

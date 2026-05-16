@@ -12,7 +12,6 @@ export interface DeZoomGuessResultDto {
 export interface DeZoomPlayerResultDto {
   dresseurId?: string
   hasFinished: boolean
-  wasCorrect: boolean
   elapsedSeconds?: number
   attemptCount?: number
 }
