@@ -66,10 +66,6 @@ export default function DeZoomGamePage() {
                 Réponse
               </h1>
               <form onSubmit={handleSubmit} className="space-y-4">
-                {wrongMessage && (
-                  <p className="font-body text-red-600 text-sm">{wrongMessage}</p>
-                )}
-
                 {selectedPokemon ? (
                   <SubCard borderColor={colors.brand.redDeep} bodyColor={colors.brand.white} className="px-3 py-2">
                     <div className="flex items-center gap-2">
@@ -134,7 +130,7 @@ export default function DeZoomGamePage() {
                   <button
                     type="button"
                     onClick={() => { setFilterType1(''); setFilterType2('') }}
-                    className="font-body text-xs text-gray-400 hover:text-red-500 transition"
+                    className="font-heading text-xs text-gray-400 hover:text-red-500 transition"
                   >
                     Effacer les filtres
                   </button>
