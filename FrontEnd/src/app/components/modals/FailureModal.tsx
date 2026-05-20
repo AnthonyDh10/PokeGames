@@ -15,7 +15,7 @@ export default function FailureModal({ show, sprite, pokemonName, isFinalPokemon
   if (!show || !sprite) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] backdrop-blur-sm p-4">
       <div className="max-w-sm w-full">
         <Card
           showHeader={true}

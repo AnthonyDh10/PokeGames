@@ -79,7 +79,7 @@ export default function ChatPanel() {
       {/* Chat Panel — Drawer Retro avec bouton intégré */}
       {/* ═══════════════════════════════════════ */}
       <div
-        className="fixed right-4 bottom-0 z-50 flex flex-col w-[calc(100vw-2rem)] md:w-[400px] h-[70vh] md:h-[450px] transition-transform duration-200 ease-linear"
+        className="fixed right-4 bottom-0 z-[50] flex flex-col w-[calc(100vw-2rem)] md:w-[400px] h-[70vh] md:h-[450px] transition-transform duration-200 ease-linear"
         style={{
           backgroundColor: colors.brand.white,
           clipPath: pixelClipPath,
@@ -222,7 +222,7 @@ export default function ChatPanel() {
       {/* Overlay — Mobile only */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 md:hidden"
+          className="fixed inset-0 z-[40] md:hidden"
           style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
           onClick={() => setOpen(false)}
         />

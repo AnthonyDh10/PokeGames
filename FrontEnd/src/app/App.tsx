@@ -106,20 +106,17 @@ export default function App() {
       <div
         style={{
           position: "relative",
-          zIndex: 1001,
           borderTop: `6px solid ${colors.brand.redLight}`,
           borderLeft: `6px solid ${colors.brand.redLight}`,
         }}
         className="flex-1 flex flex-col"
       >
         
-        <div>
-          <TopBar
-            onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          />
-        </div>
+        <TopBar
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        />
 
-        <div style={{ position: "relative", zIndex: 1 }} className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden">
           <Sidebar
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
@@ -147,11 +144,11 @@ export default function App() {
           </div>
         </div>
       </div>
-      <div style={{ position: "relative", zIndex: 2002 }}>
-        {isChenVisible(location.pathname) && <ChenPanel />}
+      <div style={{ position: "relative", zIndex: 60 }}>
         {isChatVisible(location.pathname) && <ChatPanel />}
       </div>
-      <div style={{ position: "relative", zIndex: 60 }}>
+      {isChenVisible(location.pathname) && <ChenPanel />}
+      <div style={{ position: "relative", zIndex: 1 }}>
         <Footer />
       </div>
     </div>

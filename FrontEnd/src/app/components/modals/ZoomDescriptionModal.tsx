@@ -20,7 +20,7 @@ export default function ZoomDescriptionModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4 animate-fade-in"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] backdrop-blur-sm p-4 animate-fade-in"
       onClick={onClose}
     >
       <div className="max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>

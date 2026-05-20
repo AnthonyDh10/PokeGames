@@ -24,7 +24,7 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
 
   return (
     <header 
-      className="relative w-full flex items-center px-2 sm:px-4 md:px-6 lg:px-8 z-[100]"
+      className="relative w-full flex items-center px-2 sm:px-4 md:px-6 lg:px-8 z-[20]"
       style={{ height: topbarHeight, backgroundColor: colors.brand.red }}
     >
       {/* Titre */}
@@ -43,7 +43,7 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
       <button
         onClick={handlePokeballClick}
         aria-label="Menu principal"
-        className="absolute z-[100000] top-1/2 -translate-y-1/2 transition-transform hover:scale-105 active:scale-95 cursor-pointer outline-none"
+        className="absolute z-[25] top-1/2 -translate-y-1/2 transition-transform hover:scale-105 active:scale-95 cursor-pointer outline-none"
         style={{
           // Centrage par rapport à la largeur de la sidebar
           left: `calc(${sidebarWidth} / 2 - ${pokeballSize} / 2)`,
