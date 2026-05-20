@@ -5,6 +5,7 @@ import { useChatStore } from '../store/chatStore'
 import { useChenStore } from '../store/chenStore'
 import { getAllTypes, getTypesGame, submitTypesGuess } from '../services/typesGameService'
 import { getPartie } from '../services/partieService'
+import { normalizeString } from '../utils/normalize'
 import type { TypeSimpleDto, TypesGameDto } from '../types/typesGame'
 
 export interface UseTypesGameReturn {
@@ -51,12 +52,18 @@ export function useTypesGame(partieId: string | undefined): UseTypesGameReturn {
   const [attemptCount, setAttemptCount] = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const filteredTypes1 = types.filter((t) =>
-    !searchTerm1.trim() || t.nameFr.toLowerCase().includes(searchTerm1.toLowerCase())
-  )
-  const filteredTypes2 = types.filter((t) =>
-    !searchTerm2.trim() || t.nameFr.toLowerCase().includes(searchTerm2.toLowerCase())
-  )
+  const filteredTypes1 = types.filter((t) => {
+    if (!searchTerm1.trim()) return true
+    const normalizedSearch = normalizeString(searchTerm1)
+    const normalizedName = normalizeString(t.nameFr)
+    return normalizedName.startsWith(normalizedSearch)
+  })
+  const filteredTypes2 = types.filter((t) => {
+    if (!searchTerm2.trim()) return true
+    const normalizedSearch = normalizeString(searchTerm2)
+    const normalizedName = normalizeString(t.nameFr)
+    return normalizedName.startsWith(normalizedSearch)
+  })
 
   useEffect(() => {
     if (!partieId) return

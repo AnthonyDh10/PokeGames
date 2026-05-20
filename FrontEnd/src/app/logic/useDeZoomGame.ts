@@ -7,6 +7,7 @@ import { getDeZoomGame, submitDeZoomGuess } from '../services/dezoomService'
 import { getAllPokemons } from '../services/pokemonService'
 import { getPartie } from '../services/partieService'
 import { generationToNumber } from '../utils/pokedescLogic'
+import { normalizeString } from '../utils/normalize'
 import type { PokemonDto } from '../types/pokemon'
 import type { DeZoomGameDto } from '../types/dezoom'
 
@@ -30,6 +31,8 @@ export interface UseDeZoomGameReturn {
   elapsed: number
   attemptCount: number
   allTypes: { id: number; nameFr: string }[]
+  filteredTypes1: { id: number; nameFr: string }[]
+  filteredTypes2: { id: number; nameFr: string }[]
   filteredPokemons: PokemonDto[]
   windowSpritePx: number
   windowDisplayPx: number
@@ -79,8 +82,28 @@ export function useDeZoomGame(partieId: string | undefined): UseDeZoomGameReturn
     generationFilteredPokemons.flatMap(p => p.types ?? []).map(t => t.name)
   )].sort((a, b) => a.localeCompare(b)).map((t, i) => ({ id: i, nameFr: t }))
 
+  // Filtrer les types basés sur la saisie de l'utilisateur (commence par, insensible aux accents)
+  const filteredTypes1 = allTypes.filter((t) => {
+    if (!filterType1.trim()) return true
+    const normalizedSearch = normalizeString(filterType1)
+    const normalizedName = normalizeString(t.nameFr)
+    return normalizedName.startsWith(normalizedSearch)
+  })
+
+  const filteredTypes2 = allTypes.filter((t) => {
+    if (!filterType2.trim()) return true
+    const normalizedSearch = normalizeString(filterType2)
+    const normalizedName = normalizeString(t.nameFr)
+    return normalizedName.startsWith(normalizedSearch)
+  })
+
+  // Filtrer les pokémons par nom (commence par, insensible aux accents) et par type
   const filteredPokemons = generationFilteredPokemons.filter((p) => {
-    if (searchTerm.trim() && !p.nameFr.toLowerCase().includes(searchTerm.toLowerCase())) return false
+    if (searchTerm.trim()) {
+      const normalizedSearch = normalizeString(searchTerm)
+      const normalizedName = normalizeString(p.nameFr)
+      if (!normalizedName.startsWith(normalizedSearch)) return false
+    }
     if (filterType1 && p.types?.find(t => t.slot === 1)?.name !== filterType1) return false
     if (filterType2) {
       const slot2 = p.types?.find(t => t.slot === 2)?.name
@@ -203,6 +226,8 @@ export function useDeZoomGame(partieId: string | undefined): UseDeZoomGameReturn
     elapsed,
     attemptCount,
     allTypes,
+    filteredTypes1,
+    filteredTypes2,
     filteredPokemons,
     windowSpritePx,
     windowDisplayPx,

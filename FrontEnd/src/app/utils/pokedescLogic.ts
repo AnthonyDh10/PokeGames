@@ -1,5 +1,5 @@
 import { ROMAN_GEN, HINT_PENALTIES } from './pokedescConstants'
-import { normalizeString } from '../components/PokemonSearchInput'
+import { normalizeString } from './normalize'
 import type { PokemonDto } from '../types/pokemon'
 import type { RevealedHints } from '../hooks/useGameState'
 

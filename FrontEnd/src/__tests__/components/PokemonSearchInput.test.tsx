@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import PokemonSearchInput, { normalizeString, SearchableItem } from '../../app/components/PokemonSearchInput';
+import PokemonSearchInput, { SearchableItem } from '../../app/components/PokemonSearchInput';
+import { normalizeString } from '../../app/utils/normalize';
 
 describe('normalizeString', () => {
   it('retourne une chaîne vide pour une entrée vide', () => {

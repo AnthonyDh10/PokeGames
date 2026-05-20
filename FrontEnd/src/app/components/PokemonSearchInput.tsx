@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { colors } from '../design/colors'
+import { normalizeString } from '../utils/normalize'
 import SubCard from './SubCard'
 
 export interface SearchableItem {
@@ -16,14 +17,6 @@ interface PokemonSearchInputProps<T extends SearchableItem> {
   onSelect: (item: T) => void
   disabled?: boolean
   placeholder?: string
-}
-
-export function normalizeString(str: string): string {
-  if (!str) return '';
-  return str
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
 }
 
 export default function PokemonSearchInput<T extends SearchableItem>({

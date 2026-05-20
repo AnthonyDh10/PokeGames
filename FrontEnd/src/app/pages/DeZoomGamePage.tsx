@@ -25,7 +25,8 @@ export default function DeZoomGamePage() {
     wrongMessage,
     elapsed,
     attemptCount,
-    allTypes,
+    filteredTypes1,
+    filteredTypes2,
     filteredPokemons,
     windowDisplayPx,
     windowOffset,
@@ -110,7 +111,7 @@ export default function DeZoomGamePage() {
 
                 <div className="flex gap-2">
                   <PokemonSearchInput
-                    items={allTypes}
+                    items={filteredTypes1}
                     value={filterType1}
                     onChange={setFilterType1}
                     onSelect={(t) => { setFilterType1(t.nameFr); setSelectedPokemon(null); setSearchTerm('') }}
@@ -118,7 +119,7 @@ export default function DeZoomGamePage() {
                   />
 
                   <PokemonSearchInput
-                    items={allTypes}
+                    items={filteredTypes2}
                     value={filterType2}
                     onChange={setFilterType2}
                     onSelect={(t) => { setFilterType2(t.nameFr); setSelectedPokemon(null); setSearchTerm('') }}
