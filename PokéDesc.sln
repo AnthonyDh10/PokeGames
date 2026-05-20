@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokéDesc.Domain", "PokéDe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Projet_FullStack_FrontEnd", "Projet_FullStack_FrontEnd\Projet_FullStack_FrontEnd.csproj", "{B76EE874-4710-4505-9299-D9074A4EA6B8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokéDesc.Tests", "PokéDesc.Tests\PokéDesc.Tests.csproj", "{43AFB973-C1A7-49B7-A805-D3AEE969695E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,18 @@ Global
 		{1C257504-7E49-4F91-B9CD-D59D3A8ACA29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C257504-7E49-4F91-B9CD-D59D3A8ACA29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C257504-7E49-4F91-B9CD-D59D3A8ACA29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43AFB973-C1A7-49B7-A805-D3AEE969695E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43AFB973-C1A7-49B7-A805-D3AEE969695E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43AFB973-C1A7-49B7-A805-D3AEE969695E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{43AFB973-C1A7-49B7-A805-D3AEE969695E}.Debug|x64.Build.0 = Debug|Any CPU
+		{43AFB973-C1A7-49B7-A805-D3AEE969695E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{43AFB973-C1A7-49B7-A805-D3AEE969695E}.Debug|x86.Build.0 = Debug|Any CPU
+		{43AFB973-C1A7-49B7-A805-D3AEE969695E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43AFB973-C1A7-49B7-A805-D3AEE969695E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43AFB973-C1A7-49B7-A805-D3AEE969695E}.Release|x64.ActiveCfg = Release|Any CPU
+		{43AFB973-C1A7-49B7-A805-D3AEE969695E}.Release|x64.Build.0 = Release|Any CPU
+		{43AFB973-C1A7-49B7-A805-D3AEE969695E}.Release|x86.ActiveCfg = Release|Any CPU
+		{43AFB973-C1A7-49B7-A805-D3AEE969695E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
