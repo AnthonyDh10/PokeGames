@@ -131,7 +131,6 @@ export default function HomePage() {
     gifRef.current = img;
   }, []);
 
-
   const handlePokeballClick = (index: number) => {
     setSelectedIndex(prev => prev === index ? null : index);
   };
@@ -157,7 +156,6 @@ export default function HomePage() {
   // Ajouts / Ajustements des tailles pour la nouvelle grille :
   const lgPokeballSize = "clamp(110px, 16vw, 220px)"; // Légèrement affiné pour la ligne de 4
   const lgGapSize = "clamp(1rem, 4vw, 6rem)";
-  const mdPokeballSize = "clamp(120px, 25vw, 200px)"; // Plus grand car il y a seulement 2 éléments par ligne
   const smPokeballSize = "clamp(130px, 45vw, 220px)"; 
 
   const renderItem = (
@@ -277,24 +275,9 @@ export default function HomePage() {
           {games.map((game, index) => renderItem(game, index, { pokeballSize: lgPokeballSize }))}
         </div>
 
-        {/* 640px–1023px (sm à lg) : Quinconce sur 2 LIGNES (Grille 2 colonnes) 
-            S'active en même temps que le responsive de la GameCard */}
-        <div className="hidden sm:grid lg:hidden grid-cols-2 gap-x-6 gap-y-4 max-w-2xl mx-auto pt-4 pb-12">
-          {games.map((game, index) => (
-            <div 
-              key={index} 
-              className={`flex justify-center ${
-                index % 2 !== 0 ? "mt-16" : "mb-8" // Pousse les éléments pairs vers le haut et les impairs vers le bas
-              }`}
-            >
-              {renderItem(game, index, { pokeballSize: mdPokeballSize })}
-            </div>
-          ))}
-        </div>
-
-        {/* <640px (sm) : Carrousel mobile avec Swipe et Rotation (Framer Motion) */}
+        {/* <1024px (sm à lg) : Carrousel mobile avec Swipe et Rotation (Framer Motion) */}
         <div 
-          className="sm:hidden flex flex-col items-center py-4 w-full"
+          className="lg:hidden flex flex-col items-center py-4 w-full"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
