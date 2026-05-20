@@ -73,19 +73,13 @@ export default function ChenPanel() {
       <button
         onClick={toggleOpen}
         className="flex items-center justify-between px-4 h-12 w-full shrink-0 outline-none hover:brightness-110"
-        style={{ backgroundColor: colors.brand.yellow }}
+        style={{ backgroundColor: colors.brand.chen }}
         aria-label={isOpen ? 'Fermer les indices du Prof. Chen' : 'Ouvrir les indices du Prof. Chen'}
       >
-        <div className="flex items-center gap-2">
-          <img
-            src={oakChibi}
-            alt="Prof. Chen"
-            className="w-7 h-7"
-            style={{ imageRendering: 'pixelated' }}
-          />
+        <div className="flex items-center gap-2 ml-1">
           <span
             className="font-display tracking-wide uppercase ml-1"
-            style={{ color: colors.ui.textPrimary }}
+            style={{ color: colors.ui.textMuted }}
           >
             Prof. Chen
           </span>

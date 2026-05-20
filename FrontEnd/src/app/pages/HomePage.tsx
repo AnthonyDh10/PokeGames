@@ -38,10 +38,10 @@ const games: Game[] = [
         {" "}!
       </span>
     ),
-    color: colors.ui.grayMid,
-    secondColor: colors.ui.grayBorderDark,
-    colorLight: colors.ui.grayLight,
-    colorDark: colors.ui.grayDark,
+    color: colors.brand.chen,
+    secondColor: colors.brand.chenDeep,
+    colorLight: colors.brand.chenLight,
+    colorDark: colors.brand.chenDark,
     image: rulesIconImg,
     to: "/regles",
     isOak: true,

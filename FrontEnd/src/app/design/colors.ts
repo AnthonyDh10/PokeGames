@@ -55,6 +55,11 @@ export const colors = {
     greenLight: '#30A134',
     greenDeep: '#103712',
 
+    chen: '#CBCBCB',
+    chenDeep: '#585858',
+    chenLight: '#DBDBDB',
+    chenDark: '#ADADAD',
+
   },
 
   // ─── Interface utilisateur ─────────────────────────────────────────────────
