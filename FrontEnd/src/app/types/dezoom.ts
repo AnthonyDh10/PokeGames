@@ -7,6 +7,10 @@ export interface DeZoomGuessResultDto {
   isCorrect: boolean
   message: string
   correctPokemonNameFr?: string
+  hasOneTypeInCommon?: boolean
+  hasPerfectTypeMatch?: boolean
+  hasSameGeneration?: boolean
+  isInSameEvolutionChain?: boolean
 }
 
 export interface DeZoomPlayerResultDto {

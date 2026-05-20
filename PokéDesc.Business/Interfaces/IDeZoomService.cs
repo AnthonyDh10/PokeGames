@@ -11,6 +11,11 @@ public class DeZoomGuessResult
     public bool IsCorrect { get; set; }
     public string Message { get; set; } = string.Empty;
     public string? CorrectPokemonNameFr { get; set; }
+
+    public bool HasOneTypeInCommon { get; set; }
+    public bool HasPerfectTypeMatch { get; set; }
+    public bool HasSameGeneration { get; set; }
+    public bool IsInSameEvolutionChain { get; set; }
 }
 
 public class DeZoomPlayerResultDto

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSessionStore } from '../store/sessionStore'
 import { useChatStore } from '../store/chatStore'
+import { useChenStore } from '../store/chenStore'
 import { getDeZoomGame, submitDeZoomGuess } from '../services/dezoomService'
 import { getAllPokemons } from '../services/pokemonService'
 import { getPartie } from '../services/partieService'
@@ -44,6 +45,8 @@ export function useDeZoomGame(partieId: string | undefined): UseDeZoomGameReturn
   const navigate = useNavigate()
   const { sessionId } = useSessionStore()
   const { setContext: setChatContext } = useChatStore()
+  const addChenMessage = useChenStore((state) => state.addMessage)
+  const clearChenMessages = useChenStore((state) => state.clearMessages)
 
   const [game, setGame] = useState<DeZoomGameDto | null>(null)
   const [pokemons, setPokemons] = useState<PokemonDto[]>([])
@@ -114,6 +117,7 @@ export function useDeZoomGame(partieId: string | undefined): UseDeZoomGameReturn
         } catch {
           setSessionCode('N/A')
         }
+        clearChenMessages()
         timerRef.current = setInterval(() => setElapsed((prev) => prev + 1), 1000)
       } catch {
         setErrorMessage('Impossible de charger la partie.')
@@ -154,6 +158,20 @@ export function useDeZoomGame(partieId: string | undefined): UseDeZoomGameReturn
       setWrongMessage(res.message)
       setSelectedPokemon(null)
       setSearchTerm('')
+
+      // Ajouter un message Chen avec proximité (sauf au game over)
+      if (newAttemptCount < 3) {
+        addChenMessage({
+          text: res.message,
+          timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+          proximityResult: {
+            hasOneTypeInCommon: res.hasOneTypeInCommon,
+            hasPerfectTypeMatch: res.hasPerfectTypeMatch,
+            hasSameGeneration: res.hasSameGeneration,
+            isInSameEvolutionChain: res.isInSameEvolutionChain,
+          },
+        })
+      }
 
       // 3ème mauvaise tentative → naviguer après l'animation
       if (newAttemptCount >= 3) {

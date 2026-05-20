@@ -149,10 +149,49 @@ public class DeZoomService : IDeZoomService
                 }
             }
 
+            // Calcul de la proximité (uniquement avant le game over)
+            bool hasOneTypeInCommon = false;
+            bool hasPerfectTypeMatch = false;
+            bool hasSameGeneration = false;
+            bool isInSameEvolutionChain = false;
+
+            if (attemptCount < 3)
+            {
+                var targetPokemon = _pokemons.FirstOrDefault(p =>
+                    string.Equals(p.NameFr, state.PokemonNameFr, StringComparison.OrdinalIgnoreCase));
+                var guessedPokemon = _pokemons.FirstOrDefault(p =>
+                    string.Equals(p.NameFr, pokemonNameFr.Trim(), StringComparison.OrdinalIgnoreCase));
+
+                if (targetPokemon != null && guessedPokemon != null)
+                {
+                    var targetTypes = targetPokemon.Types?.Select(t => t.Name).ToList() ?? new List<string>();
+                    var guessTypes = guessedPokemon.Types?.Select(t => t.Name).ToList() ?? new List<string>();
+                    int commonTypesCount = targetTypes.Intersect(guessTypes, StringComparer.OrdinalIgnoreCase).Count();
+
+                    hasOneTypeInCommon = commonTypesCount >= 1;
+                    hasPerfectTypeMatch = targetTypes.Count == guessTypes.Count && commonTypesCount == targetTypes.Count;
+
+                    hasSameGeneration = targetPokemon.Generation?.NameEn == guessedPokemon.Generation?.NameEn
+                                        && !string.IsNullOrEmpty(targetPokemon.Generation?.NameEn);
+
+                    isInSameEvolutionChain = targetPokemon.EvolutionChain?.BasePokemon == guessedPokemon.EvolutionChain?.BasePokemon
+                                            && !string.IsNullOrEmpty(targetPokemon.EvolutionChain?.BasePokemon);
+                }
+            }
+
+            string message = attemptCount < 3
+                ? $"Mauvaise réponse. Il te reste {3 - attemptCount} essai{(3 - attemptCount > 1 ? "s" : "")}."
+                : $"Dommage, c'était {state.PokemonNameFr} !";
+
             return new DeZoomGuessResult
             {
                 IsCorrect = false,
-                Message = "Ce n'est pas ça, réessayez !",
+                Message = message,
+                CorrectPokemonNameFr = attemptCount >= 3 ? state.PokemonNameFr : null,
+                HasOneTypeInCommon = hasOneTypeInCommon,
+                HasPerfectTypeMatch = hasPerfectTypeMatch,
+                HasSameGeneration = hasSameGeneration,
+                IsInSameEvolutionChain = isInSameEvolutionChain,
             };
         }
     }
