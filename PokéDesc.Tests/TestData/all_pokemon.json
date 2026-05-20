@@ -1,0 +1,131 @@
+[
+  {
+    "id": 1,
+    "name_fr": "Bulbizarre",
+    "name_en": "Bulbasaur",
+    "category": "Pokémon Graine",
+    "pokedex_number": 1,
+    "generation": { "name_fr": "Génération I", "name_en": "generation-i" },
+    "region": { "name_fr": "Kanto", "name_en": "kanto" },
+    "status": { "capture_rate": 45, "is_legendary": false, "is_mythical": false },
+    "breeding": { "egg_groups": [] },
+    "physical": { "height_m": 0.7, "weight_kg": 6.9 },
+    "types": [
+      { "name": "Plante", "name_en": "grass", "slot": 1 },
+      { "name": "Poison", "name_en": "poison", "slot": 2 }
+    ],
+    "abilities": [{ "name": "Engrais", "name_en": "overgrow", "is_hidden": false, "slot": 1 }],
+    "forms_count": 1,
+    "stats": {
+      "PV": { "value": 45, "name_en": "hp" },
+      "Attaque": { "value": 49, "name_en": "attack" },
+      "Défense": { "value": 49, "name_en": "defense" },
+      "Attaque Spé.": { "value": 65, "name_en": "special-attack" },
+      "Défense Spé.": { "value": 65, "name_en": "special-defense" },
+      "Vitesse": { "value": 45, "name_en": "speed" }
+    },
+    "sprites": { "front_default": "https://example.com/bulbasaur.png", "front_shiny": null },
+    "cries": {},
+    "moves": [],
+    "moves_count": 0,
+    "description": ["Bulbizarre a une graine sur le dos depuis sa naissance."],
+    "varieties": [],
+    "evolution_chain": { "count": 3, "base_pokemon": "Bulbizarre", "chain": [{ "name": "Bulbizarre", "level": 0 }] }
+  },
+  {
+    "id": 4,
+    "name_fr": "Salamèche",
+    "name_en": "Charmander",
+    "category": "Pokémon Lézard",
+    "pokedex_number": 4,
+    "generation": { "name_fr": "Génération I", "name_en": "generation-i" },
+    "region": { "name_fr": "Kanto", "name_en": "kanto" },
+    "status": { "capture_rate": 45, "is_legendary": false, "is_mythical": false },
+    "breeding": { "egg_groups": [] },
+    "physical": { "height_m": 0.6, "weight_kg": 8.5 },
+    "types": [
+      { "name": "Feu", "name_en": "fire", "slot": 1 }
+    ],
+    "abilities": [{ "name": "Brasier", "name_en": "blaze", "is_hidden": false, "slot": 1 }],
+    "forms_count": 1,
+    "stats": {
+      "PV": { "value": 39, "name_en": "hp" },
+      "Attaque": { "value": 52, "name_en": "attack" },
+      "Défense": { "value": 43, "name_en": "defense" },
+      "Attaque Spé.": { "value": 60, "name_en": "special-attack" },
+      "Défense Spé.": { "value": 50, "name_en": "special-defense" },
+      "Vitesse": { "value": 65, "name_en": "speed" }
+    },
+    "sprites": { "front_default": "https://example.com/charmander.png", "front_shiny": null },
+    "cries": {},
+    "moves": [],
+    "moves_count": 0,
+    "description": ["La flamme à l'extrémité de sa queue indique son état de santé."],
+    "varieties": [],
+    "evolution_chain": { "count": 3, "base_pokemon": "Salamèche", "chain": [{ "name": "Salamèche", "level": 0 }] }
+  },
+  {
+    "id": 150,
+    "name_fr": "Mewtwo",
+    "name_en": "Mewtwo",
+    "category": "Pokémon Génétique",
+    "pokedex_number": 150,
+    "generation": { "name_fr": "Génération I", "name_en": "generation-i" },
+    "region": { "name_fr": "Kanto", "name_en": "kanto" },
+    "status": { "capture_rate": 3, "is_legendary": true, "is_mythical": false },
+    "breeding": { "egg_groups": [] },
+    "physical": { "height_m": 2.0, "weight_kg": 122.0 },
+    "types": [
+      { "name": "Psy", "name_en": "psychic", "slot": 1 }
+    ],
+    "abilities": [{ "name": "Pression", "name_en": "pressure", "is_hidden": false, "slot": 1 }],
+    "forms_count": 1,
+    "stats": {
+      "PV": { "value": 106, "name_en": "hp" },
+      "Attaque": { "value": 110, "name_en": "attack" },
+      "Défense": { "value": 90, "name_en": "defense" },
+      "Attaque Spé.": { "value": 154, "name_en": "special-attack" },
+      "Défense Spé.": { "value": 90, "name_en": "special-defense" },
+      "Vitesse": { "value": 130, "name_en": "speed" }
+    },
+    "sprites": { "front_default": "https://example.com/mewtwo.png", "front_shiny": null },
+    "cries": {},
+    "moves": [],
+    "moves_count": 0,
+    "description": ["Mewtwo est un Pokémon qui a été créé par génie génétique."],
+    "varieties": [],
+    "evolution_chain": { "count": 1, "base_pokemon": "Mewtwo", "chain": [] }
+  },
+  {
+    "id": 151,
+    "name_fr": "Mew",
+    "name_en": "Mew",
+    "category": "Pokémon Nouvelle Espèce",
+    "pokedex_number": 151,
+    "generation": { "name_fr": "Génération I", "name_en": "generation-i" },
+    "region": { "name_fr": "Kanto", "name_en": "kanto" },
+    "status": { "capture_rate": 45, "is_legendary": false, "is_mythical": true },
+    "breeding": { "egg_groups": [] },
+    "physical": { "height_m": 0.4, "weight_kg": 4.0 },
+    "types": [
+      { "name": "Psy", "name_en": "psychic", "slot": 1 }
+    ],
+    "abilities": [{ "name": "Synchronie", "name_en": "synchronize", "is_hidden": false, "slot": 1 }],
+    "forms_count": 1,
+    "stats": {
+      "PV": { "value": 100, "name_en": "hp" },
+      "Attaque": { "value": 100, "name_en": "attack" },
+      "Défense": { "value": 100, "name_en": "defense" },
+      "Attaque Spé.": { "value": 100, "name_en": "special-attack" },
+      "Défense Spé.": { "value": 100, "name_en": "special-defense" },
+      "Vitesse": { "value": 100, "name_en": "speed" }
+    },
+    "sprites": { "front_default": "https://example.com/mew.png", "front_shiny": null },
+    "cries": {},
+    "moves": [],
+    "moves_count": 0,
+    "description": ["Mew est décrit dans le livre Pokémon rare. Son ADN contient les gènes génétiques de tous les Pokémon."],
+    "varieties": [],
+    "evolution_chain": { "count": 1, "base_pokemon": "Mew", "chain": [] }
+  }
+]
