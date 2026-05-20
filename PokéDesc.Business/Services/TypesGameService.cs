@@ -48,6 +48,8 @@ public class TypesGameService : ITypesGameService
     {
         var json = File.ReadAllText(Path.Combine(dataPath, "all_types.json"));
         _types = JsonSerializer.Deserialize<List<TypeData>>(json) ?? new();
+        if (_types.Count < 2)
+            throw new InvalidOperationException("Au moins 2 types sont nécessaires pour le jeu.");
     }
 
     public List<TypeSimpleDto> GetAllTypes() =>
@@ -105,8 +107,7 @@ public class TypesGameService : ITypesGameService
                 return new TypesGuessResult { IsCorrect = false, Message = "Vous devez sélectionner deux types !" };
             }
 
-            var secretSet = new HashSet<int> { state.Type1Id };
-            if (state.Type2Id.HasValue) secretSet.Add(state.Type2Id.Value);
+            var secretSet = new HashSet<int> { state.Type1Id, state.Type2Id };
             var guessSet = new HashSet<int> { type1Id, type2Id.Value };
             bool isCorrect = secretSet.SetEquals(guessSet);
 
@@ -190,7 +191,6 @@ public class TypesGameService : ITypesGameService
 
             return new TypesGameResultsDto
             {
-                IsMono = false,
                 Interactions = BuildDto(state).Interactions,
                 CorrectType1NameFr = t1.NameFr,
                 CorrectType2NameFr = t2.NameFr,
@@ -240,7 +240,6 @@ public class TypesGameService : ITypesGameService
 
         return new TypesGameDto
         {
-            IsMono = defType2 == null,
             Interactions = buckets,
         };
     }
@@ -281,12 +280,11 @@ public class TypesGameService : ITypesGameService
                     DresseurId1 = state.DresseurId1,
                     DresseurId2 = state.DresseurId2,
                 };
-                // Set up new puzzle
+                // Set up new puzzle with two different types
                 var random = new Random();
-                bool isMono = random.Next(10) < 3;
                 var shuffled = _types.OrderBy(_ => random.Next()).ToList();
                 newState.Type1Id = shuffled[0].Id;
-                newState.Type2Id = isMono ? null : shuffled[1].Id;
+                newState.Type2Id = shuffled[1].Id;
 
                 _gameStore[newPartieId] = newState;
             }

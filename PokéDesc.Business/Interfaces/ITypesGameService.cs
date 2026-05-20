@@ -2,7 +2,6 @@ namespace PokéDesc.Business.Interfaces;
 
 public class TypesGameDto
 {
-    public bool IsMono { get; set; }
     public Dictionary<string, List<string>> Interactions { get; set; } = new();
 }
 
@@ -31,7 +30,6 @@ public class TypesPlayerResultDto
 
 public class TypesGameResultsDto
 {
-    public bool IsMono { get; set; }
     public Dictionary<string, List<string>> Interactions { get; set; } = new();
     public string? CorrectType1NameFr { get; set; }
     public string? CorrectType2NameFr { get; set; }

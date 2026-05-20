@@ -6,7 +6,7 @@ public class TypesGameState
 {
     public string PartieId { get; set; } = string.Empty;
     public int Type1Id { get; set; }
-    public int? Type2Id { get; set; } // null = mono-type
+    public int Type2Id { get; set; } // Always two different types
 
     // J1 — premier joueur à rejoindre
     public string? DresseurId1 { get; set; }
