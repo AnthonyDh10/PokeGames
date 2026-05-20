@@ -6,6 +6,7 @@ import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 import Footer from "./components/Footer";
 import ChatPanel from "./components/ChatPanel";
+import ChenPanel from "./components/ChenPanel";
 import palletTown from "./components/images/palletTown.webp";
 import { useNavDirectionStore } from "./store/navDirectionStore";
 import HomePage from "./pages/HomePage";
@@ -25,6 +26,21 @@ const HOME_REGLES_PATHS = ["/", "/home", "/regles"];
 
 function isHomeOrRegles(path: string) {
   return HOME_REGLES_PATHS.includes(path);
+}
+
+// Chat visible partout sauf home (/,/home) et regles
+function isChatVisible(path: string): boolean {
+  return path !== "/" && path !== "/home" && path !== "/regles";
+}
+
+// Chen visible seulement dans les pages jeu (avec :partieId)
+// /pokedesc/:partieId, /types/:partieId, /dezoom/:partieId
+function isChenVisible(path: string): boolean {
+  return (
+    /^\/pokedesc\/[^/]+$/.test(path) ||
+    /^\/types\/[^/]+$/.test(path) ||
+    /^\/dezoom\/[^/]+$/.test(path)
+  );
 }
 
 export default function App() {
@@ -125,7 +141,8 @@ export default function App() {
         </div>
       </div>
       <div style={{ position: "relative", zIndex: 2002 }}>
-        <ChatPanel />
+        {isChenVisible(location.pathname) && <ChenPanel />}
+        {isChatVisible(location.pathname) && <ChatPanel />}
       </div>
       <div style={{ position: "relative", zIndex: 60 }}>
         <Footer />

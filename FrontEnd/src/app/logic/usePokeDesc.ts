@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSessionStore } from '../store/sessionStore'
 import { useChatStore } from '../store/chatStore'
+import { useChenStore } from '../store/chenStore'
 import { getAllPokemons, getHints } from '../services/pokemonService'
 import { submitGuess, useHint, resetTimer } from '../services/partieService'
 import { useTimer } from '../hooks/useTimer'
@@ -69,6 +70,8 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
   const navigate = useNavigate()
   const { sessionId } = useSessionStore()
   const { setContext: setChatContext } = useChatStore()
+  const addChenMessage = useChenStore((state) => state.addMessage)
+  const clearChenMessages = useChenStore((state) => state.clearMessages)
 
   // --- État propre à l'orchestration ---
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -231,6 +234,16 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
         setIsTimeout(result.isTimeout)
         setShowFailureModal(true)
       } else {
+        addChenMessage({
+          text: result.message,
+          timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+          proximityResult: {
+            hasOneTypeInCommon: result.hasOneTypeInCommon,
+            hasPerfectTypeMatch: result.hasPerfectTypeMatch,
+            hasSameGeneration: result.hasSameGeneration,
+            isInSameEvolutionChain: result.isInSameEvolutionChain,
+          },
+        })
         setAttemptsUsed((prev) => prev + 1)
       }
     } catch (err) {
@@ -248,6 +261,7 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
     setLastGuessCorrect(false)
     setGuessResultMessage('')
     setIsFinalPokemon(false)
+    clearChenMessages()
     if (isFinalPokemon) {
       navigate(`/resultats/${partieId}`)
       return

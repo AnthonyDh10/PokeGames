@@ -68,7 +68,6 @@ export default function PokeDescPage() {
             isSubmitting={isSubmitting}
             guessResultMessage={guessResultMessage}
             lastGuessCorrect={lastGuessCorrect}
-            proximityResult={proximityResult}
             onSearchChange={setSearchTerm}
             onSelectPokemon={(name) => { setSelectedPokemonName(name); setSearchTerm(name) }}
             onClearSelection={() => { setSelectedPokemonName(''); setSearchTerm('') }}
