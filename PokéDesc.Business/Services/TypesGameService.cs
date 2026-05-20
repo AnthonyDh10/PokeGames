@@ -160,10 +160,16 @@ public class TypesGameService : ITypesGameService
                 }
             }
 
+            var intersection = guessSet.Intersect(secretSet).ToList();
+            string? partialMatchFr = intersection.Count == 1
+                ? _types.FirstOrDefault(t => t.Id == intersection[0])?.NameFr
+                : null;
+
             return new TypesGuessResult
             {
                 IsCorrect = false,
-                Message = "Ce n'est pas ça, réessayez !",
+                Message = $"Mauvaise réponse. Il te reste {3 - attemptCount} essais.",
+                PartialMatchTypeFr = partialMatchFr,
             };
         }
     }

@@ -18,6 +18,7 @@ export interface UseTypesGameReturn {
   searchTerm2: string
   isSubmitting: boolean
   result: TypesGuessResultDto | null
+  partialMatches: string[]
   elapsed: number
   attemptCount: number
   filteredTypes1: TypeSimpleDto[]
@@ -46,6 +47,7 @@ export function useTypesGame(partieId: string | undefined): UseTypesGameReturn {
   const [searchTerm2, setSearchTerm2] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [result, setResult] = useState<TypesGuessResultDto | null>(null)
+  const [partialMatches, setPartialMatches] = useState<string[]>([])
   const [elapsed, setElapsed] = useState(0)
   const [attemptCount, setAttemptCount] = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -111,6 +113,11 @@ export function useTypesGame(partieId: string | undefined): UseTypesGameReturn {
         return
       }
       setResult(res)
+      if (res.partialMatchTypeFr) {
+        setPartialMatches((prev) =>
+          prev.includes(res.partialMatchTypeFr!) ? prev : [...prev, res.partialMatchTypeFr!]
+        )
+      }
       if (newAttemptCount >= 3) {
         if (timerRef.current) clearInterval(timerRef.current)
         navigate(`/resultats-types/${partieId}`, { state: { sessionCode } })
@@ -134,6 +141,7 @@ export function useTypesGame(partieId: string | undefined): UseTypesGameReturn {
     searchTerm2,
     isSubmitting,
     result,
+    partialMatches,
     elapsed,
     attemptCount,
     filteredTypes1,

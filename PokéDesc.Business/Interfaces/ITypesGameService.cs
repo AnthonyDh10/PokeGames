@@ -11,6 +11,7 @@ public class TypesGuessResult
     public string Message { get; set; } = string.Empty;
     public string? CorrectType1NameFr { get; set; }
     public string? CorrectType2NameFr { get; set; }
+    public string? PartialMatchTypeFr { get; set; }
 }
 
 public class TypeSimpleDto

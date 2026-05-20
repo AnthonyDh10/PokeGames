@@ -12,6 +12,7 @@ export interface TypesGuessResultDto {
   message: string
   correctType1NameFr?: string
   correctType2NameFr?: string
+  partialMatchTypeFr?: string
 }
 
 export interface TypesPlayerResultDto {
