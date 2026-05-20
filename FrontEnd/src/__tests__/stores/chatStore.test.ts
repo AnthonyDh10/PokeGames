@@ -103,4 +103,20 @@ describe('chatStore', () => {
 
     expect(useChatStore.getState().messages).toHaveLength(100);
   });
+
+  it('clearContext remet toutes les valeurs à leur état initial', () => {
+    act(() => {
+      useChatStore.getState().setContext({ partieId: 'partie-1', sessionCode: 'XYZ', isSolo: false });
+      useChatStore.getState().addMessage(makeMessage('Hello'));
+      useChatStore.getState().setOpen(true);
+      useChatStore.getState().clearContext();
+    });
+
+    const state = useChatStore.getState();
+    expect(state.partieId).toBe('');
+    expect(state.sessionCode).toBe('');
+    expect(state.isSolo).toBe(true);
+    expect(state.isOpen).toBe(false);
+    expect(state.messages).toHaveLength(0);
+  });
 });

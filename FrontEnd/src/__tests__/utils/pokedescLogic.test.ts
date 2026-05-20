@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generationToNumber, isHintLocked, filterHintPokemons, filterSearchPokemons } from '../../app/utils/pokedescLogic';
+import { generationToNumber, isHintLocked, filterHintPokemons, filterSearchPokemons, formatGenerations, getGenerationsDisplay } from '../../app/utils/pokedescLogic';
 import type { PokemonDto } from '../../app/types/pokemon';
 
 // ─────────────────────────────────────────────
@@ -191,5 +191,116 @@ describe('filterSearchPokemons', () => {
 
   it('retourne [] quand aucun résultat', () => {
     expect(filterSearchPokemons(pokemons, 'pikachu')).toHaveLength(0);
+  });
+});
+
+// ─────────────────────────────────────────────
+// formatGenerations
+// ─────────────────────────────────────────────
+
+describe('formatGenerations', () => {
+  it('retourne "" pour un tableau vide', () => {
+    expect(formatGenerations([])).toBe('');
+  });
+
+  it('retourne "Toutes générations" pour les générations 1 à 8', () => {
+    expect(formatGenerations([1, 2, 3, 4, 5, 6, 7, 8])).toBe('Toutes générations');
+  });
+
+  it('retourne "Générations 1" pour une seule génération', () => {
+    expect(formatGenerations([1])).toBe('Générations 1');
+  });
+
+  it('retourne "Générations 1-3" pour des générations consécutives', () => {
+    expect(formatGenerations([1, 2, 3])).toBe('Générations 1-3');
+  });
+
+  it('retourne les générations séparées par virgule si non consécutives', () => {
+    expect(formatGenerations([1, 3, 5])).toBe('Générations 1,3,5');
+  });
+
+  it('utilise le préfixe court "Gén" si isShort=true', () => {
+    expect(formatGenerations([2], true)).toBe('Gén 2');
+  });
+
+  it('trie les générations avant de les afficher', () => {
+    expect(formatGenerations([3, 1, 2])).toBe('Générations 1-3');
+  });
+});
+
+// ─────────────────────────────────────────────
+// getGenerationsDisplay
+// ─────────────────────────────────────────────
+
+describe('getGenerationsDisplay', () => {
+  it('retourne null pour un tableau vide', () => {
+    expect(getGenerationsDisplay([])).toBeNull();
+  });
+
+  it('retourne null si undefined', () => {
+    expect(getGenerationsDisplay(undefined)).toBeNull();
+  });
+
+  it('retourne "1 à 8" pour les 8 générations', () => {
+    const result = getGenerationsDisplay([1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(result?.value).toBe('1 à 8');
+    expect(result?.label).toContain('Générations sélectionnées');
+  });
+
+  it('retourne le numéro seul pour une génération unique', () => {
+    const result = getGenerationsDisplay([3]);
+    expect(result?.value).toBe('3');
+    expect(result?.label).toContain('Génération sélectionnée');
+  });
+
+  it('retourne "1 à N" pour des générations consécutives depuis 1', () => {
+    const result = getGenerationsDisplay([1, 2, 3, 4]);
+    expect(result?.value).toBe('1 à 4');
+  });
+
+  it('retourne les numéros séparés par virgule si non consécutives depuis 1', () => {
+    const result = getGenerationsDisplay([2, 4, 6]);
+    expect(result?.value).toBe('2,4,6');
+  });
+
+  it('retourne les numéros séparés si consécutifs mais ne commencent pas à 1', () => {
+    const result = getGenerationsDisplay([3, 4, 5]);
+    expect(result?.value).toBe('3,4,5');
+  });
+});
+
+// ─────────────────────────────────────────────
+// filterHintPokemons — branche Type 2 spécifique
+// ─────────────────────────────────────────────
+
+describe('filterHintPokemons — Type 2 spécifique', () => {
+  const makePokemonLocal = (overrides: Partial<PokemonDto>): PokemonDto => ({
+    id: '1', numericId: 1, nameFr: 'Bulbizarre', nameEn: 'Bulbasaur', pokedexNumber: 1,
+    category: 'Pokémon Graine', generation: { nameFr: 'Génération I', nameEn: 'generation-i' },
+    types: [{ name: 'Plante', nameEn: 'Grass', slot: 1 }],
+    physical: { heightM: 0.7, weightKg: 6.9 },
+    status: { isLegendary: false, isMythical: false, captureRate: 45 },
+    sprites: { frontDefault: '', frontShiny: '', backDefault: null, backShiny: null },
+    description: [],
+    ...overrides,
+  });
+
+  it('filtre par un Type 2 précis', () => {
+    const bulbWithPoison = makePokemonLocal({
+      types: [{ name: 'Plante', nameEn: 'Grass', slot: 1 }, { name: 'Poison', nameEn: 'Poison', slot: 2 }],
+    });
+    const bulbWithFly = makePokemonLocal({
+      id: '2', nameFr: 'Herbizarre', pokedexNumber: 2,
+      types: [{ name: 'Plante', nameEn: 'Grass', slot: 1 }, { name: 'Vol', nameEn: 'Flying', slot: 2 }],
+    });
+    const result = filterHintPokemons([bulbWithPoison, bulbWithFly], { 'Type 2': 'Poison' }, []);
+    expect(result).toHaveLength(1);
+    expect(result[0].nameFr).toBe('Bulbizarre');
+  });
+
+  it('filtre par Type 2 excluant ceux sans second type', () => {
+    const monoType = makePokemonLocal({ types: [{ name: 'Feu', nameEn: 'Fire', slot: 1 }] });
+    const result = filterHintPokemons([monoType], { 'Type 2': 'Poison' }, []);
+    expect(result).toHaveLength(0);
   });
 });

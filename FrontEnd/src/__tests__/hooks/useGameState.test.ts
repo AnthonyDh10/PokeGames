@@ -150,4 +150,175 @@ describe('useGameState', () => {
     // Type 1 est dans usedHintsJ1, donc devrait être révélé
     expect(result.current.revealedHints['Type 1']).toBe('Plante');
   });
+
+  it('loadGameData détecte correctement le joueur 2', async () => {
+    const partieJ2 = {
+      ...fakePartie,
+      dresseur1Id: 'autre-joueur',
+      dresseur2Id: 'session-2',
+      scoreJ2: 50,
+      attemptsUsedJ2: 2,
+      usedHintsJ2: ['Type1', 'Generation'],
+    };
+    mockedGetPartie.mockResolvedValue(partieJ2 as any);
+    mockedGetCensored.mockResolvedValue(fakeDesc as any);
+    mockedGetHints.mockResolvedValue(fakeHints as any);
+
+    const { result } = renderGameState({ sessionId: 'session-2' });
+
+    await act(async () => {
+      await result.current.loadGameData();
+    });
+
+    expect(result.current.isPlayer1).toBe(false);
+    expect(result.current.currentScore).toBe(50);
+    expect(result.current.attemptsUsed).toBe(2);
+    expect(result.current.usedHints).toEqual(['Type1', 'Generation']);
+  });
+
+  it('loadGameData met errorMessage si aucun pokémon à deviner', async () => {
+    const partieVidePokemon = { ...fakePartie, pokemonsToGuess: [] };
+    mockedGetPartie.mockResolvedValue(partieVidePokemon as any);
+    mockedGetCensored.mockResolvedValue(fakeDesc as any);
+    mockedGetHints.mockResolvedValue(fakeHints as any);
+
+    const { result } = renderGameState();
+
+    await act(async () => {
+      await result.current.loadGameData();
+    });
+
+    expect(result.current.errorMessage).toBe('Aucun Pokémon à deviner');
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('loadGameData appelle onSkip si le pokémon n\'a pas de description', async () => {
+    const onSkip = vi.fn();
+    mockedGetPartie.mockResolvedValue(fakePartie as any);
+    mockedGetCensored.mockResolvedValue({ descriptions: [] } as any);
+    mockedGetHints.mockResolvedValue(fakeHints as any);
+
+    const { result } = renderGameState({ onSkip });
+
+    await act(async () => {
+      await result.current.loadGameData();
+    });
+
+    expect(result.current.errorMessage).toContain('sans description');
+    // onSkip est appelé après un setTimeout de 1500ms — vérifier qu'il est prévu
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('processRevealedHints mappe Silhouette (hint Sprite)', async () => {
+    const partieWithSprite = { ...fakePartie, usedHintsJ1: ['Sprite'] };
+    mockedGetPartie.mockResolvedValue(partieWithSprite as any);
+    mockedGetCensored.mockResolvedValue(fakeDesc as any);
+    mockedGetHints.mockResolvedValue(fakeHints as any);
+
+    const { result } = renderGameState();
+    await act(async () => { await result.current.loadGameData(); });
+
+    expect(result.current.revealedHints['Silhouette']).toBe('https://example.com/bulbi.png');
+  });
+
+  it('processRevealedHints mappe Type 2 avec une valeur', async () => {
+    const partieWithType2 = { ...fakePartie, usedHintsJ1: ['Type2'] };
+    mockedGetPartie.mockResolvedValue(partieWithType2 as any);
+    mockedGetCensored.mockResolvedValue(fakeDesc as any);
+    mockedGetHints.mockResolvedValue(fakeHints as any);
+
+    const { result } = renderGameState();
+    await act(async () => { await result.current.loadGameData(); });
+
+    expect(result.current.revealedHints['Type 2']).toBe('Poison');
+  });
+
+  it('processRevealedHints mappe "Pas de second type" si pas de Type 2', async () => {
+    const partieWithType2 = { ...fakePartie, usedHintsJ1: ['Type2'] };
+    const hintsWithoutType2 = {
+      ...fakeHints,
+      types: [{ slot: 1, name: 'Feu' }], // Pas de slot 2
+    };
+    mockedGetPartie.mockResolvedValue(partieWithType2 as any);
+    mockedGetCensored.mockResolvedValue(fakeDesc as any);
+    mockedGetHints.mockResolvedValue(hintsWithoutType2 as any);
+
+    const { result } = renderGameState();
+    await act(async () => { await result.current.loadGameData(); });
+
+    expect(result.current.revealedHints['Type 2']).toBe('Pas de second type');
+  });
+
+  it('processRevealedHints mappe Génération', async () => {
+    const partieWithGen = { ...fakePartie, usedHintsJ1: ['Generation'] };
+    mockedGetPartie.mockResolvedValue(partieWithGen as any);
+    mockedGetCensored.mockResolvedValue(fakeDesc as any);
+    mockedGetHints.mockResolvedValue(fakeHints as any);
+
+    const { result } = renderGameState();
+    await act(async () => { await result.current.loadGameData(); });
+
+    expect(result.current.revealedHints['Génération']).toBe('Génération I');
+  });
+
+  it('processRevealedHints mappe Catégorie', async () => {
+    const partieWithCat = { ...fakePartie, usedHintsJ1: ['Category'] };
+    mockedGetPartie.mockResolvedValue(partieWithCat as any);
+    mockedGetCensored.mockResolvedValue(fakeDesc as any);
+    mockedGetHints.mockResolvedValue(fakeHints as any);
+
+    const { result } = renderGameState();
+    await act(async () => { await result.current.loadGameData(); });
+
+    expect(result.current.revealedHints['Catégorie']).toBe('Pokémon Graine');
+  });
+
+  it('processRevealedHints mappe Taille et Poids', async () => {
+    const partieWithPhysical = { ...fakePartie, usedHintsJ1: ['Height', 'Weight'] };
+    mockedGetPartie.mockResolvedValue(partieWithPhysical as any);
+    mockedGetCensored.mockResolvedValue(fakeDesc as any);
+    mockedGetHints.mockResolvedValue(fakeHints as any);
+
+    const { result } = renderGameState();
+    await act(async () => { await result.current.loadGameData(); });
+
+    expect(result.current.revealedHints['Taille']).toBe('0.7m');
+    expect(result.current.revealedHints['Poids']).toBe('6.9kg');
+  });
+
+  it('processRevealedHints mappe les Talents', async () => {
+    const partieWithAbil = { ...fakePartie, usedHintsJ1: ['Abilities'] };
+    mockedGetPartie.mockResolvedValue(partieWithAbil as any);
+    mockedGetCensored.mockResolvedValue(fakeDesc as any);
+    mockedGetHints.mockResolvedValue(fakeHints as any);
+
+    const { result } = renderGameState();
+    await act(async () => { await result.current.loadGameData(); });
+
+    expect(result.current.revealedHints['Talents']).toBe('Engrais, Chlorophylle');
+  });
+
+  it('processRevealedHints mappe les Statistiques', async () => {
+    const partieWithStats = { ...fakePartie, usedHintsJ1: ['Stats'] };
+    const hintsWithStats = {
+      ...fakeHints,
+      stats: {
+        PV: { value: 45 },
+        Attaque: { value: 49 },
+        'Défense': { value: 49 },
+        'Attaque Spé.': { value: 65 },
+        'Défense Spé.': { value: 65 },
+        Vitesse: { value: 45 },
+      },
+    };
+    mockedGetPartie.mockResolvedValue(partieWithStats as any);
+    mockedGetCensored.mockResolvedValue(fakeDesc as any);
+    mockedGetHints.mockResolvedValue(hintsWithStats as any);
+
+    const { result } = renderGameState();
+    await act(async () => { await result.current.loadGameData(); });
+
+    expect(result.current.revealedHints['Statistiques']).toContain('PV: 45');
+    expect(result.current.revealedHints['Statistiques']).toContain('Atk: 49');
+  });
 });

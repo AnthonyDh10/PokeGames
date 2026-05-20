@@ -6,6 +6,7 @@ vi.mock('../../app/services/api', () => ({
   default: {
     post: vi.fn(),
     get: vi.fn(),
+    put: vi.fn(),
   },
 }));
 
@@ -13,6 +14,7 @@ import api from '../../app/services/api';
 
 const mockedPost = vi.mocked(api.post);
 const mockedGet = vi.mocked(api.get);
+const mockedPut = vi.mocked(api.put);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -96,5 +98,106 @@ describe('partieService', () => {
 
     expect(mockedGet).toHaveBeenCalledWith('/api/partie/partie-1/timer/d1');
     expect(result).toEqual(fakeTimer);
+  });
+
+  it('startPartie en mode DeZoom envoie les générations', async () => {
+    mockedPost.mockResolvedValue({ data: fakePartie });
+
+    await partieService.startPartie('partie-1', false, { nbPokemons: 1, generations: [1, 2, 3], timerDuration: 90 }, 'DeZoom');
+
+    expect(mockedPost).toHaveBeenCalledWith('/api/partie/partie-1/start', expect.objectContaining({
+      mode: 'DeZoom',
+      isSolo: false,
+      generations: [1, 2, 3],
+      timerDuration: 90,
+    }));
+  });
+
+  it('startPartie en mode DeZoom sans timerDuration n\'inclut pas le champ', async () => {
+    mockedPost.mockResolvedValue({ data: fakePartie });
+
+    await partieService.startPartie('partie-1', false, { nbPokemons: 1, generations: [1], timerDuration: undefined as any }, 'DeZoom');
+
+    const callArg = mockedPost.mock.calls[0][1] as any;
+    expect(callArg.timerDuration).toBeUndefined();
+  });
+
+  it('startPartie en mode Types sans settings n\'envoie pas nbPokemons/generations', async () => {
+    mockedPost.mockResolvedValue({ data: fakePartie });
+
+    await partieService.startPartie('partie-1', true, undefined, 'Types');
+
+    const callArg = mockedPost.mock.calls[0][1] as any;
+    expect(callArg.nbPokemons).toBeUndefined();
+    expect(callArg.generations).toBeUndefined();
+    expect(callArg.mode).toBe('Types');
+  });
+
+  it('startPartie en mode Types avec settings optionnels les inclut', async () => {
+    mockedPost.mockResolvedValue({ data: fakePartie });
+
+    await partieService.startPartie('partie-1', true, { nbPokemons: 5, generations: [1], timerDuration: 45 }, 'Types');
+
+    expect(mockedPost).toHaveBeenCalledWith('/api/partie/partie-1/start', expect.objectContaining({
+      nbPokemons: 5,
+      generations: [1],
+      timerDuration: 45,
+    }));
+  });
+
+  it('resetTimer appelle POST /api/partie/:id/timer/reset', async () => {
+    mockedPost.mockResolvedValue({ data: undefined });
+
+    await partieService.resetTimer('partie-1', 'd1');
+
+    expect(mockedPost).toHaveBeenCalledWith('/api/partie/partie-1/timer/reset', { dresseurId: 'd1' });
+  });
+
+  it('updateGameSettings appelle PUT /api/partie/:id/settings', async () => {
+    mockedPut.mockResolvedValue({ data: fakePartie });
+
+    const result = await partieService.updateGameSettings('partie-1', 5, [1, 2, 3]);
+
+    expect(mockedPut).toHaveBeenCalledWith('/api/partie/partie-1/settings', {
+      nbPokemons: 5,
+      generations: [1, 2, 3],
+    });
+    expect(result).toEqual(fakePartie);
+  });
+
+  it('updateGameSettings avec timerDuration inclut le champ', async () => {
+    mockedPut.mockResolvedValue({ data: fakePartie });
+
+    await partieService.updateGameSettings('partie-1', 3, [1], 120);
+
+    expect(mockedPut).toHaveBeenCalledWith('/api/partie/partie-1/settings', {
+      nbPokemons: 3,
+      generations: [1],
+      timerDuration: 120,
+    });
+  });
+
+  it('startPartie en mode DeZoom sans settings utilise les générations par défaut', async () => {
+    mockedPost.mockResolvedValue({ data: fakePartie });
+
+    await partieService.startPartie('partie-1', false, undefined, 'DeZoom');
+
+    const callArg = mockedPost.mock.calls[0][1] as any;
+    expect(callArg.generations).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(callArg.timerDuration).toBeUndefined();
+  });
+
+  it('markRematchReady appelle POST /api/partie/:id/rematch-ready avec dresseurId en query param', async () => {
+    const fakeStatus = { player1Ready: true, player2Ready: false };
+    mockedPost.mockResolvedValue({ data: fakeStatus });
+
+    const result = await partieService.markRematchReady('partie-1', 'd1');
+
+    expect(mockedPost).toHaveBeenCalledWith(
+      '/api/partie/partie-1/rematch-ready',
+      {},
+      { params: { dresseurId: 'd1' } }
+    );
+    expect(result).toEqual(fakeStatus);
   });
 });
