@@ -425,7 +425,7 @@ export default function LobbyPage({
                     colorDark={colors.brand.greenDark}
                     color={colors.brand.green}
                   >
-                    <span style={{ color: '#ffffff' }} className="font-semibold">Démarrer la partie</span>
+                    <span style={{ color: '#ffffff' }} className="font-heading">Démarrer</span>
                   </PixelButton>
                 ) : (
                   <SubCard 
