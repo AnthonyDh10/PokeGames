@@ -3,7 +3,7 @@ import { useChatStore } from '../store/chatStore'
 import { useSessionStore } from '../store/sessionStore'
 import { chatService } from '../services/chatService'
 import { colors } from '../design/colors'
-import PixelButton from './PixelButton'
+import PixelButton, { pixelClipPathSm } from './PixelButton'
 import { color } from 'framer-motion'
 
 const pixelClipPath = `polygon(
@@ -98,19 +98,20 @@ export default function ChatPanel() {
             <span className="font-display text-white tracking-wide uppercase ml-2">
               Messagerie
             </span>
-            {/* Badge de notifications visible uniquement quand le chat est fermé */}
+          </div>
+          <div className="flex items-center gap-3">
             {!isSolo && messages.length > 0 && !isOpen && (
               <span
-                className="w-6 h-6 rounded-none text-[11px] font-bold flex items-center justify-center"
-                style={{ backgroundColor: colors.brand.yellow, color: colors.ui.textPrimary }}
+                className="w-6 h-6 font-bold flex items-center justify-center font-display"
+                style={{ color: colors.brand.yellow }}
               >
-                {messages.length > 9 ? '9+' : messages.length}
+                {messages.length > 9 ? '9+' : messages.length + '!'}
               </span>
             )}
+            <span className="text-white text-sm font-bold">
+              {isOpen ? '▼' : '▲'}
+            </span>
           </div>
-          <span className="text-white text-sm font-bold">
-            {isOpen ? '▼' : '▲'}
-          </span>
         </button>
 
         {/* Solo invite section */}
@@ -210,6 +211,7 @@ export default function ChatPanel() {
               colorDark={colors.brand.redDark}
               color={colors.brand.red}
               style={{ color: '#fff' }}
+              clipPath={pixelClipPathSm}
             >
               ▶
             </PixelButton>

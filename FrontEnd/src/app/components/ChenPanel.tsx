@@ -83,19 +83,23 @@ export default function ChenPanel() {
           >
             Prof. Chen
           </span>
-          {/* Badge visible quand le panel est fermé */}
-          {messages.length > 0 && !isOpen && (
-            <span
-              className="w-6 h-6 text-[11px] font-bold flex items-center justify-center"
-              style={{ backgroundColor: colors.brand.red, color: colors.brand.white }}
-            >
-              {messages.length > 9 ? '9+' : messages.length}
-            </span>
-          )}
         </div>
-        <span className="text-sm font-bold" style={{ color: colors.ui.textPrimary }}>
+        <div className="flex items-center gap-3">
+
+            {/* Badge de notifications visible uniquement quand le chat est fermé */}
+            {messages.length > 0 && !isOpen && (
+              <span
+                className="w-6 h-6 font-bold flex items-center justify-center font-display"
+                style={{ color: colors.brand.red }}
+              >
+                {messages.length > 9 ? '9+' : messages.length + '!'}
+              </span>
+            )}
+        <span className="text-sm font-bold" style={{ color: colors.ui.textMuted }}>
           {isOpen ? '▼' : '▲'}
         </span>
+      </div>
+
       </button>
 
       {/* Zone des messages */}

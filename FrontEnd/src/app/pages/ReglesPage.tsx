@@ -97,7 +97,7 @@ export default function ReglesPage() {
                 >
                   {/* Flèche d'indication améliorée */}
                   <span
-                    className={`font-heading font-bold text-lg w-6 text-center shrink-0 transition-all duration-300 ${isActive ? 'translate-x-0 opacity-100' : '-translate-x-2 opacity-0'}`}
+                    className={`font-heading font-bold text-lg w-6 text-center shrink-0 ${isActive ? 'opacity-100' : 'opacity-0'}`}
                     style={{ color: CARD_COLORS.secondColor }}
                   >
                     ▶
@@ -129,7 +129,7 @@ export default function ReglesPage() {
                   onClick={() => handleSelectGame('multiplayer')}
                 >
                   <span
-                    className={`font-heading font-bold text-lg w-6 text-center shrink-0 transition-all duration-300 ${activeGame === 'multiplayer' ? 'translate-x-0 opacity-100' : '-translate-x-2 opacity-0'}`}
+                    className={`font-heading font-bold text-lg w-6 text-center shrink-0 ${activeGame === 'multiplayer' ? 'opacity-100' : 'opacity-0'}`}
                     style={{ color: CARD_COLORS.secondColor }}
                   >
                     ▶
