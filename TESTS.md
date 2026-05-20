@@ -28,19 +28,20 @@ pnpm test:coverage   # génère un rapport de couverture dans coverage/
 | | Fichiers | Tests | Résultat |
 |---|---|---|---|
 | **Backend** | 6 | **91** | ✅ tous passent |
-| **Frontend** | 10 | **132** | ✅ tous passent |
-| **Total** | 16 | **223** | ✅ |
+| **Frontend** | 19 | **251** | ✅ tous passent |
+| **Total** | 25 | **342** | ✅ |
 
 ### Couverture frontend (v8)
 | Scope | Instructions | Branches | Fonctions | Lignes |
 |---|---|---|---|---|
-| **Composants UI** (PokemonSearchInput, SubCard) | 94.73% | 87.83% | 100% | 94.2% |
+| **Composants UI** (12 fichiers) | 96.79% | 92.5% | 100% | 96.5% |
+| **Composants modals** (3 fichiers) | 100% | 95% | 100% | 100% |
 | **Hooks** (useTimer, useGameState) | 97.87% | 83.51% | 95.65% | 100% |
 | **Services** (5 fichiers) | 100% | 88% | 100% | 100% |
 | **Store** (chatStore, sessionStore) | 100% | 100% | 100% | 100% |
 | **Utils** (pokedescLogic) | 97.56% | 94.8% | 92.85% | 98.46% |
 | **Design** (colors.ts) | 100% | 100% | 100% | 100% |
-| **Total** | **97.6%** | **88.47%** | **97.91%** | **98.47%** |
+| **Total** | **97.87%** | **90.84%** | **98.33%** | **98.53%** |
 
 ---
 
@@ -167,18 +168,29 @@ PokéDesc.Tests/
 ```
 FrontEnd/src/__tests__/
 ├── utils/
-│   └── pokedescLogic.test.ts   ← 36 tests
+│   └── pokedescLogic.test.ts       ← 36 tests
 ├── stores/
-│   ├── sessionStore.test.ts    ←  4 tests
-│   └── chatStore.test.ts       ←  9 tests
+│   ├── sessionStore.test.ts        ←  4 tests
+│   └── chatStore.test.ts           ←  9 tests
 ├── services/
-│   ├── partieService.test.ts   ← 16 tests
-│   ├── pokemonService.test.ts  ←  3 tests
-│   ├── typesGameService.test.ts←  5 tests
-│   └── dezoomService.test.ts   ←  4 tests
-└── hooks/
-    ├── useTimer.test.ts        ← 10 tests
-    └── useGameState.test.ts    ← 17 tests
+│   ├── partieService.test.ts       ← 16 tests
+│   ├── pokemonService.test.ts      ←  3 tests
+│   ├── typesGameService.test.ts    ←  5 tests
+│   └── dezoomService.test.ts       ←  4 tests
+├── hooks/
+│   ├── useTimer.test.ts            ← 10 tests
+│   └── useGameState.test.ts        ← 17 tests
+└── components/
+    ├── PokemonSearchInput.test.tsx  ← 28 tests
+    ├── Timer.test.tsx               ← 18 tests
+    ├── HPBar.test.tsx               ←  8 tests
+    ├── WinnerCard.test.tsx          ← 10 tests
+    ├── SectionTitleAndFooter.test.tsx← 12 tests
+    ├── PixelButton.test.tsx         ← 14 tests
+    ├── DescriptionCard.test.tsx     ← 11 tests
+    ├── GameLayout.test.tsx          ← 16 tests
+    ├── modals.test.tsx              ← 18 tests (FailureModal + SuccessModal)
+    └── ZoomDescriptionModal.test.tsx← 12 tests
 ```
 
 ### Stratégie
@@ -312,6 +324,64 @@ Tests du composant **combobox/dropdown** générique pour recherche et sélectio
 **Couverture:** 94.59% statements, 87.14% branches  
 **Non couvert:** Lignes 105-106 (handleMouseMove détection vraie position souris), 142-143 (cas très spécifique)
 
+#### `Timer.test.tsx` (18 tests)
+| Catégorie | Tests |
+|---|---|
+| **Mode countdown** | Affichage en `X.Xs`, label "Temps :", ♾️ pour Infinity ou >10000, shake/flash classes, pénalité affichée/masquée |
+| **Mode stopwatch** | Format `Xs` (<60s), format `Xm Ys` (≥60s), arrondi inférieur, couleur grise `#6B7280` |
+
+#### `HPBar.test.tsx` (8 tests)
+- Affichage du nom, score `current / max`, label HP
+- Classe `uppercase` appliquée au conteneur du nom
+- `isWinner=true` → `font-weight: bold`, `isWinner=false` → `font-weight: normal`
+- Rendu sans erreur pour `current=0` et `current > max`
+
+#### `WinnerCard.test.tsx` (10 tests)
+| Scénario | Message affiché |
+|---|---|
+| `isSolo=true` | `VICTOIRE !` |
+| `!bothFinished` | `EN ATTENTE QUE L'AUTRE JOUEUR FINISSE...` |
+| `bothFinished && winner` | `VAINQUEUR` + nom du gagnant |
+| `bothFinished && !winner` | `MATCH NUL` |
+| Priorité solo > bothFinished | Solo toujours prioritaire |
+
+#### `SectionTitleAndFooter.test.tsx` (12 tests)
+**SectionTitle** (6 tests) : children dans `<h2>`, className supplémentaire, classes de base (font-heading, uppercase), indicateur coloré span.  
+**Footer** (6 tests) : balise `<footer>`, titre Contact, lien email `mailto:`, mentions Nintendo, PokéAPI, nom du développeur.
+
+#### `PixelButton.test.tsx` (14 tests)
+| Catégorie | Tests |
+|---|---|
+| **Exports** | `pixelClipPathLg` et `pixelClipPathSm` sont des strings contenant `polygon` |
+| **Rendu** | Button présent, texte children, `type="button"` défaut, `type="submit"`, enabled/disabled |
+| **Interactions** | `onClick` appelé, non appelé si disabled, `title` affiché |
+| **Styles** | `className` supplémentaire, `background-color` présent, `clip-path` dans le style, clipPath personnalisé |
+
+#### `DescriptionCard.test.tsx` (11 tests)
+| Catégorie | Tests |
+|---|---|
+| **Affichage** | Titre DESCRIPTION, description à l'index courant, message de chargement si vide, bouton zoom 🔍 |
+| **Pagination** | ◀/▶ si >1 descriptions, masqués si 1 seule, compteur `N / total` |
+| **Callbacks** | `onChangeIndex` au clic ◀/▶ avec setter correct, wrap en boucle dans les deux sens, `onZoom` appelé |
+
+#### `GameLayout.test.tsx` (16 tests)
+| État | Tests |
+|---|---|
+| **Chargement** | Affiche "Chargement...", masque le contenu principal |
+| **Erreur** | Affiche le message d'erreur, ❌, bouton retour si `onErrorBack` fourni, libellé personnalisable, appelle `onErrorBack` |
+| **Normal** | Contenu left/right, header, modales, grille `1+1` (2 colonnes) et `1+2` (3 colonnes) |
+
+#### `modals.test.tsx` (18 tests) — FailureModal + SuccessModal
+**FailureModal** (9 tests) : cache si `show=false` ou `sprite=""`, titre `"Dommage !"` / `"Temps écoulé !"`, nom Pokémon, image sprite, `"Pokémon suivant"` / `"Terminer la partie"`, `onProceed` au clic.  
+**SuccessModal** (9 tests) : même logique avec titre `"Bravo !"`.
+
+#### `ZoomDescriptionModal.test.tsx` (12 tests)
+- Masqué si `show=false`, description courante affichée
+- Bouton ×, appels `onClose` via ×, via backdrop click
+- `stopPropagation` : clic intérieur ne ferme pas la modal
+- Pagination ◀/▶ affichée si >1, masquée si 1 seule
+- Setters `onChangeIndex` corrects, wrap en boucle dans les deux sens
+
 ---
 
 ## Ce qui N'est PAS testé (hors scope)
@@ -324,6 +394,8 @@ Tests du composant **combobox/dropdown** générique pour recherche et sélectio
 | `PokemonRepository` directement | Testé indirectement via `PokemonService` |
 | `TypesGameService` / `DeZoomService` (Business) | Services complexes avec état local — hors scope initial |
 | Logic hooks (`usePokeDesc`, `useTypesGame`, `useDeZoomGame`) | Orchestrateurs complexes — les services et hooks sous-jacents sont testés |
+| `Sidebar`, `TopBar`, `GameCard`, `ResultsActions` | Dépendent fortement de `useNavigate` / `useLocation` — tests d'intégration |
+| `LobbyPage` | Très complexe (API, stores, routing) — hors scope unitaire |
 | Couverture CSS / design system | Non pertinent pour les tests unitaires |
 
-> **Composants UI testés ✅:** `PokemonSearchInput` (28 tests), `SubCard` (couverture 100%)
+> **Composants UI testés ✅:** `PokemonSearchInput` (28), `SubCard` (100%), `Timer` (18), `HPBar` (8), `WinnerCard` (10), `SectionTitle` (6), `Footer` (6), `PixelButton` (14), `DescriptionCard` (11), `GameLayout` (16), `FailureModal` (9), `SuccessModal` (9), `ZoomDescriptionModal` (12)
