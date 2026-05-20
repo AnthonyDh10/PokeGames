@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { colors } from "./design/colors";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
+import { useChenStore } from "./store/chenStore";
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 import Footer from "./components/Footer";
@@ -48,6 +49,7 @@ export default function App() {
   const { setDirection } = useNavDirectionStore();
   const location = useLocation();
   const prevPathRef = useRef(location.pathname);
+  const clearChenMessages = useChenStore((s) => s.clearMessages);
 
   useEffect(() => {
     const prev = prevPathRef.current;
@@ -60,6 +62,11 @@ export default function App() {
       } else {
         setDirection("backward");
       }
+    }
+
+    // Vider l'historique du Prof. Chen immédiatement à chaque navigation
+    if (prev !== curr) {
+      clearChenMessages();
     }
 
     prevPathRef.current = curr;
