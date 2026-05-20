@@ -103,6 +103,12 @@ export default function ResultsActions({
   // 2. Gestion de la navigation au clavier (Flèches + Entrée)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignorer les commandes clavier si un input/textarea a le focus (ex: chat)
+      const activeElement = document.activeElement
+      const isInputFocused = activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement
+      
+      if (isInputFocused) return
+
       if (e.key === 'ArrowRight') {
         setSelectedIndex((prev) => (prev + 1) % options.length)
       } else if (e.key === 'ArrowLeft') {
