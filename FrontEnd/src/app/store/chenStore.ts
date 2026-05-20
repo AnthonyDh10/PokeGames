@@ -9,6 +9,7 @@ export interface ChenMessage {
     hasSameGeneration?: boolean
     isInSameEvolutionChain?: boolean
   }
+  partialMatchTypeFr?: string
 }
 
 interface ChenStore {

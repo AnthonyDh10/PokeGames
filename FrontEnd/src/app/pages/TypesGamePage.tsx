@@ -65,8 +65,6 @@ export default function TypesGamePage() {
     selectedType2,
     searchTerm2,
     isSubmitting,
-    result,
-    partialMatches,
     elapsed,
     attemptCount,
     filteredTypes1,
@@ -108,21 +106,14 @@ export default function TypesGamePage() {
                 Réponse
               </h1>
               <form onSubmit={handleSubmit} className="space-y-4">
-                {result && !result.isCorrect && (
-                  <p className="font-body text-red-600 text-sm">{result.message}</p>
-                )}
-
                 <div className="flex flex-col gap-3">
                   <div>
                     <label className="font-heading text-sm font-medium text-gray-600 block mt-4 mb-1">
                       Type 1
                     </label>
                     {selectedType1 ? (
-                      <SubCard
-                        borderColor={selectedType1.nameFr === result?.partialMatchTypeFr ? '#22c55e' : colors.brand.yellowDark}
-                        bodyColor={selectedType1.nameFr === result?.partialMatchTypeFr ? '#f0fdf4' : colors.brand.white}
-                        className="px-3 py-2"
-                      >
+                      <SubCard borderColor={colors.brand.yellowDark} bodyColor={colors.brand.white} className="px-3 py-2">
+
                         <div className="flex items-center gap-2">
                           <TypeImage name={selectedType1.nameFr} className="h-7" />
                           <button
@@ -149,11 +140,7 @@ export default function TypesGamePage() {
                       Type 2
                     </label>
                     {selectedType2 ? (
-                      <SubCard
-                        borderColor={selectedType2.nameFr === result?.partialMatchTypeFr ? '#22c55e' : colors.brand.yellowDark}
-                        bodyColor={selectedType2.nameFr === result?.partialMatchTypeFr ? '#f0fdf4' : colors.brand.white}
-                        className="px-3 py-2"
-                      >
+                      <SubCard borderColor={colors.brand.yellowDark} bodyColor={colors.brand.white} className="px-3 py-2">
                         <div className="flex items-center gap-2">
                           <TypeImage name={selectedType2.nameFr} className="h-7" />
                           <button
@@ -190,20 +177,6 @@ export default function TypesGamePage() {
                   </span>
                 </PixelButton>
 
-                {partialMatches.length > 0 && (
-                  <div className="flex flex-col gap-2 mt-2">
-                    {partialMatches.map((typeName) => (
-                      <div
-                        key={typeName}
-                        className="flex items-center gap-2 rounded-lg border border-green-400 bg-green-50 px-3 py-2"
-                      >
-                        <span className="font-body text-sm text-green-700 font-medium">✓ Un type trouvé :</span>
-                        <TypeImage name={typeName} className="h-6" />
-                        <span className="font-body text-sm text-green-700">{typeName}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </form>
             </div>
           </Card>

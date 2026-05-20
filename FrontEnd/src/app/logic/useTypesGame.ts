@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSessionStore } from '../store/sessionStore'
 import { useChatStore } from '../store/chatStore'
+import { useChenStore } from '../store/chenStore'
 import { getAllTypes, getTypesGame, submitTypesGuess } from '../services/typesGameService'
 import { getPartie } from '../services/partieService'
-import type { TypeSimpleDto, TypesGameDto, TypesGuessResultDto } from '../types/typesGame'
+import type { TypeSimpleDto, TypesGameDto } from '../types/typesGame'
 
 export interface UseTypesGameReturn {
   types: TypeSimpleDto[]
@@ -17,8 +18,6 @@ export interface UseTypesGameReturn {
   selectedType2: TypeSimpleDto | null
   searchTerm2: string
   isSubmitting: boolean
-  result: TypesGuessResultDto | null
-  partialMatches: string[]
   elapsed: number
   attemptCount: number
   filteredTypes1: TypeSimpleDto[]
@@ -34,6 +33,8 @@ export function useTypesGame(partieId: string | undefined): UseTypesGameReturn {
   const navigate = useNavigate()
   const { sessionId } = useSessionStore()
   const { setContext: setChatContext } = useChatStore()
+  const addChenMessage = useChenStore((state) => state.addMessage)
+  const clearChenMessages = useChenStore((state) => state.clearMessages)
 
   const [types, setTypes] = useState<TypeSimpleDto[]>([])
   const [game, setGame] = useState<TypesGameDto | null>(null)
@@ -46,8 +47,6 @@ export function useTypesGame(partieId: string | undefined): UseTypesGameReturn {
   const [selectedType2, setSelectedType2] = useState<TypeSimpleDto | null>(null)
   const [searchTerm2, setSearchTerm2] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [result, setResult] = useState<TypesGuessResultDto | null>(null)
-  const [partialMatches, setPartialMatches] = useState<string[]>([])
   const [elapsed, setElapsed] = useState(0)
   const [attemptCount, setAttemptCount] = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -61,6 +60,7 @@ export function useTypesGame(partieId: string | undefined): UseTypesGameReturn {
 
   useEffect(() => {
     if (!partieId) return
+    clearChenMessages()
     setIsLoading(true)
     ;(async () => {
       try {
@@ -112,12 +112,11 @@ export function useTypesGame(partieId: string | undefined): UseTypesGameReturn {
         navigate(`/resultats-types/${partieId}`, { state: { sessionCode } })
         return
       }
-      setResult(res)
-      if (res.partialMatchTypeFr) {
-        setPartialMatches((prev) =>
-          prev.includes(res.partialMatchTypeFr!) ? prev : [...prev, res.partialMatchTypeFr!]
-        )
-      }
+      addChenMessage({
+        text: res.message,
+        timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+        partialMatchTypeFr: res.partialMatchTypeFr,
+      })
       if (newAttemptCount >= 3) {
         if (timerRef.current) clearInterval(timerRef.current)
         navigate(`/resultats-types/${partieId}`, { state: { sessionCode } })
@@ -140,8 +139,6 @@ export function useTypesGame(partieId: string | undefined): UseTypesGameReturn {
     selectedType2,
     searchTerm2,
     isSubmitting,
-    result,
-    partialMatches,
     elapsed,
     attemptCount,
     filteredTypes1,

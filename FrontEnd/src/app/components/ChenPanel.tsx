@@ -20,6 +20,7 @@ export default function ChenPanel() {
   const { isOpen, messages, toggleOpen, setOpen } = useChenStore()
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const autoCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
   // Auto-scroll vers le bas quand de nouveaux messages arrivent
   useEffect(() => {
@@ -42,8 +43,25 @@ export default function ChenPanel() {
     }
   }, [messages.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Close panel when clicking/tapping outside
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handlePointerDown = (e: PointerEvent) => {
+      const target = e.target
+      if (!containerRef.current || !(target instanceof Node)) return
+      if (!containerRef.current.contains(target)) {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    return () => document.removeEventListener('pointerdown', handlePointerDown)
+  }, [isOpen, setOpen])
+
   return (
     <div
+      ref={containerRef}
       className="fixed left-4 bottom-0 z-50 flex flex-col w-[calc(100vw-2rem)] md:w-[380px] h-[50vh] md:h-[400px] transition-transform duration-200 ease-linear"
       style={{
         backgroundColor: colors.brand.white,
@@ -138,6 +156,14 @@ export default function ChenPanel() {
                       Même Famille
                     </span>
                   )}
+                </div>
+              )}
+
+              {msg.partialMatchTypeFr && (
+                <div className="flex flex-wrap gap-1.5 pl-10">
+                  <span className="inline-flex items-center bg-green-100 text-green-800 text-[10px] px-1.5 py-0.5 border border-green-200 font-heading font-bold uppercase tracking-wide">
+                    ✓ Type trouvé : {msg.partialMatchTypeFr}
+                  </span>
                 </div>
               )}
 
