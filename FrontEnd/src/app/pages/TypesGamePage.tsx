@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { colors } from '../design/colors'
 import { useTypesGame } from '../logic/useTypesGame'
+import { useChenStore } from '../store/chenStore'
 import Card from '../components/Card'
 import PixelButton from '../components/PixelButton'
 import SubCard from '../components/SubCard'
@@ -76,6 +77,10 @@ export default function TypesGamePage() {
     setSearchTerm2,
   } = useTypesGame(partieId)
 
+  const messages = useChenStore((s) => s.messages)
+  const partialMatchNames = messages.map((m) => m.partialMatchTypeFr).filter((n): n is string => !!n)
+  const partialMatchesSet = new Set(partialMatchNames)
+
   if (!game && !isLoading && !errorMessage) return null
 
   return (
@@ -112,7 +117,7 @@ export default function TypesGamePage() {
                       Type 1
                     </label>
                     {selectedType1 ? (
-                      <SubCard borderColor={colors.brand.yellowDark} bodyColor={colors.brand.white} className="px-3 py-2">
+                      <SubCard borderColor={partialMatchesSet.has(selectedType1.nameFr) ? colors.brand.green : colors.brand.yellowDark} bodyColor={colors.brand.white} className="px-3 py-2">
 
                         <div className="flex items-center gap-2">
                           <TypeImage name={selectedType1.nameFr} className="h-7" />
@@ -140,7 +145,7 @@ export default function TypesGamePage() {
                       Type 2
                     </label>
                     {selectedType2 ? (
-                      <SubCard borderColor={colors.brand.yellowDark} bodyColor={colors.brand.white} className="px-3 py-2">
+                      <SubCard borderColor={partialMatchesSet.has(selectedType2.nameFr) ? colors.brand.green : colors.brand.yellowDark} bodyColor={colors.brand.white} className="px-3 py-2">
                         <div className="flex items-center gap-2">
                           <TypeImage name={selectedType2.nameFr} className="h-7" />
                           <button
