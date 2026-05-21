@@ -27,16 +27,26 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
       className="sticky top-0 w-full flex items-center px-2 sm:px-4 md:px-6 lg:px-8 z-[20]"
       style={{ height: topbarHeight, backgroundColor: colors.brand.red, borderTop: `6px solid ${colors.brand.redLight}` }}
     >
-      {/* Titre */}
-      <h2 
+      {/* Titre (cliquable) */}
+      <h2
         className="font-display tracking-wide text-white uppercase"
+        role="link"
+        tabIndex={0}
+        onClick={() => navigate("/")}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            navigate("/");
+          }
+        }}
         style={{
           fontSize: "clamp(0.9rem, 3vw, 1.875rem)",
+          cursor: "pointer",
           // Décalage pour laisser la place à la Pokéball
           marginLeft: `calc(${sidebarWidth} + clamp(0.5rem, 1vw, 2rem))`
         }}
       >
-        PokéGames
+        PokéMini Games
       </h2>
 
       {/* Pokéball / Bouton d'action */}
