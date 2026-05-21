@@ -66,6 +66,7 @@ const games: Game[] = [
     colorDark: colors.brand.yellowWarm,
     image: typeLogo,
     to: "/types",
+    text_color: colors.ui.grayBorderDark,
   },
   {
     title: "DEX-ZOOM",

@@ -156,6 +156,7 @@ export default function GameCard({
                 size={130}
                 opacity={0.15}
                 className="absolute top-1/2 right-6 -translate-y-1/2"
+                color={text_color}
               />
               <h2
                 className="font-display uppercase font-bold text-2xl tracking-wide mb-3 drop-shadow-[2px_2px_0px_rgba(0,0,0,0.6)]"
