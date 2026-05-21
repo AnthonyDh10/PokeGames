@@ -79,7 +79,7 @@ export default function ChatPanel() {
       {/* Chat Panel — Drawer Retro avec bouton intégré */}
       {/* ═══════════════════════════════════════ */}
       <div
-        className="fixed right-4 bottom-0 z-[50] flex flex-col w-[calc(100vw-2rem)] md:w-[400px] h-[70vh] md:h-[450px] transition-transform duration-200 ease-linear"
+        className="fixed right-4 bottom-0 z-[50] flex flex-col w-[calc(50vw-1.5rem)] md:w-[400px] h-[45vh] md:h-[450px] transition-transform duration-200 ease-linear"
         style={{
           backgroundColor: colors.brand.white,
           clipPath: pixelClipPath,
