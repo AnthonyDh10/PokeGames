@@ -29,11 +29,6 @@ function isHomeOrRegles(path: string) {
   return HOME_REGLES_PATHS.includes(path);
 }
 
-// Chat visible partout sauf home (/,/home) et regles
-function isChatVisible(path: string): boolean {
-  return path !== "/" && path !== "/home" && path !== "/regles";
-}
-
 // Chen visible seulement dans les pages jeu (avec :partieId)
 // /pokedesc/:partieId, /types/:partieId, /dezoom/:partieId
 function isChenVisible(path: string): boolean {
@@ -44,12 +39,24 @@ function isChenVisible(path: string): boolean {
   );
 }
 
+function isChatVisible(path: string): boolean {
+  return path !== "/" && path !== "/home" && path !== "/regles";
+}
+
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { setDirection } = useNavDirectionStore();
   const location = useLocation();
   const prevPathRef = useRef(location.pathname);
   const clearChenMessages = useChenStore((s) => s.clearMessages);
+
+  const [isMobile, setIsMobile] = useState<boolean>(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : false));
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   useEffect(() => {
     const prev = prevPathRef.current;
@@ -106,7 +113,6 @@ export default function App() {
       <div
         style={{
           position: "relative",
-          borderTop: `6px solid ${colors.brand.redLight}`,
           borderLeft: `6px solid ${colors.brand.redLight}`,
         }}
         className="flex-1 flex flex-col"
@@ -116,10 +122,26 @@ export default function App() {
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         />
 
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex" style={{ overflow: 'clip', position: 'relative' }}>
           <Sidebar
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
+          />
+
+          {/* Bordure droite de la sidebar : redDark (6px) → redDeep (2px) */}
+          <div
+            className={`${sidebarOpen ? 'block' : 'hidden'} md:block pointer-events-none `}
+            style={{
+              position: 'absolute',
+              left: isMobile
+                ? 'calc(clamp(3.75rem, 12vw, 8rem) - 6px)'
+                : 'calc(clamp(3.75rem, 12vw, 8rem))',
+              top: 0,
+              width: '8px',
+              height: '100%',
+              background: `linear-gradient(to right, ${colors.brand.redDark} 0px, ${colors.brand.redDark} 6px, ${colors.brand.redDeep} 6px, ${colors.brand.redDeep} 8px)`,
+              zIndex: 9,
+            }}
           />
 
           <div className="flex-1 flex flex-col">

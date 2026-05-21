@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { colors } from "../design/colors";
-import PixelButton, { pixelClipPathLg } from "./PixelButton";
+import PixelButton, { pixelClipPathLg, pixelClipPathSm } from "./PixelButton";
 import Pokeball from "../components/images/pokéball_face.png";
 import pokedescLogo from "../components/images/pokedesc-logo.png";
 import typeLogo from "../components/images/type-logo.png";
@@ -20,10 +21,11 @@ interface NavButtonProps {
   isActive: boolean;
   title: string;
   size: string;
+  clipPath?: string;
   children: React.ReactNode;
 }
 
-function NavButton({ onClick, isActive, title, size, children }: NavButtonProps) {
+function NavButton({ onClick, isActive, title, size, clipPath = pixelClipPathLg, children }: NavButtonProps) {
   const color = isActive ? colors.ui.grayDark : colors.ui.grayMid;
   const colorLight = isActive ? colors.ui.grayDark : colors.ui.grayLight;
   const colorDark = isActive ? colors.ui.grayLight : colors.ui.grayDark;
@@ -37,7 +39,7 @@ function NavButton({ onClick, isActive, title, size, children }: NavButtonProps)
       colorLight={colorLight}
       colorDark={colorDark}
       color={color}
-      clipPath={pixelClipPathLg}
+      clipPath={clipPath}
     >
       {children}
     </PixelButton>
@@ -47,6 +49,16 @@ function NavButton({ onClick, isActive, title, size, children }: NavButtonProps)
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Écouter les changements de taille et détecter mobile vs desktop
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const navItems = [
     { icon: rulesLogo, label: "Règles", to: "/regles" },
@@ -74,8 +86,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={`
+        sidebar-mobile-padding sidebar-desktop-sticky sidebar-mobile-border-left
         fixed md:relative top-0 left-0 h-full md:h-auto md:self-stretch
-        flex flex-col items-center py-6 gap-4 z-[10]
+        flex flex-col items-center justify-center gap-4 z-[10]
         transition-transform duration-300
         ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
       `}
@@ -84,13 +97,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           width: sidebarWidth,
         }}
       >
-        {/* Placeholder for TopBar pokéball (mobile) */}
-        <div
-          className="md:hidden shrink-0"
-          aria-hidden="true"
-          style={{ width: buttonSize, height: buttonSize, pointerEvents: "none" }}
-        />
-
         {/* Home button */}
         <NavButton
           onClick={() => {
@@ -100,6 +106,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           isActive={isHomeActive}
           title="Home"
           size={buttonSize}
+          clipPath={isMobile ? pixelClipPathSm : pixelClipPathLg}
         >
           <svg
             fill="currentColor"
@@ -118,6 +125,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Nav Items */}
         {navItems.map((item, index) => {
           const isActive = location.pathname.startsWith(item.to);
+          const navItemClipPath = isMobile ? pixelClipPathSm : pixelClipPathLg;
           return (
             <NavButton
               key={index}
@@ -128,6 +136,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               isActive={isActive}
               title={item.label}
               size={buttonSize}
+              clipPath={navItemClipPath}
             >
               <img
                 src={item.icon}
@@ -142,17 +151,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </NavButton>
           );
         })}
-
-        {/* Bordure droite : redDark (6px) → redDeep (2px), depuis la sidebar vers la page */}
-        <div
-          className="absolute top-0 h-full pointer-events-none"
-          style={{
-            right: "-8px",
-            width: "8px",
-            background: `linear-gradient(to right, ${colors.brand.redDark} 0px, ${colors.brand.redDark} 6px, ${colors.brand.redDeep} 6px, ${colors.brand.redDeep} 8px)`,
-            zIndex: 60,
-          }}
-        />
       </aside>
     </>
   );

@@ -50,6 +50,8 @@
 }
 
 :root {
+  --topbar-height: clamp(3.75rem, 10vw, 6rem);
+  --sidebar-width: clamp(3.75rem, 12vw, 8rem);
   --font-size: 16px;
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);

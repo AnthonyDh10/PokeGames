@@ -1,3 +1,30 @@
+/* ══ Sidebar mobile: boutons décalés sous la TopBar, fond couvre toute la hauteur ══ */
+/* La sidebar est fixed top-0 (couvre toute la hauteur de la page).                   */
+/* Sur mobile, padding-top pousse les boutons sous la TopBar sticky.                  */
+/* Sur desktop (≥768px), md:py-6 et la position relative prennent le dessus.          */
+@media (max-width: 767px) {
+  .sidebar-mobile-padding {
+    padding-top: var(--topbar-height) !important;
+  }
+  
+  .sidebar-mobile-border-left {
+    border-left: 6px solid #FF2E2E !important;
+  }
+}
+
+/* ══ Sidebar desktop: reste visible au scroll via sticky ══ */
+/* overflow: clip sur le parent (flex-1 flex) permet au sticky de fonctionner        */
+/* (overflow: clip ne crée pas de scroll container, contrairement à overflow: hidden)  */
+@media (min-width: 768px) {
+  .sidebar-desktop-sticky {
+    position: sticky !important;
+    top: var(--topbar-height) !important;
+    height: calc(100dvh - var(--topbar-height)) !important;
+    align-self: flex-start !important;
+    overflow-y: auto;
+  }
+}
+
 @keyframes pulse-scale {
   0%, 100% {
     transform: scale(1);

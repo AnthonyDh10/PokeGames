@@ -17,15 +17,15 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
     }
   };
 
-  // Tailles fluides (Responsive)
+  // Tailles fluides (Responsive) — valeurs synchronisées avec les variables CSS (theme.css)
   const sidebarWidth = "clamp(3.75rem, 12vw, 8rem)";
   const pokeballSize = "clamp(2.25rem, 8vw, 4.8rem)";
-  const topbarHeight = "clamp(2.8rem, 10vh, 6rem)";
+  const topbarHeight = "var(--topbar-height)";
 
   return (
     <header 
-      className="relative w-full flex items-center px-2 sm:px-4 md:px-6 lg:px-8 z-[20]"
-      style={{ height: topbarHeight, backgroundColor: colors.brand.red }}
+      className="sticky top-0 w-full flex items-center px-2 sm:px-4 md:px-6 lg:px-8 z-[20]"
+      style={{ height: topbarHeight, backgroundColor: colors.brand.red, borderTop: `6px solid ${colors.brand.redLight}` }}
     >
       {/* Titre */}
       <h2 
