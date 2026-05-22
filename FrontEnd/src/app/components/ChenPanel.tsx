@@ -62,7 +62,11 @@ export default function ChenPanel() {
   return (
     <div
       ref={containerRef}
-      className="fixed left-4 bottom-0 z-[30] flex flex-col w-[calc(50vw-1.5rem)] md:w-[380px] h-[45vh] md:h-[400px] transition-transform duration-200 ease-linear"
+      className={`fixed bottom-0 z-[30] flex flex-col h-[45vh] md:h-[400px] transition-transform duration-200 ease-linear ${
+        isOpen
+          ? 'left-1 right-1 md:left-4 md:right-auto md:w-[380px]'
+          : 'left-2 md:left-4 w-[calc(50vw-2rem)] md:w-[380px]'
+      }`}
       style={{
         backgroundColor: colors.brand.white,
         clipPath: pixelClipPath,
