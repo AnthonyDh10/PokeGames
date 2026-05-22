@@ -150,7 +150,7 @@ export default function LobbyPokedescPage() {
               <div className="flex items-center justify-between mb-3">
                 <label className="font-heading text-sm font-medium" style={{ color: colors.ui.textMuted }}>Générations</label>
                 {isPlayer1 && (
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-1 justify-end">
                     <button
                       onClick={() => setSettings((prev) => ({ ...prev, generations: [...ALL_GENERATIONS] }))}
                       className="font-heading text-xs hover:underline"

@@ -70,7 +70,7 @@ export default function LobbyDeZoomPage() {
               <div className="flex items-center justify-between mb-3">
                 <span className="font-heading text-sm font-medium" style={{ color: colors.ui.textMuted }}>Générations</span>
                 {isPlayer1 && (
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-1 justify-end">
                     <button
                       onClick={() => setSettings((prev) => ({ ...prev, generations: [...ALL_GENERATIONS] }))}
                       className="font-heading text-xs hover:underline"

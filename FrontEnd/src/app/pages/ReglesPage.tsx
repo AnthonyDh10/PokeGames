@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import GameCard from "../components/GameCard";
 import { colors } from "../design/colors";
 import pokedescLogo from "../components/images/pokedesc-logo-transparant.png";
@@ -48,7 +48,17 @@ const GAMES = [
 
 export default function ReglesPage() {
   const [activeGame, setActiveGame] = useState<"pokedesc" | "types" | "dezoom" | "multiplayer">("pokedesc");
-  const handleSelectGame = (gameKey: "pokedesc" | "types" | "dezoom" | "multiplayer") => setActiveGame(gameKey);
+  const rulesRef = useRef<HTMLDivElement>(null);
+  
+  const handleSelectGame = (gameKey: "pokedesc" | "types" | "dezoom" | "multiplayer") => {
+    setActiveGame(gameKey);
+    // Scroll automatique vers les règles en mobile/tablette
+    if (rulesRef.current && window.innerWidth < 1024) {
+      setTimeout(() => {
+        rulesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  };
 
   const RULE_CARDS: Record<typeof activeGame, JSX.Element> = {
     pokedesc: <PokéDescRulesCard />,
@@ -95,9 +105,9 @@ export default function ReglesPage() {
                   className={`flex items-center gap-2 sm:gap-3 transition-all duration-200 cursor-pointer ${isActive ? 'scale-[1.02]' : 'hover:scale-[1.01] opacity-90 hover:opacity-100'}`}
                   onClick={() => handleSelectGame(game.key)}
                 >
-                  {/* Flèche d'indication améliorée */}
+                  {/* Flèche d'indication (visible seulement à partir de md:) */}
                   <span
-                    className={`font-heading font-bold text-lg w-6 text-center shrink-0 ${isActive ? 'opacity-100' : 'opacity-0'}`}
+                    className={`font-heading font-bold text-lg w-6 text-center shrink-0 hidden md:inline ${isActive ? 'opacity-100' : 'opacity-0'}`}
                     style={{ color: CARD_COLORS.secondColor }}
                   >
                     ▶
@@ -129,7 +139,7 @@ export default function ReglesPage() {
                   onClick={() => handleSelectGame('multiplayer')}
                 >
                   <span
-                    className={`font-heading font-bold text-lg w-6 text-center shrink-0 ${activeGame === 'multiplayer' ? 'opacity-100' : 'opacity-0'}`}
+                    className={`font-heading font-bold text-lg w-6 text-center shrink-0 hidden md:inline ${activeGame === 'multiplayer' ? 'opacity-100' : 'opacity-0'}`}
                     style={{ color: CARD_COLORS.secondColor }}
                   >
                     ▶
@@ -156,7 +166,7 @@ export default function ReglesPage() {
       </div>
 
       {/* ── Droite — Règles toujours visibles ─────────────────── */}
-      <div className="flex-1 w-full min-w-0 flex flex-col h-full">
+      <div ref={rulesRef} className="flex-1 w-full min-w-0 flex flex-col h-full">
         {RULE_CARDS[activeGame]}
       </div>
       

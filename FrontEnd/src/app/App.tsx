@@ -145,7 +145,7 @@ export default function App() {
           />
 
           <div className="flex-1 flex flex-col">
-            <main className="flex-1 p-4 md:p-8 overflow-auto">
+            <main className={`flex-1 p-4 md:p-8 overflow-auto${isChatVisible(location.pathname) ? ' pb-16 md:pb-8' : ''}`}>
               <AnimatePresence mode="wait" initial={false}>
                 <Routes location={location} key={location.pathname}>
                   <Route path="/" element={<HomePage />} />

@@ -525,7 +525,7 @@ export default function LobbyPage({
 
           header={
             <div className="text-center flex flex-col flex-1">
-              <h3 className="font-display text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
+              <h3 className="font-display text-xl md:text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
                 {gameTitle}
               </h3>
             </div>
@@ -547,7 +547,7 @@ export default function LobbyPage({
           cardSize={{ height: 380 }}
           header={
             <div className="text-center flex flex-col flex-1">
-              <h3 className="font-display text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
+              <h3 className="font-display text-xl md:text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
                 Créer une partie
               </h3>
             </div>
@@ -583,7 +583,7 @@ export default function LobbyPage({
           cardSize={{ height: 380 }}
           header={
             <div className="text-center flex flex-col flex-1">
-              <h3 className="font-display text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
+              <h3 className="font-display text-xl md:text-2xl tracking-wide mb-0" style={{ color: theme.textOnColor }}>
                 Rejoindre une partie
               </h3>
             </div>

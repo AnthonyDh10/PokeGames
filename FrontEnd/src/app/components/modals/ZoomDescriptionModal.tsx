@@ -39,27 +39,27 @@ export default function ZoomDescriptionModal({
             </button>
 
             <div className="flex-1 flex items-center justify-center py-8">
-              <p className="font-display text-center" style={{ color: colors.ui.textPrimary, fontSize: '1.5rem' }}>
+              <p className="font-display text-center" style={{ color: colors.ui.textPrimary, fontSize: 'clamp(0.875rem, 4vw, 1.5rem)' }}>
                 {descriptions[descriptionIndex] || <span className="text-gray-400 italic">Chargement...</span>}
               </p>
             </div>
 
             {descriptions.length > 1 && (
-              <div className="flex items-center justify-center gap-6 mt-auto">
+              <div className="flex items-center justify-center gap-4 md:gap-6 mt-auto flex-wrap">
                 <button
                   onClick={() => onChangeIndex((i) => (i - 1 + descriptions.length) % descriptions.length)}
-                  className="font-heading w-12 h-12 flex items-center justify-center hover:-translate-y-0.5 hover:shadow-px-sm transition cursor-pointer"
-                  style={{ color: colors.brand.blue, fontSize: '1.75rem' }}
+                  className="font-heading w-10 md:w-12 h-10 md:h-12 flex items-center justify-center hover:-translate-y-0.5 hover:shadow-px-sm transition cursor-pointer"
+                  style={{ color: colors.brand.blue, fontSize: 'clamp(1rem, 5vw, 1.75rem)' }}
                 >
                   ◀
                 </button>
-                <span className="font-heading text-gray-500 tabular-nums" style={{ fontSize: '1.75rem' }}>
+                <span className="font-heading text-gray-500 tabular-nums whitespace-nowrap" style={{ fontSize: 'clamp(0.875rem, 4vw, 1.75rem)' }}>
                   {descriptionIndex + 1} / {descriptions.length}
                 </span>
                 <button
                   onClick={() => onChangeIndex((i) => (i + 1) % descriptions.length)}
-                  className="font-heading w-12 h-12 flex items-center justify-center hover:-translate-y-0.5 hover:shadow-px-sm transition cursor-pointer"
-                  style={{ color: colors.brand.blue, fontSize: '1.75rem' }}
+                  className="font-heading w-10 md:w-12 h-10 md:h-12 flex items-center justify-center hover:-translate-y-0.5 hover:shadow-px-sm transition cursor-pointer"
+                  style={{ color: colors.brand.blue, fontSize: 'clamp(1rem, 5vw, 1.75rem)' }}
                 >
                   ▶
                 </button>

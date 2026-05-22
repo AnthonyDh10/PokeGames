@@ -151,12 +151,13 @@ export default function DeZoomGamePage() {
             <h1 className="font-heading text-xl md:text-2xl tracking-wide" style={{ color: colors.brand.redDark, fontSize: '1.25rem' }}>
               Quel est ce Pokémon ?
             </h1>
+              {/* Container responsive : prend toute la largeur disponible jusqu'à SPRITE_DISPLAY */}
               <div
                 style={{
                   position: 'relative',
-                  width: SPRITE_DISPLAY,
-                  height: SPRITE_DISPLAY,
-                  flexShrink: 0,
+                  width: '100%',
+                  maxWidth: SPRITE_DISPLAY,
+                  aspectRatio: '1 / 1',
                   borderRadius: 8,
                   overflow: 'hidden',
                 }}
@@ -168,21 +169,22 @@ export default function DeZoomGamePage() {
                   style={{
                     position: 'absolute',
                     inset: 0,
-                    width: SPRITE_DISPLAY,
-                    height: SPRITE_DISPLAY,
+                    width: '100%',
+                    height: '100%',
                     imageRendering: 'pixelated',
                   }}
                 />
 
+                {/* Overlay : positions en % du conteneur pour rester proportionnels quelle que soit la taille */}
                 <div
                   style={{
                     position: 'absolute',
-                    left: windowOffset,
-                    top: windowOffset,
-                    width: windowDisplayPx,
-                    height: windowDisplayPx,
+                    left: `${(windowOffset / SPRITE_DISPLAY) * 100}%`,
+                    top: `${(windowOffset / SPRITE_DISPLAY) * 100}%`,
+                    width: `${(windowDisplayPx / SPRITE_DISPLAY) * 100}%`,
+                    height: `${(windowDisplayPx / SPRITE_DISPLAY) * 100}%`,
                     border: '2px solid red',
-                    boxShadow: '0 0 0 500px' + colors.brand.white ,
+                    boxShadow: `0 0 0 500vmax ${colors.brand.white}`,
                     transition: 'left 0.3s ease, top 0.3s ease, width 0.3s ease, height 0.3s ease',
                     pointerEvents: 'none',
                   }}

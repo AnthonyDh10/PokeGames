@@ -25,7 +25,7 @@ export default function DescriptionCard({
         </h3>
 
         <div className="flex-1">
-          <div className="font-heading text-justify p-8 text-base leading-relaxed h-full">
+          <div className="font-heading text-left p-4 md:p-8 text-base leading-relaxed h-full">
             {descriptions[descriptionIndex] || (
               <span className="text-gray-400 italic">Chargement de la description...</span>
             )}
