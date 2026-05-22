@@ -114,8 +114,8 @@ export default function ReglesPage() {
                   <div className="flex-1 w-full min-w-0 pointer-events-none">
                     <GameCard
                       title={game.title}
-                      description={game.description}
                       color={game.color}
+                      description=""
                       secondColor={game.secondColor}
                       colorLight={game.colorLight}
                       colorDark={game.colorDark}
