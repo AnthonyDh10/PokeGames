@@ -8,7 +8,6 @@ import TopBar from "./components/TopBar";
 import Footer from "./components/Footer";
 import ChatPanel from "./components/ChatPanel";
 import ChenPanel from "./components/ChenPanel";
-import palletTown from "./components/images/palletTown.webp";
 import { useNavDirectionStore } from "./store/navDirectionStore";
 import HomePage from "./pages/HomePage";
 import LobbyPokedescPage from "./pages/LobbyPokedescPage";
@@ -89,26 +88,9 @@ export default function App() {
           overflow: "hidden",
           zIndex: 0,
           pointerEvents: "none",
+          backgroundColor: colors.brand.white,
         }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            width: "110%",
-            height: "110%",
-            transform: "translate(-50%, -50%) scale(0.985)",
-            transformOrigin: "center",
-            backgroundImage: `url(${palletTown})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            filter: "blur(4px)",
-            willChange: "transform, filter",
-          }}
-        />
-      </div>
+      />
 
       <div
         style={{
