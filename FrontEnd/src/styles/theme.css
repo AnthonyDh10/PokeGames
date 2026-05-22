@@ -6,6 +6,22 @@
   line-height: 1;
   font-weight: 400;
 }
+
+/* Classe pour les boutons ResultsActions - override la taille de font-heading */
+.font-heading-lg {
+  font-family: var(--font-heading);
+  font-size: 1.5rem; /* 40px mobile */
+  letter-spacing: 0.001em;
+  line-height: 1;
+  font-weight: 400;
+}
+
+@media (min-width: 640px) {
+  .font-heading-lg {
+    font-size: 2rem; /* 48px desktop */
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {

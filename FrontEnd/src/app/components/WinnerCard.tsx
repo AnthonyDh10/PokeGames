@@ -42,7 +42,7 @@ export default function WinnerCard({
       className="border-4 bg-slate-50 shadow-[8px_8px_0px_rgba(0,0,0,0.1)]"
       pokeballOpacity={0}
     >
-      <div className="p-6 flex flex-col items-center justify-center gap-4">
+      <div className="p-3 sm:p-6 flex flex-col items-center justify-center gap-4">
         <h2
           className="font-heading text-lg uppercase tracking-widest font-bold"
           style={{ color: messageColor }}

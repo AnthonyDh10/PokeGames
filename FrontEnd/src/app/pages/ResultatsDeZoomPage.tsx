@@ -263,12 +263,12 @@ const scoresSection = (
         className="border-4 bg-slate-50 overflow-hidden shadow-[8px_8px_0px_rgba(0,0,0,0.1)]"
         pokeballOpacity={0}
       >
-      <div className="p-6">
+      <div className="p-3 sm:p-6">
         <h3 className="font-heading text-center text-xl mb-6 uppercase tracking-widest" style={{ color: colors.brand.redDark }}>
           SCORES FINAUX
         </h3>
 
-        <div className={`grid ${isSolo ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-2'} gap-6`}>
+        <div className={`grid ${isSolo ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-1 sm:grid-cols-2'} gap-6`}>
           {/* --- SECTION JOUEUR --- */}
           <div className="flex flex-col space-y-3 w-full">
             <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.redDark }}>
@@ -371,13 +371,13 @@ const scoresSection = (
         borderColor={colors.brand.redDeep}
         bodyColor={colors.brand.white}
       >
-        <div className="p-6 flex flex-col items-center gap-4">
+        <div className="p-3 sm:p-6 flex flex-col items-center gap-4">
           <img
             src={results.spriteUrl}
             alt={results.correctPokemonNameFr}
             style={{
-              width: SPRITE_SIZE * DISPLAY_SCALE,
-              height: SPRITE_SIZE * DISPLAY_SCALE,
+              width: `min(${SPRITE_SIZE * DISPLAY_SCALE}px, 90vw)`,
+              height: 'auto',
               imageRendering: 'pixelated',
             }}
           />

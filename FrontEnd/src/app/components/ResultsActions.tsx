@@ -131,9 +131,9 @@ export default function ResultsActions({
       borderColor={buttonColorBorder}
       pokeballColor={menuColor}
       borderThickness="4px"
-      className="w-full py-4"
+      className="w-full py-2 sm:py-4"
     >
-      <div className="flex flex-row justify-around items-center w-full min-h-[4rem]">
+      <div className="flex flex-col sm:flex-row justify-around items-center w-full min-h-[4rem] gap-3 sm:gap-0">
         {options.map((opt, index) => {
           const isSelected = selectedIndex === index
 
@@ -144,11 +144,12 @@ export default function ResultsActions({
               onClick={() => !opt.disabled && opt.onClick()}
               className={`
                   flex items-center gap-3 cursor-pointer select-none transition-opacity
-                  font-heading font-semibold tracking-wide
+                  font-heading-lg font-semibold tracking-wide
+                  w-full sm:w-auto justify-center sm:justify-start
+                  py-4 sm:py-0
                   ${opt.disabled ? 'opacity-40 cursor-not-allowed' : 'opacity-100'}
                 `}
                 style={{
-                  fontSize: '1.5rem',
                   color: (['menu', 'nouvelle', 'relancer', 'revanche'].includes(opt.id) && menuColor)
                     ? menuColor
                     : 'white',

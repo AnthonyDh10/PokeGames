@@ -82,7 +82,7 @@ const pixelClipPath = `polygon(
             }}
           >
             <div
-              className={`relative flex flex-col items-center justify-center px-8 overflow-hidden ${headerClassName}`}
+              className={`relative flex flex-col items-center justify-center px-4 sm:px-8 overflow-hidden ${headerClassName}`}
               style={{
                 backgroundColor: headerColor,
                 clipPath: pixelClipPath,

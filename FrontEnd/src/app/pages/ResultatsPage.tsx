@@ -278,9 +278,9 @@ function PokemonCarouselSection({ partie, sprites, isSolo, player1Name, player2N
       className="overflow-hidden bg-slate-50 border-4" 
       borderColor={colors.brand.blueDeep}
     >
-      <div className="p-6">
+      <div className="p-3 sm:p-6">
         {/* TITRE DU MENU */}
-        <h3 className="font-heading text-center text-xl mb-8 uppercase tracking-tighter" style={{ color: colors.brand.blueDark }}>
+        <h3 className="font-heading text-center text-xl mb-4 sm:mb-8 uppercase tracking-tighter" style={{ color: colors.brand.blueDark }}>
           RÉCAPITULATIF DE LA PARTIE
         </h3>
 
@@ -332,7 +332,7 @@ function PokemonCarouselSection({ partie, sprites, isSolo, player1Name, player2N
         <div className="h-1 w-full bg-slate-200 mb-8" />
 
         {/* PARTIE STATISTIQUES (BAS) */}
-        <div className={`grid gap-6 ${isSolo ? 'max-w-md mx-auto' : 'grid-cols-2'}`}>
+        <div className={`grid gap-6 ${isSolo ? 'max-w-md mx-auto' : 'grid-cols-1 sm:grid-cols-2'}`}>
           
           {/* Stats Joueur 1 */}
           <div className="flex flex-col space-y-3">
@@ -344,7 +344,7 @@ function PokemonCarouselSection({ partie, sprites, isSolo, player1Name, player2N
 
           {/* Stats Joueur 2 (si multi) */}
           {!isSolo && (
-            <div className="flex flex-col space-y-3 border-l-2 border-slate-100 pl-6">
+            <div className="flex flex-col space-y-3 pt-4 sm:pt-0 sm:border-l-2 sm:border-slate-100 sm:pl-6">
               <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.yellowWarm}}>
                 {player2Name}
               </div>
@@ -436,13 +436,13 @@ function FinalScoreBars({ partie, player1Name, player2Name, isSolo }: {
       className="border-4 bg-slate-50 overflow-hidden shadow-[8px_8px_0px_rgba(0,0,0,0.1)]"
       pokeballOpacity={0}
     >
-      <div className="p-6">
-        <h3 className="font-heading text-center text-xl mb-10 uppercase tracking-widest" style={{ color: colors.brand.blueDark }}>
+        <div className="p-3 sm:p-6">
+        <h3 className="font-heading text-center text-xl mb-6 sm:mb-10 uppercase tracking-widest" style={{ color: colors.brand.blueDark }}>
           SCORES FINAUX
         </h3>
         
         {/* Conteneur principal avec un grand GAP pour bien séparer les joueurs */}
-        <div className="flex flex-col gap-10 max-w-xl mx-auto">
+        <div className="flex flex-col gap-6 sm:gap-10 max-w-xl mx-auto">
           <HPBar 
             name={player1Name} 
             current={partie.scoreJ1} 

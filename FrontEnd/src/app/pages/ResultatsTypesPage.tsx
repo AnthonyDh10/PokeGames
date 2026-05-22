@@ -238,12 +238,12 @@ const scoresSection = (
         className="border-4 bg-slate-50 overflow-hidden shadow-[8px_8px_0px_rgba(0,0,0,0.1)]"
         pokeballOpacity={0}
       >
-        <div className="p-6">
+        <div className="p-3 sm:p-6">
           <h3 className="font-heading text-center text-xl mb-6 uppercase tracking-widest" style={{ color: colors.brand.yellowDark }}>
             SCORES FINAUX
           </h3>
           
-          <div className={`grid ${isSolo ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-2'} gap-6`}>
+          <div className={`grid ${isSolo ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-1 sm:grid-cols-2'} gap-6`}>
             {/* Joueur 1 */}
             <div className="flex flex-col space-y-3 w-full">
               <div className="font-display text-xs py-1 px-3 self-start uppercase tracking-wider" style={{ color: colors.brand.yellowDark }}>
@@ -340,17 +340,17 @@ const scoresSection = (
         borderColor={colors.brand.yellowDark}
       >
         {correctAnswer && (
-            <div className="mt-4 text-center">
-              <p className="text-sm font-heading uppercase tracking-widest mb-3" style={{color: colors.brand.yellowDark}}>
+            <div className="mt-3 sm:mt-4 text-center">
+              <p className="text-xs sm:text-sm font-heading uppercase tracking-widest mb-2 sm:mb-3" style={{color: colors.brand.yellowDark}}>
                 Réponse 
               </p>
-              <div className="flex justify-center gap-3 items-center">
+              <div className="flex justify-center gap-2 sm:gap-3 items-center">
                 {results.correctType1NameFr && (
-                  <TypeImage name={results.correctType1NameFr} className="h-12" />
+                  <TypeImage name={results.correctType1NameFr} className="h-10 sm:h-12" />
                 )}
                 {results.correctType2NameFr && (
                   <>
-                    <TypeImage name={results.correctType2NameFr} className="h-12" />
+                    <TypeImage name={results.correctType2NameFr} className="h-10 sm:h-12" />
                   </>
                 )}
               </div>
