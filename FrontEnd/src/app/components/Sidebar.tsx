@@ -67,8 +67,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { icon: dezoomLogo, label: "Dex-Zoom", to: "/dezoom" },
   ];
 
-  const sidebarWidth = "clamp(3.75rem, 12vw, 8rem)";
-  const buttonSize = "clamp(2.25rem, 8vw, 4.8rem)";
+  const sidebarWidth = isOpen && isMobile
+    ? "clamp(7.5rem, 24vw, 16rem)"
+    : "clamp(3.75rem, 12vw, 8rem)";
+  const buttonSize = isOpen && isMobile
+    ? "clamp(4.5rem, 16vw, 9.6rem)"
+    : "clamp(2.25rem, 8vw, 4.8rem)";
   const iconScale = 0.6;
 
   const isHomeActive = location.pathname === "/";
@@ -89,7 +93,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         sidebar-mobile-padding sidebar-desktop-sticky sidebar-mobile-border-left
         fixed md:relative top-0 left-0 h-full md:h-auto md:self-stretch
         flex flex-col items-center justify-center gap-4 z-[10]
-        transition-transform duration-300
         ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
       `}
         style={{

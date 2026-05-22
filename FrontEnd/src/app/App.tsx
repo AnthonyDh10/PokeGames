@@ -133,7 +133,9 @@ export default function App() {
             className={`${sidebarOpen ? 'block' : 'hidden'} md:block pointer-events-none `}
             style={{
               position: 'absolute',
-              left: isMobile
+              left: sidebarOpen && isMobile
+                ? 'calc(clamp(7.5rem, 24vw, 16rem) - 6px)'
+                : isMobile
                 ? 'calc(clamp(3.75rem, 12vw, 8rem) - 6px)'
                 : 'calc(clamp(3.75rem, 12vw, 8rem))',
               top: 0,
