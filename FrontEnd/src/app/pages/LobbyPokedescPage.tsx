@@ -58,8 +58,8 @@ export default function LobbyPokedescPage() {
         
         return (
         <Card pokeballColor={colors.brand.blue}>
-          <div className="p-6">
-            <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 sm:p-6">
+            <div className="flex items-center gap-3 mb-3 sm:mb-6">
               <span className="text-xl">⚙️</span>
               <h3 className="font-heading text-xl tracking-wide" style={{ color: colors.ui.textPrimary, fontSize: '1.25rem' }}>
                 Paramètres de la partie
@@ -80,7 +80,7 @@ export default function LobbyPokedescPage() {
             </div>
 
             {/* Nombre de Pokémon */}
-            <div className="mb-6">
+            <div className="mb-3 sm:mb-6">
               <label className="font-heading block text-sm font-medium mb-3" style={{ color: colors.ui.textMuted }}>
                 Nombre de Pokémon à deviner :{' '}
                 <span className="font-bold font-heading" style={{ color: colors.brand.blue }}>{displayNb}</span>
@@ -112,7 +112,7 @@ export default function LobbyPokedescPage() {
             </div>
 
             {/* Durée du timer */}
-            <div className="mb-6">
+            <div className="mb-3 sm:mb-6">
               <label className="font-heading block text-sm font-medium mb-3" style={{ color: colors.ui.textMuted }}>
                 Durée du timer :{' '}
                 <span className="font-bold" style={{ color: colors.brand.blue }}>

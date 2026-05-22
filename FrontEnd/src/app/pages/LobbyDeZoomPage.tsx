@@ -54,7 +54,7 @@ export default function LobbyDeZoomPage() {
         const displayGens = isPlayer1 ? settings.generations : (partie?.selectedGenerations ?? settings.generations)
         return (
           <Card pokeballColor={colors.brand.red}>
-            <div className="p-6">
+            <div className="p-3 sm:p-6">
               <div className="flex items-center gap-3 mb-5">
                 <span className="text-xl">⚙️</span>
                 <h3 className="font-heading text-xl tracking-wide" style={{ color: colors.ui.textPrimary, fontSize: '1.25rem' }}>
@@ -90,7 +90,7 @@ export default function LobbyDeZoomPage() {
                 )}
               </div>
 
-              <div className="grid sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {ALL_GENERATIONS.map((gen) => {
                   const active = displayGens.includes(gen)
                   return (

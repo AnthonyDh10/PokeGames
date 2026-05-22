@@ -322,7 +322,7 @@ export default function LobbyPage({
           <>
             <h2 className="font-display text-2xl text-center tracking-wide mb-4" style={{ color: theme.textOnColor, fontSize: '1.5rem' }}>
               Salle d'attente <br/> {gameTitle}
-              <p className="font-heading text-sm mt-3" style={{ color: theme.textOnColor, opacity: 0.8, fontSize: '0.85rem' }}>
+              <p className="font-heading mt-2" style={{ color: theme.textOnColor, opacity: 0.8, fontSize: '0.7rem' }}>
                 Partage ce code pour inviter ton ami ou démarre en solo !
               </p>            
             </h2>
@@ -352,7 +352,7 @@ export default function LobbyPage({
           </>
         }
       >
-        <div className="relative p-6 overflow-hidden">
+        <div className="relative p-3 sm:p-6 overflow-hidden">
           <PokeballDecor
             size={150}
             opacity={0.1}
@@ -361,36 +361,36 @@ export default function LobbyPage({
           />
 
           {/* Joueurs */}
-          <div className="relative z-10 flex items-center justify-center gap-6 mb-6">
-            <div className="flex-1 max-w-48">
+          <div className="relative z-10 flex items-center justify-center gap-2 sm:gap-6 mb-4 sm:mb-6">
+            <div className="flex-1 min-w-0 sm:max-w-48">
               <SubCard
                 borderColor={isPlayer1 ? theme.primary : (colors.ui?.grayMid || '#e5e7eb')}
                 borderThickness="p-[2px]"
                 bodyColor={colors.brand.white}
-                className="text-center p-4 relative transition"
+                className="text-center p-2 sm:p-4 relative transition"
               >
-                <img src={redGif} alt="Joueur 1" className="w-12 h-12 mx-auto mb-1" />
-                <div className="font-heading font-semibold text-gray-800">
+                <img src={redGif} alt="Joueur 1" className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-1" />
+                <div className="font-heading font-semibold text-gray-800 truncate" style={{ fontSize: '0.7rem' }}>
                   {isPlayer1 ? playerName : 'Joueur 1'}
                 </div>
               </SubCard>
             </div>
 
-            <div className="font-heading text-2xl tracking-wide" style={{ color: theme.primaryDark }}>VS</div>
+            <div className="font-heading tracking-wide shrink-0" style={{ color: theme.primaryDark }}>VS</div>
 
-            <div className="flex-1 max-w-48 relative">
+            <div className="flex-1 min-w-0 sm:max-w-48 relative">
               <SubCard
                 borderColor={!isPlayer1 ? theme.primary : (colors.ui?.grayMid || '#e5e7eb')}
                 borderThickness="p-[2px]"
                 bodyColor={colors.brand.white}
-                className="text-center p-4 relative transition"
+                className="text-center p-2 sm:p-4 relative transition"
               >
                 {partie.dresseur2Id ? (
-                  <img src={redGif} alt="Joueur 2" className="w-12 h-12 mx-auto mb-1" />
+                  <img src={redGif} alt="Joueur 2" className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-1" />
                 ) : (
-                  <img src={dittoGif} alt="Joueur 2" className="w-12 h-12 mx-auto mb-1" />
+                  <img src={dittoGif} alt="Joueur 2" className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-1" />
                 )}
-                <div className="font-heading font-semibold text-gray-800">
+                <div className="font-heading font-semibold text-gray-800 truncate" style={{ fontSize: '0.7rem' }}>
                   {!isPlayer1 ? playerName : partie.dresseur2Id ? 'Adversaire' : 'En attente...'}
                 </div>
                 {!isPlayer1 && (
@@ -487,14 +487,14 @@ export default function LobbyPage({
 
     if (settingsPanel) {
       return (
-        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-4 items-start">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-4 items-start px-4 md:px-0 py-4 md:py-0">
           {waitingRoomCard}
           {settingsPanel(isPlayer1, partie)}
         </div>
       )
     }
 
-    return <div className="max-w-2xl mx-auto">{waitingRoomCard}</div>
+    return <div className="max-w-2xl mx-auto px-4 sm:px-0">{waitingRoomCard}</div>
   }
 
   // --- Options create/join ---
