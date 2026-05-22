@@ -130,7 +130,7 @@ export default function App() {
 
           {/* Bordure droite de la sidebar : redDark (6px) → redDeep (2px) */}
           <div
-            className={`${sidebarOpen ? 'block' : 'hidden'} md:block pointer-events-none `}
+            className={`${sidebarOpen ? 'block' : 'hidden'} md:block pointer-events-none`}
             style={{
               position: 'absolute',
               left: sidebarOpen && isMobile

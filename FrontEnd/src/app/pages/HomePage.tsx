@@ -294,7 +294,7 @@ export default function HomePage() {
 
               // Configuration des animations de rotation pour Framer Motion
               const variants = {
-                center: { x: "0%", y: 0, scale: 1, zIndex: 10, opacity: 1, filter: "blur(0px)" },
+                center: { x: "0%", y: 0, scale: 1, zIndex: 0, opacity: 1, filter: "blur(0px)" },
                 left: { x: "-65%", y: -30, scale: 0.65, zIndex: 5, opacity: 0.4, filter: "blur(1px)" },
                 right: { x: "65%", y: -30, scale: 0.65, zIndex: 5, opacity: 0.4, filter: "blur(1px)" },
                 hidden: { x: "0%", y: -40, scale: 0.4, zIndex: 0, opacity: 0, filter: "blur(2px)" }
