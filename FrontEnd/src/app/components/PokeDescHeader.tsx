@@ -37,7 +37,7 @@ export default function PokeDescHeader({
         headerColor={colors.brand.blue}
         headerClassName="py-4"
         header={
-          <h1 className="font-display text-xl md:text-2xl tracking-wide" style={{ color: colors.ui.textOnColor }}>
+          <h1 className="font-display text-xl md:text-2xl tracking-wide text-center" style={{ color: colors.ui.textOnColor }}>
             POKÉDESC : Devine le Pokémon !
           </h1>
         }
