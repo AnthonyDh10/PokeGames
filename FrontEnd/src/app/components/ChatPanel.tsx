@@ -99,7 +99,10 @@ export default function ChatPanel() {
           aria-label={isOpen ? 'Fermer le chat' : 'Ouvrir le chat'}
         >
           <div className="flex items-center gap-3">
-            <span className="font-display text-white tracking-wide uppercase ml-2">
+            <span
+              className="font-display text-white tracking-wide uppercase"
+              style={{ fontSize: 'clamp(10px, 3vw, 20px)' }}
+            >
               Messagerie
             </span>
           </div>

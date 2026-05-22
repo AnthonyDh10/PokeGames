@@ -82,8 +82,8 @@ export default function ChenPanel() {
       >
         <div className="flex items-center gap-2 ml-1">
           <span
-            className="font-display tracking-wide uppercase ml-1"
-            style={{ color: colors.ui.textMuted }}
+            className="font-display tracking-wide uppercase"
+            style={{ color: colors.ui.textMuted, fontSize: 'clamp(10px, 3vw, 20px)' }}
           >
             Prof. Chen
           </span>
