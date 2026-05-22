@@ -77,10 +77,10 @@ export default function PokeDescHeader({
             {/* Génération */}
             {selectedGenerations && getGenerationsDisplay(selectedGenerations) && (
               <div className="flex flex-col items-center gap-1">
-                <span className="font-heading font-semibold text-sm" style={{ color: colors.brand.blueDark }}>
+                <span className="font-heading font-semibold text-sm text-center" style={{ color: colors.brand.blueDark }}>
                   {getGenerationsDisplay(selectedGenerations)?.label}
                 </span>
-                <span className="font-heading text-xl md:text-2xl tracking-wide font-bold" style={{ color: colors.brand.blueDark, fontSize: '1.25rem' }}>
+                <span className="font-heading text-xl md:text-2xl tracking-wide font-bold text-center" style={{ color: colors.brand.blueDark, fontSize: '1.25rem' }}>
                   {getGenerationsDisplay(selectedGenerations)?.value}
                 </span>
               </div>
