@@ -54,7 +54,7 @@ export default function PokeDescPage() {
         />
       }
       left={
-        <div className="relative z-10 flex flex-col gap-4">
+        <div className="relative flex flex-col gap-4">
           <DescriptionCard
             descriptions={descriptions}
             descriptionIndex={descriptionIndex}
