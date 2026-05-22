@@ -6,7 +6,7 @@ import { useChatStore } from "../store/chatStore";
 import { colors } from "../design/colors";
 import pokeballFace from "../components/images/pokéball_face.png";
 import pokeballShaking from "../components/images/pokéball_shaking.gif";
-import solHerbes from "../components/images/sol-herbes.png";
+import solHerbes from "../components/images/sol2.png";
 import pokedescLogo from "../components/images/pokedesc-logo.png";
 import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
@@ -26,6 +26,7 @@ interface Game {
   to: string;
   isOak?: boolean;
   text_color?: string;
+  hideFromGrid?: boolean;
 }
 
 const games: Game[] = [
@@ -33,9 +34,9 @@ const games: Game[] = [
     title: "PROF. CHEN",
     description: (
       <span className="font-heading">
-        Bienvenue dresseur ! Relève les défis du Professeur pour tester tes connaissances sur les pokémon ! Chaque pokéball renferme un défi différent, survole les pour les découvrir ! Prends connaissance de leurs règles en cliquant sur le {" "}
+        Bienvenue Dresseur ! Teste tes connaissances : survole les Pokéballs pour découvrir les défis du Professeur, et clique sur le {" "}
         <img src={rulesIconImg} alt="règles" className="inline-block align-middle w-5 h-5" style={{ verticalAlign: "middle" }} />
-        {" "}!
+        {" "} pour lire les règles !
       </span>
     ),
     color: colors.brand.chen,
@@ -44,8 +45,8 @@ const games: Game[] = [
     colorDark: colors.brand.chenDark,
     image: rulesIconImg,
     to: "/regles",
-    isOak: true,
     text_color: colors.ui.grayBorderDark,
+    hideFromGrid: true,
   },
   {
     title: "POKÉDESC",
@@ -136,28 +137,34 @@ export default function HomePage() {
     setSelectedIndex(prev => prev === index ? null : index);
   };
 
+  const visibleGames = games.filter(g => !g.hideFromGrid);
+
   const handleCarouselPrev = () => {
-    const newIndex = (carouselIndex - 1 + games.length) % games.length;
+    const newIndex = (carouselIndex - 1 + visibleGames.length) % visibleGames.length;
     setCarouselIndex(newIndex);
     setSelectedIndex(newIndex);
   };
 
   const handleCarouselNext = () => {
-    const newIndex = (carouselIndex + 1) % games.length;
+    const newIndex = (carouselIndex + 1) % visibleGames.length;
     setCarouselIndex(newIndex);
     setSelectedIndex(newIndex);
   };
+
+  // Calcul des index adjacents pour les jeux visibles
+  const prevVisibleIndex = (carouselIndex - 1 + visibleGames.length) % visibleGames.length;
+  const nextVisibleIndex = (carouselIndex + 1) % visibleGames.length;
 
   const oakBottomOffset = "8%";
   const pointerSize = "clamp(20px, 2.5vw, 44px)";
   const textSize = "clamp(0.8rem, 1.5vw, 1.25rem)";
   // Espace sous la TopBar — identique à la hauteur utilisée dans TopBar.tsx
-  const topbarHeight = "clamp(1rem, 5vh, 2rem)";
+  const topbarHeight = "clamp(0.25rem, 1.5vh, 0.5rem)";
 
   // Ajouts / Ajustements des tailles pour la nouvelle grille :
   const lgPokeballSize = "clamp(110px, 16vw, 220px)"; // Légèrement affiné pour la ligne de 4
   const lgGapSize = "clamp(1rem, 4vw, 6rem)";
-  const smPokeballSize = "clamp(130px, 45vw, 220px)"; 
+  const smPokeballSize = "clamp(130px, 45vw, 220px)";
 
   const renderItem = (
     game: Game,
@@ -268,36 +275,37 @@ export default function HomePage() {
   };
 
   return (
-    <div className="space-y-8" style={{ marginTop: topbarHeight }}>
+    <div className="space-y-1" style={{ marginTop: topbarHeight }}>
       <div onMouseLeave={() => setHoveredIndex(null)}>
 
         {/* ≥1024px (lg) : Ligne unique - S'affiche quand la GameCard est complète */}
-        <div className="hidden lg:flex items-end justify-center py-6" style={{ gap: lgGapSize }}>
-          {games.map((game, index) => renderItem(game, index, { pokeballSize: lgPokeballSize }))}
+        <div className="hidden lg:flex items-end justify-center py-1" style={{ gap: lgGapSize }}>
+          {games.map((game, index) => !game.hideFromGrid && renderItem(game, index, { pokeballSize: lgPokeballSize }))}
         </div>
 
         {/* <1024px (sm à lg) : Carrousel mobile avec Swipe et Rotation (Framer Motion) */}
         <div 
-          className="lg:hidden flex flex-col items-center py-4 w-full"
+          className="lg:hidden flex flex-col items-center py-1 w-full"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
           {/* Conteneur du carousel avec une hauteur définie pour le positionnement absolu */}
-          <div className="relative flex items-center justify-center w-full min-h-[250px] mb-4">
-            {games.map((game, index) => {
+          <div className="relative flex items-center justify-center w-full min-h-[250px] mb-1">
+            {visibleGames.map((game, visibleIndex) => {
               // Détermination de la position de chaque élément par rapport à l'index actif
               let position = "hidden";
-              if (index === carouselIndex) position = "center";
-              else if (index === prevIndex) position = "left";
-              else if (index === nextIndex) position = "right";
+              if (visibleIndex === carouselIndex) position = "center";
+              else if (visibleIndex === prevVisibleIndex) position = "left";
+              else if (visibleIndex === nextVisibleIndex) position = "right";
+
+              if (position === "hidden") return null;
 
               // Configuration des animations de rotation pour Framer Motion
               const variants = {
                 center: { x: "0%", y: 0, scale: 1, zIndex: 2, opacity: 1, filter: "blur(0px)" },
                 left: { x: "-65%", y: -30, scale: 0.65, zIndex: 1, opacity: 0.4, filter: "blur(1px)" },
                 right: { x: "65%", y: -30, scale: 0.65, zIndex: 1, opacity: 0.4, filter: "blur(1px)" },
-                hidden: { x: "0%", y: -40, scale: 0.4, zIndex: 0, opacity: 0, filter: "blur(2px)" }
               };
 
               return (
@@ -314,7 +322,7 @@ export default function HomePage() {
                     if (position === "right") handleCarouselNext();
                   }}
                 >
-                  {renderItem(game, index, { 
+                  {renderItem(game, visibleIndex, { 
                     forceActive: position === "center", 
                     noInteraction: true, 
                     pokeballSize: smPokeballSize 
@@ -323,44 +331,18 @@ export default function HomePage() {
               );
             })}
           </div>
-          
-          {/* Indicateurs / Dots */}
-          <div className="flex gap-3">
-            {games.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => { setCarouselIndex(i); setSelectedIndex(i); }}
-                className={`w-2 h-2 mt-5 rounded-full transition-all duration-300 ${i === carouselIndex ? "bg-white scale-125" : "bg-white/30"}`}
-                aria-label={`Aller à ${games[i].title}`}
-              />
-            ))}
-          </div>
         </div>
 
         {/* Helper text */}
-        <div className="flex justify-center h-6 mt-2">
-          <AnimatePresence>
-            {activeIndex === null && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.25 }}
-                className="text-white/50 italic text-center px-4"
-                style={{ fontSize: "clamp(0.75rem, 1vw, 0.875rem)" }}
-              >
-                Survole ou appuie sur une Pokéball pour découvrir le jeu
-              </motion.p>
-            )}
-          </AnimatePresence>
-        </div>
+        {/* Supprimé - La GameCard s'affiche toujours par défaut */}
 
         {/* GameCard */}
-        <div className="mt-4 flex justify-center w-full px-4">
+        {/* Mobile: affiche uniquement le jeu du carrousel */}
+        <div className="lg:hidden mt-1 flex justify-center w-full px-4">
           <AnimatePresence mode="wait">
-            {activeIndex !== null && (
+            {visibleGames[carouselIndex] && (
               <motion.div
-                key={activeIndex}
+                key={visibleGames[carouselIndex].title}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
@@ -368,19 +350,53 @@ export default function HomePage() {
                 className="w-full sm:w-[85%] md:w-[75%] lg:w-[70%] min-h-[30vh] sm:min-h-[25vh]"
               >
                 <GameCard
-                  title={games[activeIndex].title}
-                  description={games[activeIndex].description}
-                  color={games[activeIndex].color}
-                  text_color={games[activeIndex].text_color}
-                  secondColor={games[activeIndex].secondColor}
-                  colorLight={games[activeIndex].colorLight}
-                  colorDark={games[activeIndex].colorDark}
-                  image={games[activeIndex].image}
-                  icon={games[activeIndex].icon}
-                  to={games[activeIndex].to}
+                  title={visibleGames[carouselIndex].title}
+                  description={visibleGames[carouselIndex].description}
+                  color={visibleGames[carouselIndex].color}
+                  text_color={visibleGames[carouselIndex].text_color}
+                  secondColor={visibleGames[carouselIndex].secondColor}
+                  colorLight={visibleGames[carouselIndex].colorLight}
+                  colorDark={visibleGames[carouselIndex].colorDark}
+                  image={visibleGames[carouselIndex].image}
+                  icon={visibleGames[carouselIndex].icon}
+                  to={visibleGames[carouselIndex].to}
                 />
               </motion.div>
             )}
+          </AnimatePresence>
+        </div>
+
+        {/* Desktop: affiche Chen ou le jeu sélectionné */}
+        <div className="hidden lg:flex lg:justify-center mt-1 w-full px-4">
+          <AnimatePresence mode="wait">
+            {(() => {
+              const shouldDisplayChen = activeIndex === null || games[activeIndex]?.hideFromGrid;
+              const gameToDisplay = shouldDisplayChen ? games[0] : games[activeIndex];
+              
+              return (
+                <motion.div
+                  key={gameToDisplay?.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.28, ease: "easeOut" }}
+                  className="w-full sm:w-[85%] md:w-[75%] lg:w-[70%] min-h-[30vh] sm:min-h-[25vh]"
+                >
+                  <GameCard
+                    title={gameToDisplay.title}
+                    description={gameToDisplay.description}
+                    color={gameToDisplay.color}
+                    text_color={gameToDisplay.text_color}
+                    secondColor={gameToDisplay.secondColor}
+                    colorLight={gameToDisplay.colorLight}
+                    colorDark={gameToDisplay.colorDark}
+                    image={gameToDisplay.image}
+                    icon={gameToDisplay.icon}
+                    to={gameToDisplay.to}
+                  />
+                </motion.div>
+              );
+            })()}
           </AnimatePresence>
         </div>
 

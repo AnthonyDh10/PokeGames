@@ -8,7 +8,7 @@ import TopBar from "./components/TopBar";
 import Footer from "./components/Footer";
 import ChatPanel from "./components/ChatPanel";
 import ChenPanel from "./components/ChenPanel";
-import palletTown from "./components/images/palletTown.webp";
+import lab from "./components/images/lab2.png";
 import { useNavDirectionStore } from "./store/navDirectionStore";
 import HomePage from "./pages/HomePage";
 import LobbyPokedescPage from "./pages/LobbyPokedescPage";
@@ -100,7 +100,7 @@ export default function App() {
             height: "110%",
             transform: "translate(-50%, -50%) scale(0.985)",
             transformOrigin: "center",
-            backgroundImage: `url(${palletTown})`,
+            backgroundImage: `url(${lab})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",

@@ -14,7 +14,6 @@ const GAMES = [
   {
     key: "pokedesc" as const,
     title: "POKÉDESC",
-    description: <span className="font-heading">Devine le Pokémon décrit !</span>,
     color: colors.brand.blue,
     secondColor: colors.brand.blueDeep,
     colorLight: colors.brand.blueLight,
@@ -25,7 +24,6 @@ const GAMES = [
   {
     key: "types" as const,
     title: <span style={{color: colors.ui.textMuted}}>TYPUZZLE</span>,
-    description: <span className="font-heading" style={{color: colors.ui.textMuted}}>Devine la paire de types cachée !</span>,
     color: colors.brand.yellow,
     secondColor: colors.brand.yellowDark,
     colorLight: colors.brand.yellowLight,
@@ -36,7 +34,6 @@ const GAMES = [
   {
     key: "dezoom" as const,
     title: "DEX-ZOOM",
-    description: <span className="font-heading">Identifie le Pokémon de l'image !</span>,
     color: colors.brand.red,
     secondColor: colors.brand.redDeep,
     colorLight: colors.brand.redLight,
@@ -148,7 +145,7 @@ export default function ReglesPage() {
                   <div className="flex-1 w-full min-w-0 pointer-events-none">
                     <GameCard
                       title={<span style={{ color: colors.ui.textMuted }}>MULTI</span>}
-                      description={<span className="font-heading" style={{ color: colors.ui.textMuted }}>Joue avec un ami en temps réel</span>}
+                      description=""
                       color={CARD_COLORS.color}
                       secondColor={CARD_COLORS.secondColor}
                       colorLight={CARD_COLORS.colorLight}
