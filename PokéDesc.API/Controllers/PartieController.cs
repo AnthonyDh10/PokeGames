@@ -1,5 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PokéDesc.Business.Interfaces;
+using PokéDesc.Business.Models;
 using PokéDesc.API.DTOs;
 
 namespace PokéDesc.API.Controllers;
@@ -9,17 +10,19 @@ namespace PokéDesc.API.Controllers;
 public class PartieController : ControllerBase
 {
     private readonly IPartieService _partieService;
+    private readonly ILogger<PartieController> _logger;
 
-    public PartieController(IPartieService partieService)
+    public PartieController(IPartieService partieService, ILogger<PartieController> logger)
     {
         _partieService = partieService;
+        _logger = logger;
     }
 
     [HttpPost("create")]
     public async Task<IActionResult> CreateGame([FromBody] CreateGameRequest request)
     {
         var partie = await _partieService.CreateGameAsync(request.DresseurId);
-        return Ok(partie);
+        return Ok(PartieResponseDto.FromPartie(partie));
     }
 
     [HttpPost("join")]
@@ -28,7 +31,7 @@ public class PartieController : ControllerBase
         try
         {
             var partie = await _partieService.JoinGameAsync(request.CodeSession, request.DresseurId);
-            return Ok(partie);
+            return Ok(PartieResponseDto.FromPartie(partie));
         }
         catch (KeyNotFoundException ex)
         {
@@ -42,7 +45,7 @@ public class PartieController : ControllerBase
         try
         {
             var partie = await _partieService.GetGameAsync(partieId);
-            return Ok(partie);
+            return Ok(PartieResponseDto.FromPartie(partie));
         }
         catch (KeyNotFoundException ex)
         {
@@ -56,7 +59,20 @@ public class PartieController : ControllerBase
         try
         {
             var result = await _partieService.SubmitGuessAsync(partieId, request.DresseurId, request.PokemonName);
-            return Ok(result);
+            return Ok(new GuessResultDto
+            {
+                IsCorrect = result.IsCorrect,
+                IsTurnFinished = result.IsTurnFinished,
+                IsGameFinished = result.IsGameFinished,
+                IsTimeout = result.IsTimeout,
+                Message = result.Message,
+                PointsEarned = result.PointsEarned,
+                UpdatedGame = PartieResponseDto.FromPartie(result.UpdatedGame),
+                HasOneTypeInCommon = result.HasOneTypeInCommon,
+                HasPerfectTypeMatch = result.HasPerfectTypeMatch,
+                HasSameGeneration = result.HasSameGeneration,
+                IsInSameEvolutionChain = result.IsInSameEvolutionChain,
+            });
         }
         catch (KeyNotFoundException ex)
         {
@@ -70,7 +86,7 @@ public class PartieController : ControllerBase
         try
         {
             var partie = await _partieService.UseHintAsync(partieId, request.DresseurId, request.HintType);
-            return Ok(partie);
+            return Ok(PartieResponseDto.FromPartie(partie));
         }
         catch (KeyNotFoundException ex)
         {
@@ -95,7 +111,7 @@ public class PartieController : ControllerBase
                 request.Generations,
                 request.TimerDuration
             );
-            return Ok(partie);
+            return Ok(PartieResponseDto.FromPartie(partie));
         }
         catch (KeyNotFoundException ex)
         {
@@ -113,7 +129,7 @@ public class PartieController : ControllerBase
         try
         {
             var partie = await _partieService.UpdateGameSettingsAsync(partieId, request.NbPokemons, request.Generations, request.TimerDuration);
-            return Ok(partie);
+            return Ok(PartieResponseDto.FromPartie(partie));
         }
         catch (KeyNotFoundException ex)
         {
@@ -126,13 +142,25 @@ public class PartieController : ControllerBase
     }
 
     [HttpPost("{partieId}/rematch-ready")]
-    public async Task<IActionResult> MarkRematchReady(string partieId, [FromQuery] string dresseurId)
+    public async Task<IActionResult> MarkRematchReady(string partieId, [FromBody] MarkRematchReadyRequest request)
     {
-        if (string.IsNullOrWhiteSpace(dresseurId))
+        if (string.IsNullOrWhiteSpace(request.DresseurId))
             return BadRequest("dresseurId est requis.");
 
-        var status = await _partieService.MarkRematchReadyAsync(partieId, dresseurId);
-        return Ok(status);
+        try
+        {
+            var status = await _partieService.MarkRematchReadyAsync(partieId, request.DresseurId);
+            return Ok(status);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur lors du traitement de la revanche pour la partie {PartieId}", partieId);
+            return StatusCode(500, new { message = "Erreur serveur" });
+        }
     }
 
     [HttpGet("{partieId}/timer/{dresseurId}")]

@@ -1,5 +1,6 @@
 using Xunit;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using PokéDesc.API.Controllers;
 using PokéDesc.Business.Interfaces;
@@ -20,7 +21,8 @@ public class PokemonControllerTests
     public PokemonControllerTests()
     {
         _serviceMock = new Mock<IPokemonService>();
-        _controller = new PokemonController(_serviceMock.Object);
+        var logger = new Mock<ILogger<PokemonController>>();
+        _controller = new PokemonController(_serviceMock.Object, logger.Object);
     }
 
     // ─────────────────────────────────────────────

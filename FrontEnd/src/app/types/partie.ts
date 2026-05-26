@@ -32,6 +32,10 @@ export interface PartieDto {
   usedHintsJ2: string[]
   completedPokemonsJ1: CompletedPokemonDto[]
   completedPokemonsJ2: CompletedPokemonDto[]
+  /** ID du Pokémon actuel pour J1 — null avant le démarrage de la partie. */
+  currentPokemonIdJ1?: string | null
+  /** ID du Pokémon actuel pour J2 — null avant le démarrage de la partie. */
+  currentPokemonIdJ2?: string | null
 }
 
 export interface GuessResultDto {

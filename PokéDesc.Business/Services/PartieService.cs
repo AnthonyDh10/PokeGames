@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using PokéDesc.Business.Constants;
 using PokéDesc.Business.Interfaces;
 using PokéDesc.Business.Models;
 using PokéDesc.Domain;
@@ -12,6 +13,7 @@ public class PartieService : IPartieService
     // TODO: Injecter un Repository pour sauvegarder la Partie (ex: IPartieRepository)
     // Pour l'instant, on va simuler le stockage en mémoire ou supposer qu'il existe.
     private static readonly ConcurrentDictionary<string, Partie> _gameStore = new();
+    private static readonly SemaphoreSlim _rematchLock = new(1, 1);
 
     // Configuration des coûts des indices
     private static readonly Dictionary<string, int> HintCosts = new()
@@ -43,13 +45,19 @@ public class PartieService : IPartieService
 
     private const int MaxAttempts = 3;
     private const int BaseScore = 100;
+    private static readonly TimeSpan GameTtl = TimeSpan.FromHours(24);
 
-    private static readonly Dictionary<int, string> GenerationNames = new()
+    private static void CleanupOldGames()
     {
-        { 1, "generation-i" },   { 2, "generation-ii" },  { 3, "generation-iii" },
-        { 4, "generation-iv" },  { 5, "generation-v" },   { 6, "generation-vi" },
-        { 7, "generation-vii" }, { 8, "generation-viii" }, { 9, "generation-ix" }
-    };
+        var cutoff = DateTime.UtcNow - GameTtl;
+        foreach (var key in _gameStore.Keys)
+        {
+            if (_gameStore.TryGetValue(key, out var p) && p.CreatedAt < cutoff)
+                _gameStore.TryRemove(key, out _);
+        }
+    }
+
+
 
     public PartieService(IPokemonService pokemonService)
     {
@@ -58,6 +66,8 @@ public class PartieService : IPartieService
 
     public async Task<Partie> CreateGameAsync(string dresseurId)
     {
+        CleanupOldGames();
+
         var partie = new Partie
         {
             Id = Guid.NewGuid().ToString(), // Simulé, MongoDB le ferait auto
@@ -92,8 +102,8 @@ public class PartieService : IPartieService
 
             // Filtrer par génération si nécessaire
             var genNames = partie.SelectedGenerations
-                .Where(g => GenerationNames.ContainsKey(g))
-                .Select(g => GenerationNames[g])
+                .Where(g => GameConstants.GenerationNames.ContainsKey(g))
+                .Select(g => GameConstants.GenerationNames[g])
                 .ToHashSet();
 
             if (genNames.Count < 8)
@@ -162,19 +172,26 @@ public class PartieService : IPartieService
         Random random)
     {
         var selectedPokemons = new List<Pokemon>();
+        var selectedIds = new HashSet<string>();
 
         foreach (var isRare in rarityDraws)
         {
             var sourceList = isRare ? legendaryMythicalPokemons : basePokemons;
-            // Extra safeguard: filter out Pokémon without descriptions
             var validPokemons = sourceList
-                .Where(p => p.Description != null && p.Description.Any())
+                .Where(p => p.Description != null && p.Description.Any() && !selectedIds.Contains(p.Id))
                 .ToList();
+
+            // Fallback sur la liste de base si le pool rare est épuisé ou vide
+            if (validPokemons.Count == 0)
+                validPokemons = basePokemons
+                    .Where(p => p.Description != null && p.Description.Any() && !selectedIds.Contains(p.Id))
+                    .ToList();
 
             if (validPokemons.Count == 0)
                 throw new ArgumentException("Aucun Pokémon valide (avec description) trouvé pour la sélection.");
 
             var selectedPokemon = validPokemons[random.Next(validPokemons.Count)];
+            selectedIds.Add(selectedPokemon.Id);
             selectedPokemons.Add(selectedPokemon);
         }
 
@@ -189,8 +206,8 @@ public class PartieService : IPartieService
         var partie = _gameStore.Values.FirstOrDefault(p => 
             p.CodeSession?.Trim().ToUpper() == normalizedCode);
             
-        if (partie == null) 
-            throw new KeyNotFoundException($"Partie introuvable avec le code '{codeSession}'. Codes disponibles: {string.Join(", ", _gameStore.Values.Select(p => p.CodeSession))}");
+        if (partie == null)
+            throw new KeyNotFoundException("Code de session invalide.");
         
         if (!string.IsNullOrEmpty(partie.Dresseur2Id))
             throw new ArgumentException("Cette partie a déjà deux joueurs.");
@@ -453,11 +470,12 @@ public class PartieService : IPartieService
         return index >= partie.PokemonsToGuess.Count;
     }
 
-    private string GenerateSessionCode()
+    private static string GenerateSessionCode()
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        var random = new Random();
-        return new string(Enumerable.Repeat(chars, 6).Select(s => s[random.Next(s.Length)]).ToArray());
+        return new string(Enumerable.Range(0, 6)
+            .Select(_ => chars[Random.Shared.Next(chars.Length)])
+            .ToArray());
     }
 
     private bool CheckTimeout(Partie partie, bool isJ1)
@@ -574,14 +592,26 @@ public class PartieService : IPartieService
 
         if (bothReady && string.IsNullOrEmpty(partie.RematchPartieId))
         {
-            var newPartie = await CreateGameAsync(partie.Dresseur1Id);
-            if (!string.IsNullOrEmpty(partie.Dresseur2Id))
+            await _rematchLock.WaitAsync();
+            try
             {
-                newPartie.Dresseur2Id = partie.Dresseur2Id;
-                newPartie.Statut = "Prêt";
+                // Double-check après acquisition du lock pour éviter les doublons
+                if (string.IsNullOrEmpty(partie.RematchPartieId))
+                {
+                    var newPartie = await CreateGameAsync(partie.Dresseur1Id);
+                    if (!string.IsNullOrEmpty(partie.Dresseur2Id))
+                    {
+                        newPartie.Dresseur2Id = partie.Dresseur2Id;
+                        newPartie.Statut = "Prêt";
+                    }
+                    await StartGameAsync(newPartie.Id, "Standard", partie.ModeSolo, partie.NbPokemons, partie.SelectedGenerations, partie.TimerDurationSeconds);
+                    partie.RematchPartieId = newPartie.Id;
+                }
             }
-            await StartGameAsync(newPartie.Id, "Standard", partie.ModeSolo, partie.NbPokemons, partie.SelectedGenerations, partie.TimerDurationSeconds);
-            partie.RematchPartieId = newPartie.Id;
+            finally
+            {
+                _rematchLock.Release();
+            }
         }
 
         return new RematchStatusDto

@@ -1,3 +1,4 @@
+using PokéDesc.Business.Constants;
 using PokéDesc.Business.Interfaces;
 using PokéDesc.Data.Repositories;
 using PokéDesc.Domain.Models;
@@ -10,16 +11,12 @@ public class DeZoomService : IDeZoomService
     private static readonly Dictionary<string, DeZoomGameState> _gameStore = new();
     private static readonly object _lock = new();
 
-    private static readonly Dictionary<int, string> GenerationNames = new()
-    {
-        { 1, "generation-i" },   { 2, "generation-ii" },  { 3, "generation-iii" },
-        { 4, "generation-iv" },  { 5, "generation-v" },   { 6, "generation-vi" },
-        { 7, "generation-vii" }, { 8, "generation-viii" }, { 9, "generation-ix" }
-    };
+
 
     public DeZoomService(PokemonRepository repository)
     {
-        _pokemons = repository.GetAllAsync().Result
+        // GetAllAsync() est synchrone en pratique (données en mémoire), .GetAwaiter().GetResult() est sûr ici.
+        _pokemons = repository.GetAllAsync().GetAwaiter().GetResult()
             .Where(p => !string.IsNullOrEmpty(p.Sprites?.FrontDefault))
             .ToList();
     }
@@ -36,8 +33,8 @@ public class DeZoomService : IDeZoomService
             return _pokemons;
 
         var genNames = selectedGenerations
-            .Where(g => GenerationNames.ContainsKey(g))
-            .Select(g => GenerationNames[g])
+            .Where(g => GameConstants.GenerationNames.ContainsKey(g))
+            .Select(g => GameConstants.GenerationNames[g])
             .ToHashSet();
 
         return _pokemons

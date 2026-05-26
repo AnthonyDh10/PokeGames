@@ -65,6 +65,9 @@ public class Partie
     public bool RematchReadyJ1 { get; set; }
     public bool RematchReadyJ2 { get; set; }
     public string? RematchPartieId { get; set; }
+
+    // Métadonnées
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
 public class CompletedPokemon

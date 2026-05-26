@@ -1,5 +1,6 @@
 using Xunit;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using PokéDesc.API.Controllers;
 using PokéDesc.API.DTOs;
@@ -21,7 +22,8 @@ public class PartieControllerTests
     public PartieControllerTests()
     {
         _serviceMock = new Mock<IPartieService>();
-        _controller = new PartieController(_serviceMock.Object);
+        var logger = new Mock<ILogger<PartieController>>();
+        _controller = new PartieController(_serviceMock.Object, logger.Object);
     }
 
     private static Partie CreateTestPartie(string id = "partie-1", string dresseur1 = "d1") => new()
@@ -45,7 +47,9 @@ public class PartieControllerTests
         var result = await _controller.CreateGame(new CreateGameRequest { DresseurId = "d1" });
 
         var ok = Assert.IsType<OkObjectResult>(result);
-        Assert.Equal(partie, ok.Value);
+        var dto = Assert.IsType<PartieResponseDto>(ok.Value);
+        Assert.Equal(partie.Id, dto.Id);
+        Assert.Equal(partie.Dresseur1Id, dto.Dresseur1Id);
     }
 
     // ─────────────────────────────────────────────
@@ -87,7 +91,8 @@ public class PartieControllerTests
         var result = await _controller.GetGame("partie-1");
 
         var ok = Assert.IsType<OkObjectResult>(result);
-        Assert.Equal(partie, ok.Value);
+        var dto = Assert.IsType<PartieResponseDto>(ok.Value);
+        Assert.Equal(partie.Id, dto.Id);
     }
 
     [Fact]
@@ -108,7 +113,8 @@ public class PartieControllerTests
     [Fact]
     public async Task SubmitGuess_Returns200WithResult()
     {
-        var guessResult = new GuessResult { IsCorrect = true, Message = "Bravo !", PointsEarned = 100 };
+        var updatedGame = CreateTestPartie();
+        var guessResult = new GuessResult { IsCorrect = true, Message = "Bravo !", PointsEarned = 100, UpdatedGame = updatedGame };
         _serviceMock.Setup(s => s.SubmitGuessAsync("partie-1", "d1", "Bulbizarre"))
             .ReturnsAsync(guessResult);
 
@@ -116,7 +122,11 @@ public class PartieControllerTests
             new SubmitGuessRequest { DresseurId = "d1", PokemonName = "Bulbizarre" });
 
         var ok = Assert.IsType<OkObjectResult>(result);
-        Assert.Equal(guessResult, ok.Value);
+        var dto = Assert.IsType<GuessResultDto>(ok.Value);
+        Assert.True(dto.IsCorrect);
+        Assert.Equal("Bravo !", dto.Message);
+        Assert.Equal(100, dto.PointsEarned);
+        Assert.Equal(updatedGame.Id, dto.UpdatedGame.Id);
     }
 
     [Fact]
@@ -256,7 +266,7 @@ public class PartieControllerTests
         var status = new RematchStatusDto { Player1Ready = true, Player2Ready = false };
         _serviceMock.Setup(s => s.MarkRematchReadyAsync("partie-1", "d1")).ReturnsAsync(status);
 
-        var result = await _controller.MarkRematchReady("partie-1", "d1");
+        var result = await _controller.MarkRematchReady("partie-1", new MarkRematchReadyRequest { DresseurId = "d1" });
 
         var ok = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(status, ok.Value);
@@ -265,7 +275,7 @@ public class PartieControllerTests
     [Fact]
     public async Task MarkRematchReady_WithEmptyDresseurId_Returns400()
     {
-        var result = await _controller.MarkRematchReady("partie-1", "");
+        var result = await _controller.MarkRematchReady("partie-1", new MarkRematchReadyRequest { DresseurId = "" });
 
         Assert.IsType<BadRequestObjectResult>(result);
     }

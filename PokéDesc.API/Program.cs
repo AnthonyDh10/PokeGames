@@ -19,8 +19,10 @@ builder.Services.AddSingleton<PokemonRepository>(sp =>
 });
 
 // --- Architecture N-tiers ---
-builder.Services.AddScoped<IPokemonService, PokemonService>();
-builder.Services.AddScoped<IPartieService, PartieService>();
+// Singleton : pas d'état mutable par requête, dépend de PokemonRepository (Singleton)
+builder.Services.AddSingleton<IPokemonService, PokemonService>();
+// Singleton : _gameStore est partagé globalement (état du serveur en mémoire)
+builder.Services.AddSingleton<IPartieService, PartieService>();
 builder.Services.AddSingleton<ITypesGameService>(sp =>
 {
     var env = sp.GetRequiredService<IWebHostEnvironment>();

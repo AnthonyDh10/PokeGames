@@ -112,8 +112,7 @@ export function useGameState({
       const player1 = p.dresseur1Id === sessionId
       setIsPlayer1(player1)
 
-      const currentIndex = player1 ? p.currentIndexJ1 : p.currentIndexJ2
-      const pokemonId = p.pokemonsToGuess?.[currentIndex]?.id ?? ''
+      const pokemonId = (player1 ? p.currentPokemonIdJ1 : p.currentPokemonIdJ2) ?? ''
 
       if (!pokemonId) {
         setErrorMessage('Aucun Pokémon à deviner')
