@@ -63,3 +63,16 @@ export interface PokemonHintsDto {
   abilities?: AbilityDto[]
   sprites?: SpritesDto
 }
+
+/** Indices d'un Pokémon tels qu'affichés dans la grille de jeu PokéDesc. */
+export interface RevealedHints {
+  'Type 1'?: string
+  'Type 2'?: string
+  'Génération'?: string
+  'Catégorie'?: string
+  'Statistiques'?: string
+  'Taille'?: string
+  'Poids'?: string
+  'Talents'?: string
+  'Silhouette'?: string
+}

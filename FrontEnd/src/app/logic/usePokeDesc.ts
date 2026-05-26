@@ -1,16 +1,13 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useSessionStore } from '../store/sessionStore'
-import { useChatStore } from '../store/chatStore'
-import { useChenStore } from '../store/chenStore'
+import { useGameSession } from '../hooks/useGameSession'
 import { getAllPokemons, getHints } from '../services/pokemonService'
 import { submitGuess, useHint, resetTimer } from '../services/partieService'
 import { useTimer } from '../hooks/useTimer'
 import { useGameState } from '../hooks/useGameState'
+import { computeRevealedHints } from '../utils/pokedescLogic'
 import type { PartieDto } from '../types/partie'
-import type { PokemonDto } from '../types/pokemon'
+import type { PokemonDto, RevealedHints } from '../types/pokemon'
 import type { GuessResultDto } from '../types/partie'
-import type { RevealedHints } from '../hooks/useGameState'
 import { HINT_PENALTIES } from '../utils/pokedescConstants'
 import { isHintLocked as checkHintLocked, filterHintPokemons, filterSearchPokemons } from '../utils/pokedescLogic'
 
@@ -21,7 +18,6 @@ export interface UsePokeDescReturn {
   errorMessage: string
   descriptions: string[]
   descriptionIndex: number
-  setDescriptionIndex: React.Dispatch<React.SetStateAction<number>>
   currentPokemonId: string
   currentScore: number
   attemptsUsed: number
@@ -38,9 +34,7 @@ export interface UsePokeDescReturn {
   allPokemons: PokemonDto[]
   filteredPokemons: PokemonDto[]
   searchTerm: string
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>
   selectedPokemonName: string
-  setSelectedPokemonName: React.Dispatch<React.SetStateAction<string>>
   // Résultat de la tentative
   isSubmitting: boolean
   guessResultMessage: string
@@ -55,11 +49,17 @@ export interface UsePokeDescReturn {
   showSuccessModal: boolean
   showFailureModal: boolean
   showDescriptionModal: boolean
-  setShowDescriptionModal: React.Dispatch<React.SetStateAction<boolean>>
   revealedPokemonSprite: string
   isFinalPokemon: boolean
   isTimeout: boolean
-  // Handlers
+  // Actions nommées (remplacent les setters React.Dispatch)
+  changeDescriptionIndex: (index: number) => void
+  updateSearch: (term: string) => void
+  selectPokemon: (name: string) => void
+  clearSelection: () => void
+  openDescriptionModal: () => void
+  closeDescriptionModal: () => void
+  // Handlers métier
   handleSubmitGuess: () => Promise<void>
   handleRequestHint: (hintKey: string) => Promise<void>
   proceedAfterModal: () => Promise<void>
@@ -67,11 +67,7 @@ export interface UsePokeDescReturn {
 }
 
 export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
-  const navigate = useNavigate()
-  const { sessionId } = useSessionStore()
-  const { setContext: setChatContext } = useChatStore()
-  const addChenMessage = useChenStore((state) => state.addMessage)
-  const clearChenMessages = useChenStore((state) => state.clearMessages)
+  const { sessionId, navigate, setChatContext, addChenMessage, clearChenMessages } = useGameSession()
 
   // --- État propre à l'orchestration ---
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -102,8 +98,6 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
   const game = useGameState({
     partieId,
     sessionId,
-    setChatContext,
-    timerDurationRef: timer.timerDurationRef,
     onSkip: skipPokemonWithoutDescription,
   })
 
@@ -114,8 +108,8 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
     currentScore, setCurrentScore,
     attemptsUsed, setAttemptsUsed,
     usedHints, setUsedHints,
-    revealedHints, currentPokemonIdRef,
-    loadGameData, processRevealedHints,
+    revealedHints, setRevealedHints, currentPokemonIdRef,
+    loadGameData,
   } = game
 
   const {
@@ -132,7 +126,12 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
   }, [])
 
   useEffect(() => {
-    loadGameData().then(() => startTimer())
+    loadGameData().then((result) => {
+      if (!result) return
+      timerDurationRef.current = result.timerDurationSeconds
+      setChatContext({ partieId: partieId!, sessionCode: result.sessionCode, isSolo: result.isSolo })
+      startTimer()
+    })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // --- Valeurs calculées ---
@@ -201,7 +200,7 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
       }
 
       const hintData = await getHints(currentPokemonId)
-      processRevealedHints(hintData, newUsed)
+      setRevealedHints(computeRevealedHints(hintData, newUsed))
     } catch (err: any) {
       setErrorMessage(`Erreur lors de la demande d'indice : ${err?.message ?? ''}`)
     }
@@ -222,7 +221,7 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
         isInSameEvolutionChain: result.isInSameEvolutionChain,
       })
       if (result.isCorrect) {
-        setCurrentScore((prev) => prev + result.pointsEarned)
+        setCurrentScore(currentScore + result.pointsEarned)
         stopTimer()
         setRevealedPokemonSprite(currentPokemonSprite)
         setIsFinalPokemon(result.isGameFinished)
@@ -244,7 +243,7 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
             isInSameEvolutionChain: result.isInSameEvolutionChain,
           },
         })
-        setAttemptsUsed((prev) => prev + 1)
+        setAttemptsUsed(attemptsUsed + 1)
       }
     } catch (err) {
       console.error('[Guess] Échec de l\'envoi de la réponse :', err)
@@ -286,7 +285,6 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
     errorMessage,
     descriptions,
     descriptionIndex,
-    setDescriptionIndex,
     currentPokemonId,
     currentScore,
     attemptsUsed,
@@ -301,9 +299,7 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
     allPokemons,
     filteredPokemons,
     searchTerm,
-    setSearchTerm,
     selectedPokemonName,
-    setSelectedPokemonName,
     isSubmitting,
     guessResultMessage,
     lastGuessCorrect,
@@ -311,10 +307,16 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
     showSuccessModal,
     showFailureModal,
     showDescriptionModal,
-    setShowDescriptionModal,
     revealedPokemonSprite,
     isFinalPokemon,
     isTimeout,
+    // Actions nommées
+    changeDescriptionIndex: (index: number) => setDescriptionIndex(index),
+    updateSearch: (term: string) => setSearchTerm(term),
+    selectPokemon: (name: string) => { setSelectedPokemonName(name); setSearchTerm(name) },
+    clearSelection: () => { setSelectedPokemonName(''); setSearchTerm('') },
+    openDescriptionModal: () => setShowDescriptionModal(true),
+    closeDescriptionModal: () => setShowDescriptionModal(false),
     handleSubmitGuess,
     handleRequestHint,
     proceedAfterModal,

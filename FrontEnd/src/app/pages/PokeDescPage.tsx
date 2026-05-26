@@ -18,14 +18,16 @@ export default function PokeDescPage() {
 
   const {
     partie, isLoading, errorMessage,
-    descriptions, descriptionIndex, setDescriptionIndex,
+    descriptions, descriptionIndex,
     currentPokemonId, currentScore, attemptsUsed,
     usedHints, revealedHints,
     timeRemaining, timerShake, timerFlash, showTimePenalty, currentTimePenalty, hintAnimations,
-    allPokemons, filteredPokemons, searchTerm, setSearchTerm, selectedPokemonName, setSelectedPokemonName,
+    allPokemons, filteredPokemons, searchTerm, selectedPokemonName,
     isSubmitting, guessResultMessage, lastGuessCorrect, proximityResult,
-    showSuccessModal, showFailureModal, showDescriptionModal, setShowDescriptionModal,
+    showSuccessModal, showFailureModal, showDescriptionModal,
     revealedPokemonSprite, isFinalPokemon, isTimeout,
+    changeDescriptionIndex, updateSearch, selectPokemon, clearSelection,
+    openDescriptionModal, closeDescriptionModal,
     handleSubmitGuess, handleRequestHint, proceedAfterModal, isHintLocked,
   } = usePokeDesc(partieId)
 
@@ -58,8 +60,8 @@ export default function PokeDescPage() {
           <DescriptionCard
             descriptions={descriptions}
             descriptionIndex={descriptionIndex}
-            onChangeIndex={setDescriptionIndex}
-            onZoom={() => setShowDescriptionModal(true)}
+            onChangeIndex={changeDescriptionIndex}
+            onZoom={openDescriptionModal}
           />
           <AnswerCard
             filteredPokemons={filteredPokemons}
@@ -68,9 +70,9 @@ export default function PokeDescPage() {
             isSubmitting={isSubmitting}
             guessResultMessage={guessResultMessage}
             lastGuessCorrect={lastGuessCorrect}
-            onSearchChange={setSearchTerm}
-            onSelectPokemon={(name) => { setSelectedPokemonName(name); setSearchTerm(name) }}
-            onClearSelection={() => { setSelectedPokemonName(''); setSearchTerm('') }}
+            onSearchChange={updateSearch}
+            onSelectPokemon={selectPokemon}
+            onClearSelection={clearSelection}
             onSubmit={handleSubmitGuess}
           />
         </div>
@@ -107,8 +109,8 @@ export default function PokeDescPage() {
             show={showDescriptionModal}
             descriptions={descriptions}
             descriptionIndex={descriptionIndex}
-            onChangeIndex={setDescriptionIndex}
-            onClose={() => setShowDescriptionModal(false)}
+            onChangeIndex={changeDescriptionIndex}
+            onClose={closeDescriptionModal}
           />
         </>
       }

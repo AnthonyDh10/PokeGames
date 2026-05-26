@@ -31,10 +31,14 @@ export default function DeZoomGamePage() {
     windowDisplayPx,
     windowOffset,
     handleSubmit,
-    setSelectedPokemon,
-    setSearchTerm,
-    setFilterType1,
-    setFilterType2,
+    clearPokemonSelection,
+    selectPokemonResult,
+    updateSearch,
+    updateFilterType1,
+    updateFilterType2,
+    selectFilterType1,
+    selectFilterType2,
+    clearFilters,
   } = useDeZoomGame(partieId)
 
   if (!game && !isLoading && !errorMessage) return null
@@ -74,7 +78,7 @@ export default function DeZoomGamePage() {
                       <span className="font-heading font-medium text-gray-900">{selectedPokemon.nameFr}</span>
                       <button
                         type="button"
-                        onClick={() => { setSelectedPokemon(null); setSearchTerm('') }}
+                        onClick={clearPokemonSelection}
                         className="ml-auto text-gray-400 hover:text-gray-600 text-lg leading-none"
                         aria-label="Effacer"
                       >×</button>
@@ -84,8 +88,8 @@ export default function DeZoomGamePage() {
                   <PokemonSearchInput
                     items={filteredPokemons}
                     value={searchTerm}
-                    onChange={setSearchTerm}
-                    onSelect={(p) => { setSelectedPokemon(p); setSearchTerm(p.nameFr) }}
+                    onChange={updateSearch}
+                    onSelect={selectPokemonResult}
                     placeholder="Rechercher un Pokémon..."
                   />
                 )}
@@ -113,16 +117,16 @@ export default function DeZoomGamePage() {
                   <PokemonSearchInput
                     items={filteredTypes1}
                     value={filterType1}
-                    onChange={setFilterType1}
-                    onSelect={(t) => { setFilterType1(t.nameFr); setSelectedPokemon(null); setSearchTerm('') }}
+                    onChange={updateFilterType1}
+                    onSelect={(t) => selectFilterType1(t.nameFr)}
                     placeholder="Type 1"
                   />
 
                   <PokemonSearchInput
                     items={filteredTypes2}
                     value={filterType2}
-                    onChange={setFilterType2}
-                    onSelect={(t) => { setFilterType2(t.nameFr); setSelectedPokemon(null); setSearchTerm('') }}
+                    onChange={updateFilterType2}
+                    onSelect={(t) => selectFilterType2(t.nameFr)}
                     placeholder="Type 2"
                   />
                 </div>
@@ -130,7 +134,7 @@ export default function DeZoomGamePage() {
                 {(filterType1 || filterType2) && (
                   <button
                     type="button"
-                    onClick={() => { setFilterType1(''); setFilterType2('') }}
+                    onClick={clearFilters}
                     className="font-heading text-xs text-gray-400 hover:text-red-500 transition"
                   >
                     Effacer les filtres

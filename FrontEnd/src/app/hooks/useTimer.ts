@@ -67,7 +67,7 @@ export function useTimer({
       } catch (err) {
         console.warn('[Timer] Erreur lors de la récupération du timer :', err)
       }
-    }, 100)
+    }, 1000)
   }
 
   function stopTimer() {

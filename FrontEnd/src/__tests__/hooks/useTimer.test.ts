@@ -27,7 +27,7 @@ describe('useTimer', () => {
     expect(result.current.timeRemaining).toBe(60);
   });
 
-  it('startTimer appelle getTimer toutes les 100ms', async () => {
+  it('startTimer appelle getTimer toutes les 1000ms', async () => {
     mockedGetTimer.mockResolvedValue({ timeRemaining: 50, timerDurationSeconds: 60 });
 
     const { result } = renderHook(() =>
@@ -36,10 +36,10 @@ describe('useTimer', () => {
 
     act(() => { result.current.startTimer(); });
 
-    await act(async () => { vi.advanceTimersByTime(300); });
+    await act(async () => { vi.advanceTimersByTime(2500); });
 
     expect(mockedGetTimer).toHaveBeenCalledWith('p1', 's1');
-    expect(mockedGetTimer.mock.calls.length).toBeGreaterThanOrEqual(3);
+    expect(mockedGetTimer.mock.calls.length).toBeGreaterThanOrEqual(2);
   });
 
   it('stopTimer arrête les appels à getTimer', async () => {
@@ -50,11 +50,11 @@ describe('useTimer', () => {
     );
 
     act(() => { result.current.startTimer(); });
-    await act(async () => { vi.advanceTimersByTime(200); });
+    await act(async () => { vi.advanceTimersByTime(1000); });
 
     const callsBeforeStop = mockedGetTimer.mock.calls.length;
     act(() => { result.current.stopTimer(); });
-    await act(async () => { vi.advanceTimersByTime(500); });
+    await act(async () => { vi.advanceTimersByTime(2000); });
 
     expect(mockedGetTimer.mock.calls.length).toBe(callsBeforeStop);
   });
@@ -68,7 +68,7 @@ describe('useTimer', () => {
     );
 
     act(() => { result.current.startTimer(); });
-    await act(async () => { vi.advanceTimersByTime(200); });
+    await act(async () => { vi.advanceTimersByTime(1000); });
 
     expect(onTimeout).toHaveBeenCalledTimes(1);
   });
@@ -82,7 +82,7 @@ describe('useTimer', () => {
     );
 
     act(() => { result.current.startTimer(); });
-    await act(async () => { vi.advanceTimersByTime(200); });
+    await act(async () => { vi.advanceTimersByTime(1000); });
 
     expect(onTimeout).not.toHaveBeenCalled();
   });
@@ -95,7 +95,7 @@ describe('useTimer', () => {
     );
 
     act(() => { result.current.startTimer(); });
-    await act(async () => { vi.advanceTimersByTime(150); });
+    await act(async () => { vi.advanceTimersByTime(1000); });
 
     expect(result.current.timeRemaining).toBe(42);
   });
@@ -109,7 +109,7 @@ describe('useTimer', () => {
     );
 
     act(() => { result.current.startTimer(); });
-    await act(async () => { vi.advanceTimersByTime(200); });
+    await act(async () => { vi.advanceTimersByTime(1000); });
 
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[Timer]'), expect.any(Error));
     warnSpy.mockRestore();

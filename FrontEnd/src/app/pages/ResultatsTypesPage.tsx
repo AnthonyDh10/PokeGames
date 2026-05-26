@@ -4,6 +4,7 @@ import { useSessionStore } from '../store/sessionStore'
 import { useChatStore } from '../store/chatStore'
 import { getTypesGameResults, markRematchReady } from '../services/typesGameService'
 import { createPartie, startPartie } from '../services/partieService'
+import { useRematch } from '../hooks/useRematch'
 import GameResultsLayout from '../components/GameResultsLayout'
 import ResultsActions from '../components/ResultsActions'
 import Card from '../components/Card'
@@ -74,11 +75,17 @@ export default function ResultatsTypesPage() {
   const [isSolo, setIsSolo] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const [rematchRequested, setRematchRequested] = useState(false)
   const [isRelaunching, setIsRelaunching] = useState(false)
   const [isCreatingNew, setIsCreatingNew] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const rematchPollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const { rematchRequested, handleRematch: handleRematchClick } = useRematch({
+    partieId,
+    sessionId,
+    markReadyFn: markRematchReady,
+    gameRoute: '/types',
+    onError: setErrorMessage,
+  })
 
   async function fetchResults() {
     if (!partieId) return
@@ -97,33 +104,6 @@ export default function ResultatsTypesPage() {
     } catch {
       setErrorMessage('Impossible de charger les résultats.')
       return null
-    }
-  }
-
-  async function handleRematchClick() {
-    if (!partieId) return
-    setRematchRequested(true)
-    try {
-      const status = await markRematchReady(partieId, sessionId)
-      if (status.rematchPartieId) {
-        navigate(`/types/${status.rematchPartieId}`)
-        return
-      }
-      // Poll for rematch status
-      rematchPollRef.current = setInterval(async () => {
-        try {
-          const fresh = await markRematchReady(partieId, sessionId)
-          if (fresh.rematchPartieId) {
-            clearInterval(rematchPollRef.current!)
-            navigate(`/types/${fresh.rematchPartieId}`)
-          }
-        } catch {
-          // silent
-        }
-      }, 1000)
-    } catch {
-      setErrorMessage('Erreur lors de la demande de revanche.')
-      setRematchRequested(false)
     }
   }
 
@@ -152,7 +132,7 @@ export default function ResultatsTypesPage() {
   }
 
   useEffect(() => {
-    return () => { if (rematchPollRef.current) clearInterval(rematchPollRef.current) }
+    return () => { if (pollRef.current) clearInterval(pollRef.current) }
   }, [])
 
   useEffect(() => {

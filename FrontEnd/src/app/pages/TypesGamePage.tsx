@@ -71,10 +71,12 @@ export default function TypesGamePage() {
     filteredTypes1,
     filteredTypes2,
     handleSubmit,
-    setSelectedType1,
-    setSearchTerm1,
-    setSelectedType2,
-    setSearchTerm2,
+    selectType1,
+    clearType1,
+    updateSearchTerm1,
+    selectType2,
+    clearType2,
+    updateSearchTerm2,
   } = useTypesGame(partieId)
 
   const messages = useChenStore((s) => s.messages)
@@ -123,7 +125,7 @@ export default function TypesGamePage() {
                           <TypeImage name={selectedType1.nameFr} className="h-7" />
                           <button
                             type="button"
-                            onClick={() => { setSelectedType1(null); setSearchTerm1('') }}
+                            onClick={clearType1}
                             className="ml-auto text-gray-400 hover:text-gray-600 text-lg leading-none"
                             aria-label="Effacer"
                           >×</button>
@@ -133,8 +135,8 @@ export default function TypesGamePage() {
                       <PokemonSearchInput
                         items={filteredTypes1}
                         value={searchTerm1}
-                        onChange={setSearchTerm1}
-                        onSelect={(t) => { setSelectedType1(t); setSearchTerm1(t.nameFr) }}
+                        onChange={updateSearchTerm1}
+                        onSelect={selectType1}
                         placeholder="Rechercher un type..."
                       />
                     )}
@@ -150,7 +152,7 @@ export default function TypesGamePage() {
                           <TypeImage name={selectedType2.nameFr} className="h-7" />
                           <button
                             type="button"
-                            onClick={() => { setSelectedType2(null); setSearchTerm2('') }}
+                            onClick={clearType2}
                             className="ml-auto text-gray-400 hover:text-gray-600 text-lg leading-none"
                             aria-label="Effacer"
                           >×</button>
@@ -160,8 +162,8 @@ export default function TypesGamePage() {
                       <PokemonSearchInput
                         items={filteredTypes2}
                         value={searchTerm2}
-                        onChange={setSearchTerm2}
-                        onSelect={(t) => { setSelectedType2(t); setSearchTerm2(t.nameFr) }}
+                        onChange={updateSearchTerm2}
+                        onSelect={selectType2}
                         placeholder="Rechercher un type..."
                       />
                     )}

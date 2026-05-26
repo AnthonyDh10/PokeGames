@@ -1,10 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useSessionStore } from '../store/sessionStore'
-import { useChatStore } from '../store/chatStore'
-import { useChenStore } from '../store/chenStore'
+import { useGameSession } from '../hooks/useGameSession'
 import { getAllTypes, getTypesGame, submitTypesGuess } from '../services/typesGameService'
-import { getPartie } from '../services/partieService'
 import { normalizeString } from '../utils/normalize'
 import type { TypeSimpleDto, TypesGameDto } from '../types/typesGame'
 
@@ -24,18 +20,16 @@ export interface UseTypesGameReturn {
   filteredTypes1: TypeSimpleDto[]
   filteredTypes2: TypeSimpleDto[]
   handleSubmit: (e: React.FormEvent) => Promise<void>
-  setSelectedType1: React.Dispatch<React.SetStateAction<TypeSimpleDto | null>>
-  setSearchTerm1: React.Dispatch<React.SetStateAction<string>>
-  setSelectedType2: React.Dispatch<React.SetStateAction<TypeSimpleDto | null>>
-  setSearchTerm2: React.Dispatch<React.SetStateAction<string>>
+  selectType1: (t: TypeSimpleDto) => void
+  clearType1: () => void
+  updateSearchTerm1: (term: string) => void
+  selectType2: (t: TypeSimpleDto) => void
+  clearType2: () => void
+  updateSearchTerm2: (term: string) => void
 }
 
 export function useTypesGame(partieId: string | undefined): UseTypesGameReturn {
-  const navigate = useNavigate()
-  const { sessionId } = useSessionStore()
-  const { setContext: setChatContext } = useChatStore()
-  const addChenMessage = useChenStore((state) => state.addMessage)
-  const clearChenMessages = useChenStore((state) => state.clearMessages)
+  const { sessionId, navigate, addChenMessage, clearChenMessages, loadSessionInfo } = useGameSession()
 
   const [types, setTypes] = useState<TypeSimpleDto[]>([])
   const [game, setGame] = useState<TypesGameDto | null>(null)
@@ -74,18 +68,8 @@ export function useTypesGame(partieId: string | undefined): UseTypesGameReturn {
         const [t, g] = await Promise.all([getAllTypes(), getTypesGame(partieId, sessionId)])
         setTypes(t.sort((a, b) => a.nameFr.localeCompare(b.nameFr)))
         setGame(g)
-        // getPartie peut échouer en cas de rematch — ne pas bloquer le jeu si c'est le cas
-        try {
-          const p = await getPartie(partieId)
-          setSessionCode(p.codeSession ?? 'N/A')
-          setChatContext({
-            partieId,
-            sessionCode: p.codeSession ?? '',
-            isSolo: !p.dresseur2Id,
-          })
-        } catch {
-          setSessionCode('N/A')
-        }
+        const { sessionCode: code } = await loadSessionInfo(partieId)
+        setSessionCode(code)
         timerRef.current = setInterval(() => setElapsed((prev) => prev + 1), 1000)
       } catch {
         setErrorMessage('Impossible de charger la partie.')
@@ -151,9 +135,11 @@ export function useTypesGame(partieId: string | undefined): UseTypesGameReturn {
     filteredTypes1,
     filteredTypes2,
     handleSubmit,
-    setSelectedType1,
-    setSearchTerm1,
-    setSelectedType2,
-    setSearchTerm2,
+    selectType1: (t: TypeSimpleDto) => { setSelectedType1(t); setSearchTerm1(t.nameFr) },
+    clearType1: () => { setSelectedType1(null); setSearchTerm1('') },
+    updateSearchTerm1: (term: string) => setSearchTerm1(term),
+    selectType2: (t: TypeSimpleDto) => { setSelectedType2(t); setSearchTerm2(t.nameFr) },
+    clearType2: () => { setSelectedType2(null); setSearchTerm2('') },
+    updateSearchTerm2: (term: string) => setSearchTerm2(term),
   }
 }

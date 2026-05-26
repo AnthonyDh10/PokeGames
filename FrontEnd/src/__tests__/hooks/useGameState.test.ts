@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useGameState } from '../../app/hooks/useGameState';
-import { useRef } from 'react';
 
 vi.mock('../../app/services/pokemonService', () => ({
   getCensoredDescription: vi.fn(),
@@ -50,12 +49,9 @@ const fakeHints = {
 
 function renderGameState(overrides: Partial<Parameters<typeof useGameState>[0]> = {}) {
   return renderHook(() => {
-    const timerDurationRef = useRef(60);
     return useGameState({
       partieId: 'p1',
       sessionId: 'session-1',
-      setChatContext: vi.fn(),
-      timerDurationRef,
       onSkip: vi.fn(),
       ...overrides,
     });
@@ -83,14 +79,21 @@ describe('useGameState', () => {
 
     const { result } = renderGameState();
 
+    let loadResult: any;
     await act(async () => {
-      await result.current.loadGameData();
+      loadResult = await result.current.loadGameData();
     });
 
     expect(result.current.partie).toBeTruthy();
     expect(result.current.descriptions).toEqual(fakeDesc.descriptions);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.currentPokemonId).toBe('1');
+    // Vérifier que loadGameData retourne les données de configuration
+    expect(loadResult).toEqual({
+      timerDurationSeconds: 60,
+      sessionCode: 'ABC',
+      isSolo: true,
+    });
   });
 
   it('loadGameData détecte le joueur 1 correctement', async () => {
@@ -128,12 +131,14 @@ describe('useGameState', () => {
 
     const { result } = renderGameState();
 
+    let loadResult: any;
     await act(async () => {
-      await result.current.loadGameData();
+      loadResult = await result.current.loadGameData();
     });
 
     expect(result.current.errorMessage).toContain('Network error');
     expect(result.current.isLoading).toBe(false);
+    expect(loadResult).toBeNull();
   });
 
   it('processRevealedHints mappe les indices correctement', async () => {

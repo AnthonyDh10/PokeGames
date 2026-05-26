@@ -1,7 +1,6 @@
 import { ROMAN_GEN, HINT_PENALTIES } from './pokedescConstants'
 import { normalizeString } from './normalize'
-import type { PokemonDto } from '../types/pokemon'
-import type { RevealedHints } from '../hooks/useGameState'
+import type { PokemonDto, PokemonHintsDto, RevealedHints } from '../types/pokemon'
 
 export function generationToNumber(nameEn: string): number | null {
   const match = nameEn.toLowerCase().match(/generation-([ivx]+)/)
@@ -141,4 +140,45 @@ export function filterSearchPokemons(
     })
     .sort((a, b) => a.pokedexNumber - b.pokedexNumber)
     .slice(0, 10)
+}
+
+/**
+ * Calcule les indices révélés à afficher à partir des données du serveur et
+ * de la liste des clés d'indices utilisés. Fonction pure, sans effet de bord.
+ */
+export function computeRevealedHints(hints: PokemonHintsDto, used: string[]): RevealedHints {
+  const revealed: RevealedHints = {}
+  if (used.includes('Sprite') && hints.sprites?.frontDefault) {
+    revealed['Silhouette'] = hints.sprites.frontDefault
+  }
+  if (used.includes('Type1') && hints.types) {
+    const t = hints.types.find((t) => t.slot === 1)
+    if (t) revealed['Type 1'] = t.name
+  }
+  if (used.includes('Type2') && hints.types) {
+    const t = hints.types.find((t) => t.slot === 2)
+    revealed['Type 2'] = t ? t.name : 'Pas de second type'
+  }
+  if (used.includes('Generation') && hints.generation) {
+    revealed['Génération'] = hints.generation.nameFr
+  }
+  if (used.includes('Category') && hints.category) {
+    revealed['Catégorie'] = hints.category
+  }
+  if (used.includes('Stats') && hints.stats) {
+    const s = hints.stats
+    revealed['Statistiques'] =
+      `PV: ${s.PV?.value ?? '?'}, Atk: ${s.Attaque?.value ?? '?'}, Déf: ${s['Défense']?.value ?? '?'}, ` +
+      `SpA: ${s['Attaque Spé.']?.value ?? '?'}, SpD: ${s['Défense Spé.']?.value ?? '?'}, Spe: ${s.Vitesse?.value ?? '?'}`
+  }
+  if (used.includes('Height') && hints.physical) {
+    revealed['Taille'] = `${hints.physical.heightM}m`
+  }
+  if (used.includes('Weight') && hints.physical) {
+    revealed['Poids'] = `${hints.physical.weightKg}kg`
+  }
+  if (used.includes('Abilities') && hints.abilities?.length) {
+    revealed['Talents'] = hints.abilities.map((a) => a.name).join(', ')
+  }
+  return revealed
 }

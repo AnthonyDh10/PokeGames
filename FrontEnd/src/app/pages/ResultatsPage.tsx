@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useSessionStore } from '../store/sessionStore'
 import { useChatStore } from '../store/chatStore'
 import { getPartie, markRematchReady, createPartie, startPartie } from '../services/partieService'
+import { useRematch } from '../hooks/useRematch'
 import { getHints } from '../services/pokemonService'
 import Card from '../components/Card'
 import GameResultsLayout from '../components/GameResultsLayout'
@@ -31,12 +32,17 @@ export default function ResultatsPage() {
   const [partie, setPartie] = useState<PartieDto | null>(null)
   const [sprites, setSprites] = useState<Record<string, string>>({})
   const [gameFullyComplete, setGameFullyComplete] = useState(false)
-  const [rematchRequested, setRematchRequested] = useState(false)
   const [isRelaunching, setIsRelaunching] = useState(false)
   const [isCreatingNew, setIsCreatingNew] = useState(false)
+
+  const { rematchRequested, handleRematch: handleRematchClick } = useRematch({
+    partieId,
+    sessionId,
+    markReadyFn: markRematchReady,
+    gameRoute: '/pokedesc',
+  })
   
   const autoRefreshRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const rematchPollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const isPlayer1 = partie?.dresseur1Id === sessionId
   const player1Name = isPlayer1 ? (playerName || 'Joueur 1') : 'Adversaire'
@@ -104,35 +110,9 @@ export default function ResultatsPage() {
 
   useEffect(() => {
     return () => { 
-      if (rematchPollRef.current) clearInterval(rematchPollRef.current)
       if (autoRefreshRef.current) clearInterval(autoRefreshRef.current)
     }
   }, [])
-
-  async function handleRematchClick() {
-    if (!partieId) return
-    setRematchRequested(true)
-    try {
-      const status = await markRematchReady(partieId, sessionId)
-      if (status.rematchPartieId) {
-        navigate(`/pokedesc/${status.rematchPartieId}`)
-        return
-      }
-      rematchPollRef.current = setInterval(async () => {
-        try {
-          const fresh = await markRematchReady(partieId, sessionId)
-          if (fresh.rematchPartieId) {
-            clearInterval(rematchPollRef.current!)
-            navigate(`/pokedesc/${fresh.rematchPartieId}`)
-          }
-        } catch {
-          // silent
-        }
-      }, 1000)
-    } catch {
-      setRematchRequested(false)
-    }
-  }
 
   async function handleRelaunchClick() {
     if (!partie) return

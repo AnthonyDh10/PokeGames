@@ -37,7 +37,7 @@ export default function Timer({
     mode === 'countdown'
       ? (!isFinite(value) || value > 10000)
         ? '♾️'
-        : `${value.toFixed(1)}s`
+        : `${Math.floor(value)}s`
       : formatElapsed(value)
 
   return (

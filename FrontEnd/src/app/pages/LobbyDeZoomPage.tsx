@@ -5,7 +5,7 @@ import SubCard from '../components/SubCard'
 import LobbyPage from '../components/LobbyPage'
 import { colors } from '../design/colors'
 import type { PartieDto } from '../types/partie'
-import type { GameSettings } from './LobbyPokedescPage'
+import type { GameSettings } from '../types/lobby'
 
 const ALL_GENERATIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 

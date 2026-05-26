@@ -4,6 +4,7 @@ import { useSessionStore } from '../store/sessionStore'
 import { useChatStore } from '../store/chatStore'
 import { getDeZoomResults, markDeZoomRematchReady } from '../services/dezoomService'
 import { createPartie, startPartie } from '../services/partieService'
+import { useRematch } from '../hooks/useRematch'
 import GameResultsLayout from '../components/GameResultsLayout'
 import ResultsActions from '../components/ResultsActions'
 import Card from '../components/Card'
@@ -33,11 +34,17 @@ export default function ResultatsDeZoomPage() {
   const [isSolo, setIsSolo] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const [rematchRequested, setRematchRequested] = useState(false)
   const [isRelaunching, setIsRelaunching] = useState(false)
   const [isCreatingNew, setIsCreatingNew] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const rematchPollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const { rematchRequested, handleRematch: handleRematchClick } = useRematch({
+    partieId,
+    sessionId,
+    markReadyFn: markDeZoomRematchReady,
+    gameRoute: '/dezoom',
+    onError: setErrorMessage,
+  })
 
   async function fetchResults() {
     if (!partieId) return
@@ -55,32 +62,6 @@ export default function ResultatsDeZoomPage() {
     } catch {
       setErrorMessage('Impossible de charger les résultats.')
       return null
-    }
-  }
-
-  async function handleRematchClick() {
-    if (!partieId) return
-    setRematchRequested(true)
-    try {
-      const status = await markDeZoomRematchReady(partieId, sessionId)
-      if (status.rematchPartieId) {
-        navigate(`/dezoom/${status.rematchPartieId}`)
-        return
-      }
-      rematchPollRef.current = setInterval(async () => {
-        try {
-          const fresh = await markDeZoomRematchReady(partieId, sessionId)
-          if (fresh.rematchPartieId) {
-            clearInterval(rematchPollRef.current!)
-            navigate(`/dezoom/${fresh.rematchPartieId}`)
-          }
-        } catch {
-          // silent
-        }
-      }, 1000)
-    } catch {
-      setErrorMessage('Erreur lors de la demande de revanche.')
-      setRematchRequested(false)
     }
   }
 
@@ -117,10 +98,6 @@ export default function ResultatsDeZoomPage() {
       setIsCreatingNew(false)
     }
   }
-
-  useEffect(() => {
-    return () => { if (rematchPollRef.current) clearInterval(rematchPollRef.current) }
-  }, [])
 
   useEffect(() => {
     if (!partieId) return

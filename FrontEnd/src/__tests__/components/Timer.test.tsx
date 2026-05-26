@@ -3,9 +3,9 @@ import { render, screen } from '@testing-library/react';
 import Timer from '../../app/components/Timer';
 
 describe('Timer — mode countdown (défaut)', () => {
-  it('affiche le temps en secondes avec 1 décimale', () => {
+  it('affiche le temps en secondes entières', () => {
     render(<Timer value={30} />);
-    expect(screen.getByText('30.0s')).toBeInTheDocument();
+    expect(screen.getByText('30s')).toBeInTheDocument();
   });
 
   it('affiche le label "Temps :"', () => {
@@ -23,9 +23,9 @@ describe('Timer — mode countdown (défaut)', () => {
     expect(screen.getByText('♾️')).toBeInTheDocument();
   });
 
-  it('affiche 0.0s pour value=0', () => {
+  it('affiche 0s pour value=0', () => {
     render(<Timer value={0} />);
-    expect(screen.getByText('0.0s')).toBeInTheDocument();
+    expect(screen.getByText('0s')).toBeInTheDocument();
   });
 
   it('affiche avec couleur verte (>20s)', () => {

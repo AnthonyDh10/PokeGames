@@ -1,11 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useSessionStore } from '../store/sessionStore'
-import { useChatStore } from '../store/chatStore'
-import { useChenStore } from '../store/chenStore'
+import { useGameSession } from '../hooks/useGameSession'
 import { getDeZoomGame, submitDeZoomGuess } from '../services/dezoomService'
 import { getAllPokemons } from '../services/pokemonService'
-import { getPartie } from '../services/partieService'
 import { generationToNumber } from '../utils/pokedescLogic'
 import { normalizeString } from '../utils/normalize'
 import type { PokemonDto } from '../types/pokemon'
@@ -38,18 +34,18 @@ export interface UseDeZoomGameReturn {
   windowDisplayPx: number
   windowOffset: number
   handleSubmit: (e: React.FormEvent) => Promise<void>
-  setSelectedPokemon: React.Dispatch<React.SetStateAction<PokemonDto | null>>
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>
-  setFilterType1: React.Dispatch<React.SetStateAction<string>>
-  setFilterType2: React.Dispatch<React.SetStateAction<string>>
+  clearPokemonSelection: () => void
+  selectPokemonResult: (p: PokemonDto) => void
+  updateSearch: (term: string) => void
+  updateFilterType1: (type: string) => void
+  updateFilterType2: (type: string) => void
+  selectFilterType1: (typeName: string) => void
+  selectFilterType2: (typeName: string) => void
+  clearFilters: () => void
 }
 
 export function useDeZoomGame(partieId: string | undefined): UseDeZoomGameReturn {
-  const navigate = useNavigate()
-  const { sessionId } = useSessionStore()
-  const { setContext: setChatContext } = useChatStore()
-  const addChenMessage = useChenStore((state) => state.addMessage)
-  const clearChenMessages = useChenStore((state) => state.clearMessages)
+  const { sessionId, navigate, addChenMessage, clearChenMessages, loadSessionInfo } = useGameSession()
 
   const [game, setGame] = useState<DeZoomGameDto | null>(null)
   const [pokemons, setPokemons] = useState<PokemonDto[]>([])
@@ -126,20 +122,9 @@ export function useDeZoomGame(partieId: string | undefined): UseDeZoomGameReturn
         setGame(g)
         setAttemptCount(g.attemptCount)
         setPokemons(pkms.sort((a, b) => a.nameFr.localeCompare(b.nameFr)))
-        try {
-          const p = await getPartie(partieId)
-          setSessionCode(p.codeSession ?? 'N/A')
-          if (p.selectedGenerations?.length > 0) {
-            setSelectedGenerations(p.selectedGenerations)
-          }
-          setChatContext({
-            partieId,
-            sessionCode: p.codeSession ?? '',
-            isSolo: !p.dresseur2Id,
-          })
-        } catch {
-          setSessionCode('N/A')
-        }
+        const { sessionCode: code, selectedGenerations: gens } = await loadSessionInfo(partieId)
+        setSessionCode(code)
+        if (gens.length > 0) setSelectedGenerations(gens)
         clearChenMessages()
         timerRef.current = setInterval(() => setElapsed((prev) => prev + 1), 1000)
       } catch {
@@ -233,9 +218,13 @@ export function useDeZoomGame(partieId: string | undefined): UseDeZoomGameReturn
     windowDisplayPx,
     windowOffset,
     handleSubmit,
-    setSelectedPokemon,
-    setSearchTerm,
-    setFilterType1,
-    setFilterType2,
+    clearPokemonSelection: () => { setSelectedPokemon(null); setSearchTerm('') },
+    selectPokemonResult: (p: PokemonDto) => { setSelectedPokemon(p); setSearchTerm(p.nameFr) },
+    updateSearch: (term: string) => setSearchTerm(term),
+    updateFilterType1: (type: string) => setFilterType1(type),
+    updateFilterType2: (type: string) => setFilterType2(type),
+    selectFilterType1: (typeName: string) => { setFilterType1(typeName); setSelectedPokemon(null); setSearchTerm('') },
+    selectFilterType2: (typeName: string) => { setFilterType2(typeName); setSelectedPokemon(null); setSearchTerm('') },
+    clearFilters: () => { setFilterType1(''); setFilterType2('') },
   }
 }

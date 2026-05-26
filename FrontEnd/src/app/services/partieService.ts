@@ -24,7 +24,13 @@ export async function startPartie(
 ): Promise<PartieDto> {
   // Build payload conditionally: some game modes (eg. "Types") don't accept
   // nbPokemons/generations parameters, so only include fields when relevant.
-  const payload: any = { mode, isSolo }
+  const payload: {
+    mode: string
+    isSolo: boolean
+    nbPokemons?: number
+    generations?: number[]
+    timerDuration?: number
+  } = { mode, isSolo }
 
   if (mode === 'Standard') {
     payload.nbPokemons = settings?.nbPokemons ?? 1
@@ -70,7 +76,7 @@ export async function updateGameSettings(
   generations: number[],
   timerDuration?: number
 ): Promise<PartieDto> {
-  const payload: any = {
+  const payload: { nbPokemons: number; generations: number[]; timerDuration?: number } = {
     nbPokemons,
     generations,
   }
