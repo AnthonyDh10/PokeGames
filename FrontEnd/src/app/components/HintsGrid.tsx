@@ -1,7 +1,7 @@
 import Card from './Card'
 import PixelButton, { pixelClipPathSm } from './PixelButton'
 import { colors } from '../design/colors'
-import { HINTS_CONFIG, HINT_PENALTIES, HINT_POINT_COSTS } from '../utils/pokedescConstants'
+import { HINTS_CONFIG, HINTS_DATA } from '../utils/pokedescConstants'
 import type { RevealedHints } from '../hooks/useGameState'
 
 /** Props du composant `HintsGrid`. */
@@ -49,12 +49,12 @@ export default function HintsGrid({
           {HINTS_CONFIG.map(({ key, icon, imgIcon, label }) => {
             const used = usedHints.includes(key)
             const locked = isHintLocked(key)
-            const timePenalty = HINT_PENALTIES[key]
+            const timePenalty = HINTS_DATA[key]?.timePenaltyPct ?? 0
             const penaltySeconds =
               timerDurationSeconds && timerDurationSeconds > 0
                 ? Math.round((timePenalty * timerDurationSeconds) / 100)
                 : timePenalty
-            const pointCost = HINT_POINT_COSTS[key] ?? 0
+            const pointCost = HINTS_DATA[key]?.pointCost ?? 0
             const animation = hintAnimations[key]
             const revealedKey = label as keyof RevealedHints
             const revealedValue = revealedHints[revealedKey]

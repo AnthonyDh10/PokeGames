@@ -2,7 +2,7 @@ export interface PokemonDto {
   id: string
   nameFr: string
   pokedexNumber: number
-  types?: { name: string; nameEn: string; slot: number }[]
+  types?: TypeDto[]
   generation?: { nameFr: string; nameEn: string }
 }
 

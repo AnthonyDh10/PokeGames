@@ -57,3 +57,14 @@ export interface RematchStatusDto {
   player2Ready: boolean
   rematchPartieId?: string
 }
+
+/**
+ * Indicateurs de proximité retournés par le serveur après une tentative ratée.
+ * Utilisé dans GuessResultDto, usePokeDesc et ChenMessage.
+ */
+export interface ProximityResult {
+  hasOneTypeInCommon?: boolean
+  hasPerfectTypeMatch?: boolean
+  hasSameGeneration?: boolean
+  isInSameEvolutionChain?: boolean
+}

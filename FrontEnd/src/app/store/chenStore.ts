@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { ProximityResult } from '../types/partie'
 
 /**
  * Message affiché par le Prof. Chen dans son panneau de conseils.
@@ -8,12 +9,7 @@ export interface ChenMessage {
   text: string
   timestamp: string
   /** Indicateurs de proximité entre la proposition et la bonne réponse. */
-  proximityResult?: {
-    hasOneTypeInCommon?: boolean
-    hasPerfectTypeMatch?: boolean
-    hasSameGeneration?: boolean
-    isInSameEvolutionChain?: boolean
-  }
+  proximityResult?: ProximityResult
   /** Nom du type en commun avec la bonne réponse (si pertinent). */
   partialMatchTypeFr?: string
 }

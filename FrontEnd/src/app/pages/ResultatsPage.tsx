@@ -1,11 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { useSessionStore } from '../store/sessionStore'
-import { useChatStore } from '../store/chatStore'
-import { getPartie, markRematchReady, createPartie, startPartie } from '../services/partieService'
-import { useRematch } from '../hooks/useRematch'
-import { getHints } from '../services/pokemonService'
+import { useResultats } from '../logic/useResultats'
 import Card from '../components/Card'
 import GameResultsLayout from '../components/GameResultsLayout'
 import ResultsActions from '../components/ResultsActions'
@@ -13,159 +9,31 @@ import HPBar from '../components/HPBar'
 import WinnerCard from '../components/WinnerCard'
 import { colors } from '../design/colors'
 import type { PartieDto, CompletedPokemonDto } from '../types/partie'
+import { HINTS_CONFIG } from '../utils/pokedescConstants'
 import dittoGif from '../components/images/ditto-gif.gif'
 
-
-const HINT_LABELS: Record<string, string> = {
-  Type1: 'Type 1', Type2: 'Type 2', Generation: 'Génération', Category: 'Catégorie',
-  Stats: 'Statistiques', Height: 'Taille', Weight: 'Poids', Abilities: 'Talents', Sprite: 'Silhouette',
-}
+/** Labels d'affichage des indices, dérivés de HINTS_CONFIG (source unique de vérité). */
+const HINT_LABELS: Record<string, string> = Object.fromEntries(HINTS_CONFIG.map((h) => [h.key, h.label]))
 
 /**
  * Page de résultats PokéDesc.
- * Charge l'état de la partie et les sprites des Pokémon devintés.
- * En mode multijoueur, lance un auto-refresh toutes les 2s jusqu'à ce que l'adversaire ait terminé.
- * Propose de rejouer (revanche directe) ou de créer une nouvelle partie.
+ * La logique (chargement, auto-refresh, actions) est gérée par `useResultats`.
  */
 export default function ResultatsPage() {
   const { partieId } = useParams<{ partieId: string }>()
-  const navigate = useNavigate()
-  const { sessionId, playerName } = useSessionStore()
-  const { setContext: setChatContext } = useChatStore()
 
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState('')
-  const [partie, setPartie] = useState<PartieDto | null>(null)
-  const [sprites, setSprites] = useState<Record<string, string>>({})
-  const [gameFullyComplete, setGameFullyComplete] = useState(false)
-  const [isRelaunching, setIsRelaunching] = useState(false)
-  const [isCreatingNew, setIsCreatingNew] = useState(false)
-
-  const { rematchRequested, handleRematch: handleRematchClick } = useRematch({
-    partieId,
-    sessionId,
-    markReadyFn: markRematchReady,
-    gameRoute: '/pokedesc',
-  })
-  
-  const autoRefreshRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  const isPlayer1 = partie?.dresseur1Id === sessionId
-  const player1Name = isPlayer1 ? (playerName || 'Joueur 1') : 'Adversaire'
-  const player2Name = isPlayer1 ? 'Adversaire' : (playerName || 'Joueur 2')
-
-  // --- LOGIQUE DE CHARGEMENT ---
-  async function loadSprites(p: PartieDto) {
-    const all = [...(p.completedPokemonsJ1 ?? []), ...(p.completedPokemonsJ2 ?? [])]
-    const newSprites: Record<string, string> = {}
-    await Promise.all(all.map(async (cp) => {
-      if (!newSprites[cp.pokemonId]) {
-        try {
-          const hints = await getHints(cp.pokemonId)
-          if (hints.sprites?.frontDefault) newSprites[cp.pokemonId] = hints.sprites.frontDefault
-        } catch {}
-      }
-    }))
-    setSprites((prev) => ({ ...prev, ...newSprites }))
-  }
-
-  function isComplete(p: PartieDto): boolean {
-    if (p.modeSolo) return (p.completedPokemonsJ1?.length ?? 0) >= p.nbPokemons
-    return (
-      (p.completedPokemonsJ1?.length ?? 0) >= p.nbPokemons &&
-      (p.completedPokemonsJ2?.length ?? 0) >= p.nbPokemons
-    )
-  }
-
-  async function load() {
-    if (!partieId) return
-    setIsLoading(true)
-    try {
-      const p = await getPartie(partieId)
-      setPartie(p)
-      setChatContext({ partieId, sessionCode: p.codeSession ?? '', isSolo: p.modeSolo || !p.dresseur2Id })
-      const complete = isComplete(p)
-      setGameFullyComplete(complete)
-      await loadSprites(p)
-    } catch (err: any) { setErrorMessage(err?.message ?? 'Erreur') } 
-    finally { setIsLoading(false) }
-  }
-
-  useEffect(() => { load() }, [partieId])
-
-  // --- AUTO-REFRESH MULTIJOUEUR ---
-  useEffect(() => {
-    if (!partie || gameFullyComplete || partie.modeSolo) return
-    autoRefreshRef.current = setInterval(async () => {
-      try {
-        const p = await getPartie(partieId!)
-        // On charge les sprites au fur et à mesure sans mettre à jour les scores
-        // (on attend que J2 ait terminé TOUS ses Pokémon pour afficher les résultats finaux).
-        if (isComplete(p)) {
-          setGameFullyComplete(true)
-          setPartie(p)
-          await loadSprites(p)
-          clearInterval(autoRefreshRef.current!)
-        }
-      } catch {
-        // silent
-      }
-    }, 2000)
-    return () => { if (autoRefreshRef.current) clearInterval(autoRefreshRef.current) }
-  }, [partie, gameFullyComplete])
-
-  useEffect(() => {
-    return () => { 
-      if (autoRefreshRef.current) clearInterval(autoRefreshRef.current)
-    }
-  }, [])
-
-  async function handleRelaunchClick() {
-    if (!partie) return
-    setIsRelaunching(true)
-    try {
-      const newPartie = await createPartie(sessionId)
-      await startPartie(newPartie.id, true, {
-        nbPokemons: partie.nbPokemons,
-        generations: partie.selectedGenerations,
-        timerDuration: partie.timerDurationSeconds,
-      })
-      navigate(`/pokedesc/${newPartie.id}`)
-    } catch {
-      setIsRelaunching(false)
-    }
-  }
-
-  async function handleNewGame() {
-    if (!partie) return
-    setIsCreatingNew(true)
-    try {
-      const newPartie = await createPartie(sessionId)
-      navigate('/pokedesc', {
-        state: {
-          existingPartieId: newPartie.id,
-          previousSettings: {
-            nbPokemons: partie.nbPokemons,
-            generations: partie.selectedGenerations,
-            timerDuration: partie.timerDurationSeconds,
-          },
-        },
-      })
-    } catch {
-      setIsCreatingNew(false)
-    }
-  }
+  const {
+    isLoading, partie, sprites, gameFullyComplete,
+    isRelaunching, isCreatingNew,
+    player1Name, player2Name, isSolo,
+    j1Wins, j2Wins, winnerName,
+    rematchRequested, handleRematchClick, handleRelaunchClick, handleNewGame,
+  } = useResultats(partieId)
 
   if (isLoading) return <div className="p-12 text-center">Chargement...</div>
   if (!partie) return null
 
-  const isSolo = partie.modeSolo
-
   // --- RENDU DES SECTIONS ---
-
-  const j1Wins = !isSolo && partie.scoreJ1 > partie.scoreJ2
-  const j2Wins = !isSolo && partie.scoreJ2 > partie.scoreJ1
-  const winnerName = j1Wins ? player1Name : (j2Wins ? player2Name : null)
 
   const scoresSection = (
     <div className="flex flex-col gap-6">

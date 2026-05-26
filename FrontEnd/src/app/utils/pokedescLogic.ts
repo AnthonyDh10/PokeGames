@@ -1,4 +1,4 @@
-import { ROMAN_GEN, HINT_PENALTIES } from './pokedescConstants'
+import { ROMAN_GEN, HINTS_DATA } from './pokedescConstants'
 import { normalizeString } from './normalize'
 import type { PokemonDto, PokemonHintsDto, RevealedHints } from '../types/pokemon'
 
@@ -110,7 +110,7 @@ export function isHintLocked(
 ): boolean {
   if (usedHints.includes(hintKey)) return false
   if (timerDurationSeconds === -1) return false
-  const penaltyPct = HINT_PENALTIES[hintKey] ?? 0
+  const penaltyPct = HINTS_DATA[hintKey]?.timePenaltyPct ?? 0
   const penaltySeconds = (penaltyPct * timerDurationSeconds) / 100
   return penaltySeconds > timeRemaining
 }

@@ -4,31 +4,18 @@ export const ROMAN_GEN: Record<string, number> = {
   i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9,
 }
 
-// Pénalités de temps en pourcentage (%) de la durée totale du timer de la partie
-export const HINT_PENALTIES: Record<string, number> = {
-  Type1: 20,
-  Type2: 20,
-  Generation: 15,
-  Category: 5,
-  Stats: 5,
-  Height: 5,
-  Weight: 5,
-  Abilities: 5,
-  Sprite: 50,
-}
-
-// Coûts des indices en points (déduits du score du joueur)
-// IMPORTANT: doit correspondre exactement à HintCosts dans PartieService.cs du backend
-export const HINT_POINT_COSTS: Record<string, number> = {
-  Type1: 20,
-  Type2: 20,
-  Generation: 15,
-  Category: 5,
-  Stats: 5,
-  Height: 5,
-  Weight: 5,
-  Abilities: 5,
-  Sprite: 50,
+// Coûts des indices : pénalité de temps (% du timer total) et déduction de points.
+// IMPORTANT: les valeurs pointCost doivent correspondre exactement à HintCosts dans PartieService.cs du backend.
+export const HINTS_DATA: Record<string, { timePenaltyPct: number; pointCost: number }> = {
+  Type1:      { timePenaltyPct: 20, pointCost: 20 },
+  Type2:      { timePenaltyPct: 20, pointCost: 20 },
+  Generation: { timePenaltyPct: 15, pointCost: 15 },
+  Category:   { timePenaltyPct:  5, pointCost:  5 },
+  Stats:      { timePenaltyPct:  5, pointCost:  5 },
+  Height:     { timePenaltyPct:  5, pointCost:  5 },
+  Weight:     { timePenaltyPct:  5, pointCost:  5 },
+  Abilities:  { timePenaltyPct:  5, pointCost:  5 },
+  Sprite:     { timePenaltyPct: 50, pointCost: 50 },
 }
 
 export type HintConfig = {

@@ -6,6 +6,7 @@ import { generationToNumber } from '../utils/pokedescLogic'
 import { normalizeString } from '../utils/normalize'
 import type { PokemonDto } from '../types/pokemon'
 import type { DeZoomGameDto } from '../types/dezoom'
+import type { ProximityResult } from '../types/partie'
 
 export const DISPLAY_SCALE = 4
 export const SPRITE_DISPLAY = 96 * DISPLAY_SCALE // 384px

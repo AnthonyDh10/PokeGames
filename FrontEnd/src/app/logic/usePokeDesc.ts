@@ -5,10 +5,9 @@ import { submitGuess, useHint, resetTimer } from '../services/partieService'
 import { useTimer } from '../hooks/useTimer'
 import { useGameState } from '../hooks/useGameState'
 import { computeRevealedHints } from '../utils/pokedescLogic'
-import type { PartieDto } from '../types/partie'
+import type { PartieDto, GuessResultDto, ProximityResult } from '../types/partie'
 import type { PokemonDto, RevealedHints } from '../types/pokemon'
-import type { GuessResultDto } from '../types/partie'
-import { HINT_PENALTIES } from '../utils/pokedescConstants'
+import { HINTS_DATA } from '../utils/pokedescConstants'
 import { isHintLocked as checkHintLocked, filterHintPokemons, filterSearchPokemons } from '../utils/pokedescLogic'
 
 /** Interface publique du hook `usePokeDesc` — toutes les valeurs et actions nécessaires à la page de jeu. */
@@ -47,12 +46,7 @@ export interface UsePokeDescReturn {
   isSubmitting: boolean
   guessResultMessage: string
   lastGuessCorrect: boolean
-  proximityResult: {
-    hasOneTypeInCommon?: boolean
-    hasPerfectTypeMatch?: boolean
-    hasSameGeneration?: boolean
-    isInSameEvolutionChain?: boolean
-  }
+  proximityResult: ProximityResult
   // --- Modales ---
   showSuccessModal: boolean
   showFailureModal: boolean
@@ -102,12 +96,7 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [guessResultMessage, setGuessResultMessage] = useState('')
   const [lastGuessCorrect, setLastGuessCorrect] = useState(false)
-  const [proximityResult, setProximityResult] = useState<{
-    hasOneTypeInCommon?: boolean
-    hasPerfectTypeMatch?: boolean
-    hasSameGeneration?: boolean
-    isInSameEvolutionChain?: boolean
-  }>({})
+  const [proximityResult, setProximityResult] = useState<ProximityResult>({})
 
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showFailureModal, setShowFailureModal] = useState(false)
@@ -237,7 +226,7 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
       const newUsed = [...usedHints, hintKey]
       setUsedHints(newUsed)
 
-      const penalty = HINT_PENALTIES[hintKey]
+      const penalty = HINTS_DATA[hintKey]?.timePenaltyPct ?? 0
       if (penalty && timerDurationRef.current !== -1) {
         const penaltySeconds = Math.round((penalty * timerDurationRef.current) / 100)
         triggerHintAnimation(hintKey, penaltySeconds)
