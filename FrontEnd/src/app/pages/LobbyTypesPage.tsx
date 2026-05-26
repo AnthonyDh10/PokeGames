@@ -9,6 +9,10 @@ const THEME = {
   borderColor: colors.brand.yellowDark,
 }
 
+/**
+ * Page de lobby Typuzzle.
+ * Thin page : configure le thème et le texte explicatif, puis délègue à `LobbyPage`.
+ */
 export default function LobbyTypesPage() {
   return (
     <LobbyPage

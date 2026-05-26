@@ -21,6 +21,12 @@ const HINT_LABELS: Record<string, string> = {
   Stats: 'Statistiques', Height: 'Taille', Weight: 'Poids', Abilities: 'Talents', Sprite: 'Silhouette',
 }
 
+/**
+ * Page de résultats PokéDesc.
+ * Charge l'état de la partie et les sprites des Pokémon devintés.
+ * En mode multijoueur, lance un auto-refresh toutes les 2s jusqu'à ce que l'adversaire ait terminé.
+ * Propose de rejouer (revanche directe) ou de créer une nouvelle partie.
+ */
 export default function ResultatsPage() {
   const { partieId } = useParams<{ partieId: string }>()
   const navigate = useNavigate()

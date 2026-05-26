@@ -8,8 +8,11 @@ import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
 import rulesLogo from "../components/images/rules-icon.png";
 
+/** Props du composant `Sidebar`. */
 interface SidebarProps {
+  /** `true` quand la sidebar est en mode ouvert (mode mobile uniquement). */
   isOpen: boolean;
+  /** Callback pour fermer la sidebar. */
   onClose: () => void;
 }
 
@@ -46,6 +49,12 @@ function NavButton({ onClick, isActive, title, size, clipPath = pixelClipPathLg,
   );
 }
 
+/**
+ * Navigation latérale du jeu.
+ * Sur mobile : drawer coulissant (ouvert via TopBar).
+ * Sur desktop : barre fixe à gauche, toujours visible.
+ * Contient les liens vers Home, PokéDesc, Typuzzle, DeZoom et Règles.
+ */
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();

@@ -2,11 +2,20 @@ import { ROMAN_GEN, HINT_PENALTIES } from './pokedescConstants'
 import { normalizeString } from './normalize'
 import type { PokemonDto, PokemonHintsDto, RevealedHints } from '../types/pokemon'
 
+/**
+ * Convertit un nom de génération en anglais (ex: `'generation-iii'`) en numéro entier.
+ * @returns Le numéro de génération, ou `null` si le format est inconnu.
+ */
 export function generationToNumber(nameEn: string): number | null {
   const match = nameEn.toLowerCase().match(/generation-([ivx]+)/)
   return match ? (ROMAN_GEN[match[1]] ?? null) : null
 }
 
+/**
+ * Formate une liste de générations en chaîne lisible.
+ * Exemple : `[1, 2, 3]` → `'Générations 1-3'`.
+ * @param isShort Utilise le préfixe court `'Gén'` au lieu de `'Générations'`.
+ */
 export function formatGenerations(generations: number[], isShort: boolean = false): string {
   if (!generations || generations.length === 0) return ''
 
@@ -36,6 +45,11 @@ export function formatGenerations(generations: number[], isShort: boolean = fals
   return `${prefix} ${sorted.join(',')}`
 }
 
+/**
+ * Retourne un objet `{ label, value }` destiné à l'affichage des générations sélectionnées
+ * dans les headers de jeu. Adapte le label au singulier/pluriel et compacte les tranches consécutives.
+ * @returns `null` si la liste est vide ou absente.
+ */
 export function getGenerationsDisplay(generations: number[] | undefined): { label: string; value: string } | null {
   if (!generations || generations.length === 0) return null
 
@@ -83,6 +97,11 @@ export function getGenerationsDisplay(generations: number[] | undefined): { labe
   }
 }
 
+/**
+ * Détermine si un indice doit être verrouillé (non cliquable) parce que sa pénalité en secondes
+ * dépasse le temps restant.
+ * @returns `false` si l'indice est déjà utilisé ou si le timer est infini (`-1`).
+ */
 export function isHintLocked(
   hintKey: string,
   usedHints: string[],
@@ -96,6 +115,11 @@ export function isHintLocked(
   return penaltySeconds > timeRemaining
 }
 
+/**
+ * Filtre la liste de tous les Pokémon selon les indices déjà révélés (types, génération)
+ * et les générations sélectionnées pour la partie.
+ * Utilisé pour réduire les suggestions de l'autocomplétion.
+ */
 export function filterHintPokemons(
   allPokemons: PokemonDto[],
   revealedHints: RevealedHints,
@@ -126,6 +150,11 @@ export function filterHintPokemons(
   })
 }
 
+/**
+ * Filtre et classe les Pokémon de l'autocomplétion selon le terme de recherche normalisé.
+ * Retourne au maximum 10 résultats triés par numéro de Pokédex.
+ * @returns Tableau vide si le terme de recherche est vide.
+ */
 export function filterSearchPokemons(
   hintFiltered: PokemonDto[],
   searchTerm: string,

@@ -19,6 +19,12 @@ const THEME = {
   borderColor: colors.brand.blueDeep,
 }
 
+/**
+ * Page de lobby PokéDesc.
+ * Gère les paramètres de partie (nombre de Pokémon, générations, durée du timer)
+ * et les transmet à `LobbyPage` via `settingsPanel` et `getSettings`.
+ * Les paramètres précédents sont restaurés depuis `location.state` (retour depuis les résultats).
+ */
 export default function LobbyPokedescPage() {
   const location = useLocation()
   const previousSettings = (location.state as { previousSettings?: GameSettings } | null)?.previousSettings

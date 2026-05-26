@@ -43,6 +43,11 @@ const GAMES = [
   },
 ];
 
+/**
+ * Page des règles.
+ * Affiche un menu de sélection de jeu à gauche et la carte de règles correspondante à droite.
+ * Sur mobile/tablette, la carte de règles est scrolle-jumpée au clic.
+ */
 export default function ReglesPage() {
   const [activeGame, setActiveGame] = useState<"pokedesc" | "types" | "dezoom" | "multiplayer">("pokedesc");
   const rulesRef = useRef<HTMLDivElement>(null);

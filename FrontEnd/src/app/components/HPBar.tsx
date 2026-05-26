@@ -2,13 +2,23 @@ import { motion } from 'framer-motion'
 import { colors } from '../design/colors'
 import SubCard from './SubCard'
 
+/** Props du composant `HPBar`. */
 interface HPBarProps {
+  /** Nom du joueur affiché au-dessus de la barre. */
   name: string
+  /** Score actuel du joueur (en points). */
   current: number
+  /** Score maximum possible (détermine 100% de la barre). */
   max: number
+  /** `true` si ce joueur est le vainqueur (agrandit le nom). */
   isWinner?: boolean
 }
 
+/**
+ * Barre de points HP style jeu Pokémon GBA.
+ * La couleur de la jauge évolue de vert (>50%) → jaune (>20%) → rouge (≤20%).
+ * L'animation de remplissage est gérée par framer-motion.
+ */
 export default function HPBar({ name, current, max, isWinner }: HPBarProps) {
   const percentage = Math.min((current / max) * 100, 100)
 

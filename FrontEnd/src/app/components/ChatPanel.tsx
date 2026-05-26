@@ -17,6 +17,13 @@ const pixelClipPath = `polygon(
   4px 16px, 4px 8px, 8px 8px, 8px 4px, 16px 4px
 )`;
 
+const AUTO_CLOSE_DELAY = 5000
+
+/**
+ * Panneau de chat flottant (drawer) affiché sur les pages de jeu actif.
+ * Se connecte automatiquement au hub SignalR de la partie via `chatService`.
+ * Masqué tant qu'aucune `partieId` n'est définie dans `chatStore`.
+ */
 export default function ChatPanel() {
   const { partieId, sessionCode, isSolo, isOpen, messages, toggleOpen, setOpen } = useChatStore()
   const { playerName, sessionId } = useSessionStore()

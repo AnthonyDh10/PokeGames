@@ -8,37 +8,69 @@ import type { RevealedHints } from '../types/pokemon'
 // Re-export pour la rétro-compatibilité des imports existants.
 export type { RevealedHints } from '../types/pokemon'
 
-/** Données retournées par loadGameData, à consommer par le hook orchestrateur. */
+/** Données retournées par `loadGameData`, à consommer par le hook orchestrateur. */
 export interface GameLoadResult {
+  /** Durée du timer en secondes (`-1` pour le mode chronomètre sans limite). */
   timerDurationSeconds: number
+  /** Code de session à afficher dans l'UI. */
   sessionCode: string
+  /** `true` si la partie est solo (un seul dresseur). */
   isSolo: boolean
 }
 
+/** État et actions exposés par le hook `useGameState`. */
 export interface UseGameStateReturn {
+  /** État complet de la partie retourné par le serveur. `null` tant que le chargement n'est pas terminé. */
   partie: PartieDto | null
+  /** `true` pendant le chargement des données (getPartie + getCensoredDescription + getHints). */
   isLoading: boolean
   errorMessage: string
   setErrorMessage: (msg: string) => void
+  /** Liste des descriptions censurées disponibles pour le Pokémon en cours. */
   descriptions: string[]
+  /** Index de la description actuellement affichée (changeable par le joueur). */
   descriptionIndex: number
   setDescriptionIndex: (index: number) => void
+  /** Identifiant du Pokémon en cours (numéro Pokédex en string). */
   currentPokemonId: string
+  /** URL du sprite front du Pokémon en cours (révélé en cas d'échec). */
   currentPokemonSprite: string
   currentScore: number
   setCurrentScore: (score: number) => void
+  /** Nombre de tentatives utilisées pour le Pokémon en cours. */
   attemptsUsed: number
   setAttemptsUsed: (attempts: number) => void
+  /** Clés des indices déjà utilisés (ex : `['type', 'generation']`). */
   usedHints: string[]
   setUsedHints: (hints: string[]) => void
+  /** Valeurs révélées des indices déjà débloqués. */
   revealedHints: RevealedHints
   setRevealedHints: (hints: RevealedHints) => void
   sessionCode: string
+  /** `true` si le joueur local est le dresseur 1 de la partie. */
   isPlayer1: boolean
+  /** Ref stable vers l'ID du Pokémon en cours (accessible sans re-render dans les callbacks async). */
   currentPokemonIdRef: React.MutableRefObject<string>
+  /**
+   * Charge (ou recharge) les données de jeu depuis le serveur :
+   * état de la partie, description censurée et indices du Pokémon courant.
+   * Appelé au montage du composant et après chaque passage au Pokémon suivant.
+   */
   loadGameData: () => Promise<GameLoadResult | null>
 }
 
+/**
+ * Hook gérant les données de jeu PokéDesc : état de la partie, Pokémon en cours,
+ * descriptions censurées, indices révélés, score et tentatives.
+ *
+ * Ce hook est consommé exclusivement par `usePokeDesc` (hook orchestrateur).
+ * Il ne gère ni le timer ni la soumission de réponses — ces responsabilités
+ * appartiennent à `useTimer` et aux handlers de `usePokeDesc`.
+ *
+ * @param partieId - Identifiant de la partie. Si `undefined`, le chargement ne démarre pas.
+ * @param sessionId - UUID de session du joueur, utilisé pour déterminer s'il est J1 ou J2.
+ * @param onSkip - Callback déclenché quand un Pokémon sans description est détecté.
+ */
 export function useGameState({
   partieId,
   sessionId,
@@ -63,7 +95,7 @@ export function useGameState({
   const [isPlayer1, setIsPlayer1] = useState(true)
 
   const currentPokemonIdRef = useRef<string>('')
-  // Stable ref to always call the latest onSkip without stale closures
+  // Ref stable vers onSkip pour éviter les closures périmées dans les callbacks async
   const onSkipRef = useRef(onSkip)
   useEffect(() => { onSkipRef.current = onSkip }, [onSkip])
 
@@ -76,6 +108,7 @@ export function useGameState({
       setPartie(p)
       setSessionCode(p.codeSession ?? 'N/A')
 
+      // Détermine si le joueur local est J1 ou J2 pour lire les bons champs (index, score, tentatives).
       const player1 = p.dresseur1Id === sessionId
       setIsPlayer1(player1)
 
@@ -95,12 +128,15 @@ export function useGameState({
       const hints = player1 ? p.usedHintsJ1 : p.usedHintsJ2
       setUsedHints(hints)
 
+      // Chargement parallèle : description censurée + données d'indices (évite deux aller-retours séquentiels).
       const [desc, hintData] = await Promise.all([
         getCensoredDescription(pokemonId),
         getHints(pokemonId),
       ])
 
       if (!desc.descriptions?.length) {
+        // Le Pokémon n'a pas de description utilisable : on notifie l'utilisateur
+        // puis on déclenche le passage au suivant via onSkip (après 1,5 s pour la lisibilité).
         setIsLoading(false)
         setErrorMessage('Pokémon sans description — passage au suivant...')
         setTimeout(() => { onSkipRef.current() }, 1500)

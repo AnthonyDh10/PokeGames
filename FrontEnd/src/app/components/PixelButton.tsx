@@ -16,10 +16,13 @@ export const pixelClipPathLg = `polygon(
 export const pixelClipPathSm = 'polygon(0 3px, 3px 3px, 3px 0, calc(100% - 3px) 0, calc(100% - 3px) 3px, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 3px calc(100% - 3px), 0 calc(100% - 3px))'
 
 interface PixelButtonProps {
+  /** Callback au clic. */
   onClick?: () => void
   /** HTML button `type` attribute (default: 'button') */
   type?: 'button' | 'submit' | 'reset'
+  /** Désactive le bouton (curseur interdit, opacité réduite, ombre fixe). */
   disabled?: boolean
+  /** Texte de l'infobulle native. */
   title?: string
   /** Classes supplémentaires appliquées au bouton racine (ex: taille, font) */
   className?: string
@@ -27,15 +30,24 @@ interface PixelButtonProps {
   innerClassName?: string
   /** Styles supplémentaires appliqués au bouton racine (ex: width, height) */
   style?: CSSProperties
+  /** Couleur de la bordure extérieure (ombre portée pixélisée). */
   colorBorder: string
+  /** Couleur de la bordure lumière (haut et gauche). */
   colorLight: string
+  /** Couleur de la bordure ombre (bas et droite). */
   colorDark: string
+  /** Couleur du fond interne du bouton. */
   color: string
   /** Clip path à utiliser — pixelClipPathLg (défaut) ou pixelClipPathSm */
   clipPath?: string
   children: ReactNode
 }
 
+/**
+ * Bouton avec rendu pixélisé style Game Boy Advance.
+ * Simule un effet 3D à 4 calques : bordure extérieure, lumière, ombre, fond.
+ * L'état `disabled` fixe l'ombre et désactive les effets de survol/clic.
+ */
 export default function PixelButton({
   onClick,
   type = 'button',

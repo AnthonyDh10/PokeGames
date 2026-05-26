@@ -13,8 +13,11 @@ interface GameCardProps {
   colorDark: string;
   /** Couleur du texte (ex: '#ffffff' ou 'white') — défaut: blanc */
   text_color?: string;
+  /** Icône emoji affichée si `image` est absent. */
   icon?: string;
+  /** Route vers laquelle naviguer au clic. */
   to: string;
+  /** Image affichée côté gauche de la carte (sprite Pokémon, logo jeu…). */
   image?: string;
   /** Si fourni, remplace la navigation par cet handler au clic */
   onClick?: () => void;
@@ -22,6 +25,11 @@ interface GameCardProps {
   secondColor?: string;
 }
 
+/**
+ * Carte de jeu cliquable avec style rétro pixel.
+ * Sur desktop (≥720px), affiche une image/icône à gauche et le contenu à droite.
+ * Sur mobile, n'affiche que le bloc droit (image masquée via container query).
+ */
 export default function GameCard({
   title,
   description,

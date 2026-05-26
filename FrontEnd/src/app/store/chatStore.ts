@@ -1,12 +1,15 @@
 import { create } from 'zustand'
 
+/** Représente un message reçu ou envoyé dans le chat de partie. */
 export interface ChatMessage {
   senderName: string
   text: string
   timestamp: string
+  /** `true` si le message a été envoyé par le joueur local. */
   isOwn?: boolean
 }
 
+/** Contexte de session fourni par la page active, utilisé par le panneau de chat. */
 interface ChatContext {
   partieId: string
   sessionCode: string
@@ -14,24 +17,37 @@ interface ChatContext {
 }
 
 interface ChatStore {
-  // Context set by pages
+  // --- Contexte de partie (défini par les pages) ---
   partieId: string
   sessionCode: string
+  /** `true` si le joueur est seul (pas de multijoueur), désactive le bouton chat). */
   isSolo: boolean
 
-  // UI state
+  // --- État d'interface ---
+  /** `true` si le panneau de chat est ouvert. */
   isOpen: boolean
+  /** Historique des messages reçus, plafonné à 100 entrées. */
   messages: ChatMessage[]
 
-  // Actions
+  // --- Actions ---
+  /** Définit le contexte de la partie courante. Efface l'historique si la partie change. */
   setContext: (ctx: ChatContext) => void
+  /** Réinitialise entièrement le store (déconnexion, changement de route majeur). */
   clearContext: () => void
   toggleOpen: () => void
   setOpen: (open: boolean) => void
+  /** Ajoute un message à l'historique (max 100 messages conservés). */
   addMessage: (msg: ChatMessage) => void
   clearMessages: () => void
 }
 
+/**
+ * Store Zustand du chat en temps réel.
+ *
+ * Alimenté par `chatService` (SignalR) et par les pages de jeu (`setChatContext`).
+ * Les messages sont conservés en mémoire uniquement (pas de persistance localStorage) :
+ * l'historique est perdu à chaque rechargement de page.
+ */
 export const useChatStore = create<ChatStore>((set) => ({
   partieId: '',
   sessionCode: '',

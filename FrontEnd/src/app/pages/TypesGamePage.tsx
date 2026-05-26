@@ -53,6 +53,13 @@ const INTERACTION_LABELS: Record<string, string> = {
 
 const INTERACTION_ORDER = ['x4', 'x2', 'x1', 'x0.5', 'x0.25', 'x0']
 
+/**
+ * Page de jeu Typuzzle.
+ * Thin page : délègue toute la logique à `useTypesGame` et compose `GameLayout`
+ * avec deux champs de recherche de types (Type 1 / Type 2).
+ * Les correspondances partielles détectées par le Prof. Chen sont mises en valeur
+ * en colorant les types déjà sélectionnés.
+ */
 export default function TypesGamePage() {
   const { partieId } = useParams<{ partieId: string }>()
   const navigate = useNavigate()

@@ -17,6 +17,11 @@ const THEME = {
   borderColor: colors.brand.redDeep,
 }
 
+/**
+ * Page de lobby DeZoom.
+ * Gère le sélecteur de générations et transmet les paramètres à `LobbyPage`.
+ * Prend en charge la restauration des paramètres précédents depuis `location.state`.
+ */
 export default function LobbyDeZoomPage() {
   const location = useLocation()
   const previousSettings = (location.state as { previousSettings?: GameSettings } | null)?.previousSettings

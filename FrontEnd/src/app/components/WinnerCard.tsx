@@ -1,15 +1,26 @@
 import Card from './Card'
 import { colors } from '../design/colors'
 
+/** Props du composant `WinnerCard`. */
 interface WinnerCardProps {
+  /** Nom du vainqueur (null en cas d'égalité ou si la partie n'est pas terminée). */
   winner?: string | null
+  /** `true` si la partie est en mode solo (affiche toujours "VICTOIRE !"). */
   isSolo: boolean
+  /** `true` quand les deux joueurs ont terminé leur partie. */
   bothFinished: boolean
+  /** Couleur de fond de la carte. */
   cardColor?: string
+  /** Couleur de la bordure. */
   borderColor?: string
+  /** Couleur principale utilisée pour le message et le nom du vainqueur. */
   mainColor?: string
 }
 
+/**
+ * Carte affichant le résultat d'une partie : victoire solo, vainqueur multijoueur,
+ * match nul, ou message d'attente si l'adversaire n'a pas encore terminé.
+ */
 export default function WinnerCard({
   winner,
   isSolo,

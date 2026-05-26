@@ -2,15 +2,23 @@ import Card from '../Card'
 import PixelButton from '../PixelButton'
 import { colors } from '../../design/colors'
 
+/** Props du composant `FailureModal`. */
 interface FailureModalProps {
+  /** Affiche la modale si `true`. */
   show: boolean
+  /** URL du sprite révélé du Pokémon. */
   sprite: string
+  /** Nom du Pokémon à deviner. */
   pokemonName: string
+  /** `true` si c'était le dernier Pokémon de la partie. */
   isFinalPokemon: boolean
+  /** `true` si l'échec est dû à un timeout (change le titre de la modale). */
   isTimeout: boolean
+  /** Callback déclenché quand le joueur clique sur le bouton (suivant ou terminer). */
   onProceed: () => void
 }
 
+/** Modale d'échec affichée après 3 tentatives ratées ou un timeout. */
 export default function FailureModal({ show, sprite, pokemonName, isFinalPokemon, isTimeout, onProceed }: FailureModalProps) {
   if (!show || !sprite) return null
 

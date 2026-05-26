@@ -105,6 +105,10 @@ const GAME_COLORS = {
   deep: colors.brand.yellowDark || "#713F12",
 };
 
+/**
+ * Carte de règles Typuzzle avec pagination.
+ * Affiche les règles page par page via `TYPUZZLE_RULES`, avec bouton "Jouer" sur la dernière page.
+ */
 export default function TypuzzleRulesCard() {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const navigate = useNavigate();

@@ -160,6 +160,10 @@ const GAME_COLORS = {
   deep: colors.brand.blueDeep,
 };
 
+/**
+ * Carte de règles PokéDesc avec pagination.
+ * Affiche les règles page par page via `POKEDESC_RULES`, avec boutons "Jouer" sur la dernière page.
+ */
 export default function PokéDescRulesCard() {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const navigate = useNavigate();

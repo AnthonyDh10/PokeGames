@@ -14,6 +14,7 @@ import pointerImg from "../components/images/pointer.png";
 import oakImg from "../components/images/oak.png";
 import rulesIconImg from "../components/images/rules-icon.png";
 
+/** Définition d'un jeu affiché dans le carrousel de la page d'accueil. */
 interface Game {
   title: string;
   description: ReactNode;
@@ -24,8 +25,10 @@ interface Game {
   image?: string;
   icon?: string;
   to: string;
+  /** `true` pour le bouton Prof. Chen (ne l'affiche pas dans la grille standard). */
   isOak?: boolean;
   text_color?: string;
+  /** Si `true`, exclut le jeu de la grille visible. */
   hideFromGrid?: boolean;
 }
 
@@ -81,6 +84,12 @@ const games: Game[] = [
   },
 ];
 
+/**
+ * Page d'accueil de PokéMini Games.
+ * Affiche un carrousel de jeux (swipeable sur mobile, clés fléchées sur desktop),
+ * une présentation dynamique du jeu survolé / sélectionné,
+ * et le Prof. Chen avec une interaction cliquable.
+ */
 export default function HomePage() {
   const { clearContext, setOpen } = useChatStore();
 

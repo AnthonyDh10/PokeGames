@@ -2,18 +2,33 @@ import type { ReactNode } from 'react'
 import Card from './Card'
 import { colors } from '../design/colors'
 
+/** Props du composant `GameResultsLayout`. */
 interface GameResultsLayoutProps {
+  /** Titre principal affiché dans la carte header (ex : "PokéDesc — Résultats"). */
   title: string
+  /** Code de session affiché sous le titre. */
   sessionCode?: string
+  /** Alerte ou message contextuel affiché dans la colonne gauche (ex : en attente adversaire). */
   topAlert?: ReactNode
+  /** Colonne gauche — liste des scores (HPBars). */
   scores: ReactNode
+  /** Colonne droite — détail des résultats (pokémons devintés, etc.). */
   details: ReactNode
+  /** Zone d'actions pleine largeur (boutons Rejouer, Nouvelle partie…). */
   actions: ReactNode
+  /** Couleur de la pokéball décorative dans la carte header. */
   pokeballColor?: string
+  /** Couleur du fond de la carte header. */
   bodyColor?: string
+  /** Couleur du texte dans la carte header. */
   textColor?: string
 }
 
+/**
+ * Mise en page des pages de résultats (PokéDesc, Typuzzle, DeZoom).
+ * Grille 40/60 sur desktop : scores à gauche, détails à droite.
+ * Actions en pleine largeur en dessous.
+ */
 export default function GameResultsLayout({
   title,
   sessionCode,

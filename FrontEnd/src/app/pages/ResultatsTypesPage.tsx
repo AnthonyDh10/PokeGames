@@ -63,6 +63,11 @@ function formatElapsed(seconds: number): string {
   return m > 0 ? `${m}m ${s}s` : `${s}s`
 }
 
+/**
+ * Page de résultats Typuzzle.
+ * Interroge le serveur pour obtenir les résultats et lance un polling jusqu'à
+ * ce que les deux joueurs aient terminé (`bothFinished`).
+ */
 export default function ResultatsTypesPage() {
   const { partieId } = useParams<{ partieId: string }>()
   const navigate = useNavigate()

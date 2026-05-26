@@ -4,16 +4,29 @@ import { colors } from '../design/colors'
 import { HINTS_CONFIG, HINT_PENALTIES, HINT_POINT_COSTS } from '../utils/pokedescConstants'
 import type { RevealedHints } from '../hooks/useGameState'
 
+/** Props du composant `HintsGrid`. */
 interface HintsGridProps {
+  /** Clés des indices déjà utilisés (ex : `['Type 1', 'Sprite']`). */
   usedHints: string[]
+  /** Valeurs révélées par les indices demandés. */
   revealedHints: RevealedHints
+  /** Animations en cours : clé de l'indice → nombre de secondes de pénalité animé. */
   hintAnimations: Record<string, number>
+  /** Temps restant en secondes (pour vérifier si un indice est verrouillé). */
   timeRemaining: number
+  /** Durée totale du timer en secondes (`-1` = mode sans limite). */
   timerDurationSeconds: number | undefined
+  /** Callback pour demander un indice par sa clé (ex : `'Type 1'`). */
   onRequestHint: (key: string) => void
+  /** Retourne `true` si l'indice est verrouillé (pénalité > temps restant). */
   isHintLocked: (key: string) => boolean
 }
 
+/**
+ * Grille des boutons d'indices pour PokéDesc.
+ * Chaque bouton affiche l'icône, le label et le coût en secondes.
+ * Une fois utilisé, il affiche la valeur révélée (texte ou sprite).
+ */
 export default function HintsGrid({
   usedHints,
   revealedHints,

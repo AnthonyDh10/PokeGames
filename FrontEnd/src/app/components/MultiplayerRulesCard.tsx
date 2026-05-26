@@ -57,6 +57,10 @@ const GAME_COLORS = {
   deep: colors.ui.grayBorderDark,
 };
 
+/**
+ * Carte de règles Multijoueur avec pagination.
+ * Affiche les règles page par page via `MULTIPLAYER_RULES`.
+ */
 export default function MultiplayerRulesCard() {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const navigate = useNavigate();

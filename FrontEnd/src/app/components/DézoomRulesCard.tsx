@@ -113,6 +113,10 @@ const GAME_COLORS = {
   deep: colors.brand.redDeep || "#7F1D1D",
 };
 
+/**
+ * Carte de règles DeZoom avec pagination.
+ * Affiche les règles page par page via `DEXZOOM_RULES`, avec bouton "Jouer" sur la dernière page.
+ */
 export default function DexZoomRulesCard() {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const navigate = useNavigate();

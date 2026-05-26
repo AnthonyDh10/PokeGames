@@ -1,14 +1,24 @@
 import Card from '../Card'
 import { colors } from '../../design/colors'
 
+/** Props du composant `ZoomDescriptionModal`. */
 interface ZoomDescriptionModalProps {
+  /** Affiche la modale si `true`. */
   show: boolean
+  /** Liste des descriptions disponibles. */
   descriptions: string[]
+  /** Index de la description actuellement affichée. */
   descriptionIndex: number
+  /** Setter pour changer l'index de description. */
   onChangeIndex: (setter: (i: number) => number) => void
+  /** Callback pour fermer la modale. */
   onClose: () => void
 }
 
+/**
+ * Modale plein écran affichant la description du Pokémon en grand format.
+ * Inclut une pagination et se ferme en cliquant hors du contenu.
+ */
 export default function ZoomDescriptionModal({
   show,
   descriptions,

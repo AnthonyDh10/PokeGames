@@ -1,15 +1,27 @@
 import React from 'react'
 import { colors } from '../design/colors'
 
+/**
+ * Props du composant `SubCard`.
+ * Étend `HTMLAttributes<HTMLDivElement>` pour accepter `onClick`, `ref`, etc.
+ */
 interface SubCardProps extends React.HTMLAttributes<HTMLDivElement>{
   children: React.ReactNode
+  /** Classes supplémentaires appliquées au conteneur interne. */
   className?: string
+  /** Couleur de fond du corps de la carte (défaut : blanc). */
   bodyColor?: string
+  /** Couleur de la bordure pixélisée (défaut : noir). */
   borderColor?: string
+  /** Épaisseur de la bordure via padding (ex: `'p-[2px]'`). */
   borderThickness?: string
   style?: React.CSSProperties
 }
 
+/**
+ * Variante légère de `Card` avec un clip-path simplifié (une marche par coin).
+ * Utilisée pour les éléments imbriqués : champs de saisie, badges, barres HP.
+ */
 export default function SubCard ({
   children,
   className = '',

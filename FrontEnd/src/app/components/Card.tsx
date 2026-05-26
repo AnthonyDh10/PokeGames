@@ -2,23 +2,39 @@ import { motion } from 'framer-motion'
 import { PokeballDecor } from './Pokeball'
 import { colors } from '../design/colors'
 
+/** Props du composant `Card`. */
 interface CardProps {
   children: React.ReactNode
+  /** Classes supplémentaires appliquées au conteneur interne. */
   className?: string
+  /** Active les effets de survol (ombre + translation). */
   hoverable?: boolean
+  /** Couleur de fond du header (CSS color). Si absente, le header n'est pas rendu. */
   headerColor?: string
+  /** Contenu du header (titre, sous-titre…). */
   header?: React.ReactNode
+  /** Classes Tailwind appliquées au header (défaut : `'py-8'`). */
   headerClassName?: string
+  /** Couleur de la pokéball décorative en arrière-plan. */
   pokeballColor?: string
+  /** Opacité de la pokéball décorative (0–1). */
   pokeballOpacity?: number
+  /** Taille en px de la pokéball décorative. */
   pokeballSize?: number
+  /** Si `true`, le conteneur interne ne masque pas le débordement (utile pour les dropdowns). */
   overflowVisible?: boolean
+  /** Active l'animation d'entrée framer-motion (défaut : `true`). */
   animation?: boolean
+  /** Taille fixe optionnelle en px. */
   cardSize?: { width?: number; height?: number }
   style?: React.CSSProperties
+  /** Couleur de la bordure pixélisée (défaut : transparente). */
   borderColor?: string
+  /** Affiche le header si `true` (défaut : `true`). */
   showHeader?: boolean
+  /** Couleur du corps de la carte (défaut : blanc). */
   bodyColor?: string
+  /** Épaisseur de la bordure via padding (défaut : `'p-1.5'`). */
   borderThickness?: string
 }
 
@@ -27,6 +43,11 @@ const cardAnimationVariants = {
   animate: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" as const } },
 }
 
+/**
+ * Composant Card principal avec bordures et coins pixélisés.
+ * Supporte un header coloré, une pokéball décorative, et une animation framer-motion d'entrée.
+ * Utilisable avec ou sans header (`showHeader`).
+ */
 export default function Card({
   children,
   className = '',

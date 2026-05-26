@@ -14,22 +14,37 @@ import redGif from './images/red-gif.gif'
 import dittoGif from './images/ditto-gif.gif'
 import SubCard from './SubCard'
 
+/** Thème visuel passé au `LobbyPage` pour personnaliser les couleurs selon le jeu. */
 export interface LobbyTheme {
+  /** Couleur principale (header, boutons). */
   primary: string
+  /** Variante claire (bordures lumière). */
   primaryLight: string
+  /** Variante foncée (bordures ombre). */
   primaryDark: string
+  /** Couleur de bordure extérieure. */
   borderColor: string
+  /** Couleur du texte sur fond coloré. */
   textOnColor: string
 }
 
+/** Props du composant `LobbyPage`. */
 interface LobbyPageProps {
+  /** Route de jeu vers laquelle naviguer après le lancement (ex: `'/pokedesc'`). */
   gameRoute: string
+  /** Thème visuel du jeu. */
   theme: LobbyTheme
+  /** Texte explicatif du jeu affiché dans la carte d'information. */
   explanationText: React.ReactNode
+  /** Rendu du panneau de paramètres (optionnel, uniquement pour les jeux configurables). */
   settingsPanel?: (isPlayer1: boolean, partie: PartieDto | null) => React.ReactNode
+  /** Accesseur des paramètres courants (utilisé pour la synchronisation serveur). */
   getSettings?: () => GameSettings
+  /** Paramètres par défaut si aucun n'est fourni via navigation state. */
   defaultSettings?: GameSettings
+  /** Mode de démarrage transmis à `startPartie` (ex: `'Standard'`, `'DeZoom'`, `'Types'`). */
   startMode?: string
+  /** Callback optionnel déclenché quand les paramètres changent (pour synchroniser le parent). */
   onSettingsChange?: (settings: GameSettings) => void
 }
 

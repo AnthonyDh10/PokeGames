@@ -1,14 +1,30 @@
 import { colors } from '../design/colors'
 
+/** Props du composant `Timer`. */
 interface TimerProps {
+  /** Valeur du timer en secondes. */
   value: number
+  /**
+   * Mode d'affichage :
+   * - `'countdown'` (défaut) : affiche le temps restant en secondes entières.
+   *   Affiche ♥️ si la valeur est infinie ou supérieure à 10 000 (mode sans limite).
+   * - `'stopwatch'` : affiche le temps écoulé au format `Xs` ou `Xm Ys`.
+   */
   mode?: 'countdown' | 'stopwatch'
+  /** Joue l'animation de secousse horizontale (utilisée lors d'une pénalité de temps). */
   shake?: boolean
+  /** Joue l'animation de clignotement rouge (utilisée lors d'une pénalité de temps). */
   flash?: boolean
+  /** Affiche la pénalité flottante au-dessus du timer. */
   showPenalty?: boolean
+  /** Valeur en secondes de la pénalité à afficher (ex : `15` → affiche "-15s"). */
   penaltyValue?: number
 }
 
+/**
+ * Convertit un nombre total de secondes en chaîne lisible pour le mode chronomètre.
+ * Exemple : `75` → `"1m 15s"`, `45` → `"45s"`.
+ */
 function formatElapsed(totalSeconds: number): string {
   const total = Math.floor(totalSeconds)
   const m = Math.floor(total / 60)
@@ -16,6 +32,16 @@ function formatElapsed(totalSeconds: number): string {
   return m > 0 ? `${m}m ${s}s` : `${s}s`
 }
 
+/**
+ * Composant d'affichage du timer de jeu.
+ *
+ * Supporte deux modes : compte à rebours (`countdown`) et chronomètre (`stopwatch`).
+ * La couleur change automatiquement en fonction du temps restant :
+ * - vert (`>20s`), orange (`≤20s`), rouge (`≤10s`).
+ *
+ * Les animations shake et flash sont pilotées par le hook `useTimer`
+ * et transmises depuis `PokeDescHeader`.
+ */
 export default function Timer({
   value,
   mode = 'countdown',

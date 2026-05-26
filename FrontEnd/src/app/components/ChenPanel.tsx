@@ -14,8 +14,14 @@ const pixelClipPath = `polygon(
   4px 16px, 4px 8px, 8px 8px, 8px 4px, 16px 4px
 )`
 
-const AUTO_CLOSE_DELAY = 5000
+/** Délai en millisecondes avant fermeture automatique du panneau après un nouveau message. */
+const AUTO_CLOSE_DELAY = 3000
 
+/**
+ * Panneau "Prof. Chen" flottant affichant les messages d'indices après chaque mauvaise réponse.
+ * S'ouvre automatiquement à l'arrivée d'un nouveau message et se referme après `AUTO_CLOSE_DELAY` ms,
+ * ou immédiatement si le joueur clique en dehors.
+ */
 export default function ChenPanel() {
   const { isOpen, messages, toggleOpen, setOpen } = useChenStore()
   const messagesEndRef = useRef<HTMLDivElement>(null)

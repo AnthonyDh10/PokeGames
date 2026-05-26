@@ -2,14 +2,21 @@ import Card from '../Card'
 import PixelButton from '../PixelButton'
 import { colors } from '../../design/colors'
 
+/** Props du composant `SuccessModal`. */
 interface SuccessModalProps {
+  /** Affiche la modale si `true`. */
   show: boolean
+  /** URL du sprite révélé du Pokémon. */
   sprite: string
+  /** Nom du Pokémon trouvé. */
   pokemonName: string
+  /** `true` si c'était le dernier Pokémon de la partie. */
   isFinalPokemon: boolean
+  /** Callback déclenché quand le joueur clique sur le bouton (suivant ou terminer). */
   onProceed: () => void
 }
 
+/** Modale de succès affichée quand le joueur a trouvé le bon Pokémon. */
 export default function SuccessModal({ show, sprite, pokemonName, isFinalPokemon, onProceed }: SuccessModalProps) {
   if (!show || !sprite) return null
 

@@ -11,6 +11,12 @@ import { useIsMobile } from "./hooks/useIsMobile";
 import { useNavigationBehavior } from "./hooks/useNavigationBehavior";
 import AppRoutes, { isChenVisible, isChatVisible } from "./components/AppRoutes";
 
+/**
+ * Composant racine de l'application.
+ * Gère le layout global : fond image flouté, `TopBar`, `Sidebar`, zone de contenu principale,
+ * `ChatPanel` et `ChenPanel` (affichés conditionnellement selon la route),
+ * et les transitions de page via `AppRoutes`.
+ */
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();

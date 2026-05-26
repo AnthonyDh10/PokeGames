@@ -5,20 +5,42 @@ import Pokeball from './images/pokéball_face.png'
 import { colors } from '../design/colors'
 import { getGenerationsDisplay } from '../utils/pokedescLogic'
 
+/** Props du composant `PokeDescHeader`. */
 interface PokeDescHeaderProps {
+  /** Pseudo du joueur, affiché dans la barre HP. */
   playerName: string
+  /** Score actuel en points. */
   currentScore: number
+  /** Nombre total de Pokémon à deviner dans la partie (détermine le max de la barre HP). */
   nbPokemons: number
+  /** Nombre de tentatives utilisées pour le Pokémon en cours (0–3). */
   attemptsUsed: number
+  /** Générations sélectionnées pour la partie (ex : `[1, 2, 3]`). */
   selectedGenerations: number[] | undefined
+  /** Temps restant en secondes, transmis directement au composant `Timer`. */
   timeRemaining: number
+  /**
+   * Durée totale du timer en secondes.
+   * `-1` ou `undefined` → mode chronomètre (affiche ♾️ dans `Timer`).
+   */
   timerDurationSeconds: number | undefined
+  /** `true` pendant l'animation de secousse du timer. */
   timerShake: boolean
+  /** `true` pendant l'animation de clignotement rouge du timer. */
   timerFlash: boolean
+  /** `true` lorsque la pénalité flottante doit être affichée. */
   showTimePenalty: boolean
+  /** Valeur en secondes de la pénalité actuellement affichée. */
   currentTimePenalty: number
 }
 
+/**
+ * En-tête de la page PokéDesc, affichant les informations de partie en cours :
+ * - Barre HP (score / max) avec le pseudo du joueur
+ * - Pokéballs représentant les tentatives restantes
+ * - Générations sélectionnées
+ * - Timer avec animations (shake, flash, pénalité flottante)
+ */
 export default function PokeDescHeader({
   playerName,
   currentScore,

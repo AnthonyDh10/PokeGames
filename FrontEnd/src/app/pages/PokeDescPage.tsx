@@ -11,6 +11,11 @@ import SuccessModal from '../components/modals/SuccessModal'
 import FailureModal from '../components/modals/FailureModal'
 import ZoomDescriptionModal from '../components/modals/ZoomDescriptionModal'
 
+/**
+ * Page de jeu PokéDesc.
+ * Thin page : délègue toute la logique à `usePokeDesc` et compose
+ * `GameLayout` avec `PokeDescHeader`, `DescriptionCard`, `AnswerCard`, `HintsGrid` et les modales.
+ */
 export default function PokeDescPage() {
   const { partieId } = useParams<{ partieId: string }>()
   const navigate = useNavigate()

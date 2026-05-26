@@ -2,10 +2,17 @@ import { useNavigate } from "react-router-dom";
 import Pokeball from "../components/images/pokéball_face.png";
 import { colors } from "../design/colors";
 
+/** Props du composant `TopBar`. */
 interface TopBarProps {
+  /** Callback pour ouvrir/fermer la sidebar (mobile uniquement). */
   onToggleSidebar: () => void;
 }
 
+/**
+ * Barre de navigation supérieure sticky.
+ * Sur desktop, la Pokéball redirige vers l'accueil.
+ * Sur mobile, elle ouvre/ferme la sidebar.
+ */
 export default function TopBar({ onToggleSidebar }: TopBarProps) {
   const navigate = useNavigate();
 

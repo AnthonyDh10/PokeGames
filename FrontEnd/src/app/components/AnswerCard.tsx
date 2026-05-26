@@ -5,19 +5,35 @@ import PokemonSearchInput from './PokemonSearchInput'
 import { colors } from '../design/colors'
 import type { PokemonDto } from '../types/pokemon'
 
+/** Props du composant `AnswerCard`. */
 interface AnswerCardProps {
+  /** Liste des Pokémon filtrés (résultat de la recherche). */
   filteredPokemons: PokemonDto[]
+  /** Texte de recherche courant dans l'input. */
   searchTerm: string
+  /** Nom du Pokémon sélectionné (vide si aucun). */
   selectedPokemonName: string
+  /** `true` pendant l'envoi de la réponse au serveur. */
   isSubmitting: boolean
+  /** Message de feedback affiché après une réponse (vide si aucun). */
   guessResultMessage: string
+  /** `true` si la dernière réponse était correcte (détermine la couleur du message). */
   lastGuessCorrect: boolean
+  /** Callback déclenché à chaque frappe dans l'input de recherche. */
   onSearchChange: (term: string) => void
+  /** Callback quand le joueur sélectionne un Pokémon dans la liste. */
   onSelectPokemon: (name: string) => void
+  /** Callback pour effacer la sélection courante. */
   onClearSelection: () => void
+  /** Callback de soumission de la réponse. */
   onSubmit: () => void
 }
 
+/**
+ * Carte de saisie de réponse pour PokéDesc.
+ * Affiche un champ de recherche avec autocomplétion ou le Pokémon sélectionné,
+ * un bouton de validation, et un message de feedback inline.
+ */
 export default function AnswerCard({
   filteredPokemons,
   searchTerm,

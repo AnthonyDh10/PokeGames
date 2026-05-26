@@ -1,13 +1,23 @@
 import Card from './Card'
 import { colors } from '../design/colors'
 
+/** Props du composant `DescriptionCard`. */
 interface DescriptionCardProps {
+  /** Liste de toutes les descriptions disponibles pour le Pokémon courant. */
   descriptions: string[]
+  /** Index de la description actuellement affichée. */
   descriptionIndex: number
+  /** Setter pour changer l'index de description (style `setState` fonctionnel). */
   onChangeIndex: (setter: (i: number) => number) => void
+  /** Callback pour ouvrir la modale de description en plein écran. */
   onZoom: () => void
 }
 
+/**
+ * Carte affichant la description censurée du Pokémon courant.
+ * Inclut une pagination si plusieurs descriptions sont disponibles,
+ * et un bouton zoom pour ouvrir `ZoomDescriptionModal`.
+ */
 export default function DescriptionCard({
   descriptions,
   descriptionIndex,
