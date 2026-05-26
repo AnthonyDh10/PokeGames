@@ -70,8 +70,11 @@ export default function ResultatsPage() {
   }
 
   function isComplete(p: PartieDto): boolean {
-    if (p.modeSolo) return (p.completedPokemonsJ1?.length ?? 0) > 0
-    return (p.completedPokemonsJ1?.length ?? 0) > 0 && (p.completedPokemonsJ2?.length ?? 0) > 0
+    if (p.modeSolo) return (p.completedPokemonsJ1?.length ?? 0) >= p.nbPokemons
+    return (
+      (p.completedPokemonsJ1?.length ?? 0) >= p.nbPokemons &&
+      (p.completedPokemonsJ2?.length ?? 0) >= p.nbPokemons
+    )
   }
 
   async function load() {
@@ -96,15 +99,12 @@ export default function ResultatsPage() {
     autoRefreshRef.current = setInterval(async () => {
       try {
         const p = await getPartie(partieId!)
-        const prevJ2Count = partie.completedPokemonsJ2?.length ?? 0
-        const newJ2Count = p.completedPokemonsJ2?.length ?? 0
-        if (newJ2Count !== prevJ2Count) {
-          setPartie(p)
-          await loadSprites(p)
-        }
+        // On charge les sprites au fur et à mesure sans mettre à jour les scores
+        // (on attend que J2 ait terminé TOUS ses Pokémon pour afficher les résultats finaux).
         if (isComplete(p)) {
           setGameFullyComplete(true)
           setPartie(p)
+          await loadSprites(p)
           clearInterval(autoRefreshRef.current!)
         }
       } catch {

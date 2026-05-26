@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { useGameSession } from '../hooks/useGameSession'
 import { getDeZoomGame, submitDeZoomGuess } from '../services/dezoomService'
 import { getAllPokemons } from '../services/pokemonService'
@@ -66,47 +66,62 @@ export function useDeZoomGame(partieId: string | undefined): UseDeZoomGameReturn
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Pokémons filtrés par générations actives (lobby settings)
-  const generationFilteredPokemons = selectedGenerations.length > 0
-    ? pokemons.filter((p) => {
-        const genNumber = p.generation?.nameEn ? generationToNumber(p.generation.nameEn) : null
-        return genNumber !== null && selectedGenerations.includes(genNumber)
-      })
-    : pokemons
+  const generationFilteredPokemons = useMemo(
+    () => selectedGenerations.length > 0
+      ? pokemons.filter((p) => {
+          const genNumber = p.generation?.nameEn ? generationToNumber(p.generation.nameEn) : null
+          return genNumber !== null && selectedGenerations.includes(genNumber)
+        })
+      : pokemons,
+    [pokemons, selectedGenerations],
+  )
 
   // Listes dédupliquées pour les filtres de type
-  const allTypes = [...new Set(
-    generationFilteredPokemons.flatMap(p => p.types ?? []).map(t => t.name)
-  )].sort((a, b) => a.localeCompare(b)).map((t, i) => ({ id: i, nameFr: t }))
+  const allTypes = useMemo(
+    () => [...new Set(
+      generationFilteredPokemons.flatMap(p => p.types ?? []).map(t => t.name)
+    )].sort((a, b) => a.localeCompare(b)).map((t, i) => ({ id: i, nameFr: t })),
+    [generationFilteredPokemons],
+  )
 
   // Filtrer les types basés sur la saisie de l'utilisateur (commence par, insensible aux accents)
-  const filteredTypes1 = allTypes.filter((t) => {
-    if (!filterType1.trim()) return true
-    const normalizedSearch = normalizeString(filterType1)
-    const normalizedName = normalizeString(t.nameFr)
-    return normalizedName.startsWith(normalizedSearch)
-  })
+  const filteredTypes1 = useMemo(
+    () => allTypes.filter((t) => {
+      if (!filterType1.trim()) return true
+      const normalizedSearch = normalizeString(filterType1)
+      const normalizedName = normalizeString(t.nameFr)
+      return normalizedName.startsWith(normalizedSearch)
+    }),
+    [allTypes, filterType1],
+  )
 
-  const filteredTypes2 = allTypes.filter((t) => {
-    if (!filterType2.trim()) return true
-    const normalizedSearch = normalizeString(filterType2)
-    const normalizedName = normalizeString(t.nameFr)
-    return normalizedName.startsWith(normalizedSearch)
-  })
+  const filteredTypes2 = useMemo(
+    () => allTypes.filter((t) => {
+      if (!filterType2.trim()) return true
+      const normalizedSearch = normalizeString(filterType2)
+      const normalizedName = normalizeString(t.nameFr)
+      return normalizedName.startsWith(normalizedSearch)
+    }),
+    [allTypes, filterType2],
+  )
 
   // Filtrer les pokémons par nom (commence par, insensible aux accents) et par type
-  const filteredPokemons = generationFilteredPokemons.filter((p) => {
-    if (searchTerm.trim()) {
-      const normalizedSearch = normalizeString(searchTerm)
-      const normalizedName = normalizeString(p.nameFr)
-      if (!normalizedName.startsWith(normalizedSearch)) return false
-    }
-    if (filterType1 && p.types?.find(t => t.slot === 1)?.name !== filterType1) return false
-    if (filterType2) {
-      const slot2 = p.types?.find(t => t.slot === 2)?.name
-      if (slot2 !== filterType2) return false
-    }
-    return true
-  })
+  const filteredPokemons = useMemo(
+    () => generationFilteredPokemons.filter((p) => {
+      if (searchTerm.trim()) {
+        const normalizedSearch = normalizeString(searchTerm)
+        const normalizedName = normalizeString(p.nameFr)
+        if (!normalizedName.startsWith(normalizedSearch)) return false
+      }
+      if (filterType1 && p.types?.find(t => t.slot === 1)?.name !== filterType1) return false
+      if (filterType2) {
+        const slot2 = p.types?.find(t => t.slot === 2)?.name
+        if (slot2 !== filterType2) return false
+      }
+      return true
+    }),
+    [generationFilteredPokemons, searchTerm, filterType1, filterType2],
+  )
 
   // Calculs d'affichage pour l'effet de zoom pixelisé
   const windowSpritePx = WINDOW_STEPS[stepIndex]

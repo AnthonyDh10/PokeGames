@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import SectionTitle from './SectionTitle'
 import { PokeballDecor } from './Pokeball'
@@ -88,16 +88,16 @@ export default function LobbyPage({
     } else {
       clearChatContext()
     }
-  }, [partie?.id, partie?.dresseur2Id, partie?.codeSession]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [partie?.id, partie?.dresseur2Id, partie?.codeSession, setChatContext, clearChatContext])
 
-  const gameTitle = (() => {
+  const gameTitle = useMemo(() => {
     const route = (gameRoute || '').toLowerCase()
     if (route.includes('pokedesc')) return 'PokéDesc'
     if (route.includes('dezoom')) return 'Dex-Zoom'
     if (route.includes('types')) return 'Typuzzle'
     if (startMode) return startMode
     return 'Explication'
-  })()
+  }, [gameRoute, startMode])
 
   useEffect(() => {
     return () => {
@@ -119,7 +119,10 @@ export default function LobbyPage({
       })
       .catch(() => setErrorMessage('Impossible de charger la partie.'))
       .finally(() => setIsLoading(false))
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Intentionnellement run-once au montage : on lit location.state une seule fois
+    // pour détecter un partieId pré-créé issu de la navigation.
+  }, [])
 
   // Monitor settings changes and update on server (player 1 only)
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { useGameSession } from '../hooks/useGameSession'
 import { getAllTypes, getTypesGame, submitTypesGuess } from '../services/typesGameService'
 import { normalizeString } from '../utils/normalize'
@@ -46,18 +46,24 @@ export function useTypesGame(partieId: string | undefined): UseTypesGameReturn {
   const [attemptCount, setAttemptCount] = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const filteredTypes1 = types.filter((t) => {
-    if (!searchTerm1.trim()) return true
-    const normalizedSearch = normalizeString(searchTerm1)
-    const normalizedName = normalizeString(t.nameFr)
-    return normalizedName.startsWith(normalizedSearch)
-  })
-  const filteredTypes2 = types.filter((t) => {
-    if (!searchTerm2.trim()) return true
-    const normalizedSearch = normalizeString(searchTerm2)
-    const normalizedName = normalizeString(t.nameFr)
-    return normalizedName.startsWith(normalizedSearch)
-  })
+  const filteredTypes1 = useMemo(
+    () => types.filter((t) => {
+      if (!searchTerm1.trim()) return true
+      const normalizedSearch = normalizeString(searchTerm1)
+      const normalizedName = normalizeString(t.nameFr)
+      return normalizedName.startsWith(normalizedSearch)
+    }),
+    [types, searchTerm1],
+  )
+  const filteredTypes2 = useMemo(
+    () => types.filter((t) => {
+      if (!searchTerm2.trim()) return true
+      const normalizedSearch = normalizeString(searchTerm2)
+      const normalizedName = normalizeString(t.nameFr)
+      return normalizedName.startsWith(normalizedSearch)
+    }),
+    [types, searchTerm2],
+  )
 
   useEffect(() => {
     if (!partieId) return

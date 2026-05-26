@@ -4,7 +4,6 @@ import { useSessionStore } from '../store/sessionStore'
 import { chatService } from '../services/chatService'
 import { colors } from '../design/colors'
 import PixelButton, { pixelClipPathSm } from './PixelButton'
-import { color } from 'framer-motion'
 
 const pixelClipPath = `polygon(
   16px 0px, calc(100% - 16px) 0px, 

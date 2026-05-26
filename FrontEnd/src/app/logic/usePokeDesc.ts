@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useGameSession } from '../hooks/useGameSession'
 import { getAllPokemons, getHints } from '../services/pokemonService'
 import { submitGuess, useHint, resetTimer } from '../services/partieService'
@@ -163,15 +163,22 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
       setChatContext({ partieId: partieId!, sessionCode: result.sessionCode, isSolo: result.isSolo })
       startTimer()
     })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Intentionnellement vide : cet effet est run-once au montage.
+    // loadGameData et startTimer ne peuvent pas être stabilisés sans refonte
+    // de useGameState et useTimer — accepté jusqu'à la migration vers useReducer.
+  }, [])
 
   // --- Valeurs calculées ---
-  const hintFilteredPokemons = filterHintPokemons(
-    allPokemons,
-    revealedHints,
-    partie?.selectedGenerations ?? [],
+  // useMemo évite de re-filtrer 1000+ Pokémon à chaque tick du timer (toutes les secondes).
+  const hintFilteredPokemons = useMemo(
+    () => filterHintPokemons(allPokemons, revealedHints, partie?.selectedGenerations ?? []),
+    [allPokemons, revealedHints, partie?.selectedGenerations],
   )
-  const filteredPokemons = filterSearchPokemons(hintFilteredPokemons, searchTerm)
+  const filteredPokemons = useMemo(
+    () => filterSearchPokemons(hintFilteredPokemons, searchTerm),
+    [hintFilteredPokemons, searchTerm],
+  )
 
   function isHintLocked(hintKey: string): boolean {
     return checkHintLocked(hintKey, usedHints, timeRemaining, partie?.timerDurationSeconds ?? -1)

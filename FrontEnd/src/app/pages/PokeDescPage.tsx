@@ -65,7 +65,7 @@ export default function PokeDescPage() {
           <DescriptionCard
             descriptions={descriptions}
             descriptionIndex={descriptionIndex}
-            onChangeIndex={changeDescriptionIndex}
+            onChangeIndex={(setter) => changeDescriptionIndex(setter(descriptionIndex))}
             onZoom={openDescriptionModal}
           />
           <AnswerCard
@@ -114,7 +114,7 @@ export default function PokeDescPage() {
             show={showDescriptionModal}
             descriptions={descriptions}
             descriptionIndex={descriptionIndex}
-            onChangeIndex={changeDescriptionIndex}
+            onChangeIndex={(setter) => changeDescriptionIndex(setter(descriptionIndex))}
             onClose={closeDescriptionModal}
           />
         </>

@@ -16,5 +16,6 @@ export function useNavigationBehavior(): void {
     const curr = location.pathname
     if (prev !== curr) clearChenMessages()
     prevPathRef.current = curr
-  }, [location.pathname]) // eslint-disable-line react-hooks/exhaustive-deps
+    // clearChenMessages est stable (référence Zustand) — l'inclure satisfait la règle sans déclencher de re-runs.
+  }, [location.pathname, clearChenMessages])
 }
