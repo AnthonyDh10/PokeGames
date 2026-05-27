@@ -1,4 +1,4 @@
-using PokéDesc.Data.Repositories;
+using PokéDesc.Business.Interfaces;
 using PokéDesc.Domain.Models;
 using PokéDesc.Business.Interfaces;
 using PokéDesc.Business.Models;
@@ -144,10 +144,10 @@ public class PokemonService : IPokemonService
 
     public async Task<Pokemon?> GetPokemonByNameAsync(string nameFr)
     {
-    var allPokemons = await _repository.GetAllAsync();
-    // Recherche insensible à la casse et aux espaces superflus
-    return allPokemons.FirstOrDefault(p => 
-        string.Equals(p.NameFr?.Trim(), nameFr?.Trim(), StringComparison.OrdinalIgnoreCase));
+        var allPokemons = await _repository.GetAllAsync();
+        // Recherche insensible à la casse et aux espaces superflus
+        return allPokemons.FirstOrDefault(p =>
+            string.Equals(p.NameFr?.Trim(), nameFr?.Trim(), StringComparison.OrdinalIgnoreCase));
     }
 }
 

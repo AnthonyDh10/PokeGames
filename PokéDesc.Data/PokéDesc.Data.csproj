@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\PokéDesc.Business\PokéDesc.Business.csproj" />
     <ProjectReference Include="..\PokéDesc.Domain\PokéDesc.Domain.csproj" />
   </ItemGroup>
 

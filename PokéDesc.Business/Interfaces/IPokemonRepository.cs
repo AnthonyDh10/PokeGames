@@ -1,6 +1,6 @@
 using PokéDesc.Domain.Models;
 
-namespace PokéDesc.Data.Repositories;
+namespace PokéDesc.Business.Interfaces;
 
 public interface IPokemonRepository
 {

@@ -28,7 +28,7 @@ public class StandardModeStrategy : IGameModeStrategy
             .Select(g => GameConstants.GenerationNames[g])
             .ToHashSet();
 
-        if (genNames.Count < 8)
+        if (genNames.Count < GameConstants.GenerationNames.Count)
         {
             basePokemons = basePokemons
                 .Where(p => genNames.Contains(p.Generation?.NameEn ?? ""))

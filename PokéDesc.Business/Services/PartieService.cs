@@ -16,7 +16,10 @@ public class PartieService : IPartieService
     // TODO: Injecter un Repository pour sauvegarder la Partie (ex: IPartieRepository)
     // Pour l'instant, on va simuler le stockage en mémoire ou supposer qu'il existe.
     private readonly ConcurrentDictionary<string, Partie> _gameStore = new();
+    // Lock global pour la création de revanche (double-check pattern)
     private readonly SemaphoreSlim _rematchLock = new(1, 1);
+    // Un SemaphoreSlim par partie pour protéger les mutations concurrentes (J1 + J2 simultanés)
+    private readonly ConcurrentDictionary<string, SemaphoreSlim> _gameLocks = new();
 
     private static readonly TimeSpan GameTtl = TimeSpan.FromHours(24);
 
@@ -34,9 +37,15 @@ public class PartieService : IPartieService
         foreach (var key in _gameStore.Keys)
         {
             if (_gameStore.TryGetValue(key, out var p) && p.CreatedAt < cutoff)
-                _gameStore.TryRemove(key, out _);
+            {
+                if (_gameStore.TryRemove(key, out _))
+                    _gameLocks.TryRemove(key, out _);
+            }
         }
     }
+
+    private SemaphoreSlim GetOrCreateGameLock(string partieId)
+        => _gameLocks.GetOrAdd(partieId, _ => new SemaphoreSlim(1, 1));
 
 
 
@@ -107,48 +116,61 @@ public class PartieService : IPartieService
 
     public async Task<Partie> UseHintAsync(string partieId, string dresseurId, string hintType)
     {
-        var partie = await GetGameAsync(partieId);
+        var gameLock = GetOrCreateGameLock(partieId);
+        await gameLock.WaitAsync();
+        try
+        {
+            var partie = await GetGameAsync(partieId);
         
-        // Vérifier si c'est le tour du joueur (simplifié ici pour J1)
-        bool isJ1 = dresseurId == partie.Dresseur1Id;
-        var usedHints = isJ1 ? partie.UsedHintsJ1 : partie.UsedHintsJ2;
+            // Vérifier si c'est le tour du joueur (simplifié ici pour J1)
+            bool isJ1 = dresseurId == partie.Dresseur1Id;
+            var usedHints = isJ1 ? partie.UsedHintsJ1 : partie.UsedHintsJ2;
 
-        if (!HintConfig.Hints.ContainsKey(hintType))
-        {
-            throw new ArgumentException($"Type d'indice '{hintType}' inconnu.");
-        }
-
-        if (!usedHints.Contains(hintType))
-        {
-            usedHints.Add(hintType);
-            
-            // Appliquer la pénalité de temps (sauf si timer infini)
-            // La pénalité est un pourcentage de la durée totale du timer de la partie
-            if (HintConfig.Hints.TryGetValue(hintType, out var hintCost) && partie.TimerDurationSeconds > 0)
+            if (!HintConfig.Hints.ContainsKey(hintType))
             {
-                double timePenaltySeconds = partie.TimerDurationSeconds * hintCost.TimePenaltyPct / 100.0;
-                if (isJ1)
+                throw new ArgumentException($"Type d'indice '{hintType}' inconnu.");
+            }
+
+            if (!usedHints.Contains(hintType))
+            {
+                usedHints.Add(hintType);
+            
+                // Appliquer la pénalité de temps (sauf si timer infini)
+                // La pénalité est un pourcentage de la durée totale du timer de la partie
+                if (HintConfig.Hints.TryGetValue(hintType, out var hintCost) && partie.TimerDurationSeconds > 0)
                 {
-                    if (partie.TimeRemainingJ1 >= 0)
+                    double timePenaltySeconds = partie.TimerDurationSeconds * hintCost.TimePenaltyPct / 100.0;
+                    if (isJ1)
                     {
-                        partie.TimeRemainingJ1 = Math.Max(0, partie.TimeRemainingJ1 - timePenaltySeconds);
+                        if (partie.TimeRemainingJ1 >= 0)
+                        {
+                            partie.TimeRemainingJ1 = Math.Max(0, partie.TimeRemainingJ1 - timePenaltySeconds);
+                        }
                     }
-                }
-                else
-                {
-                    if (partie.TimeRemainingJ2 >= 0)
+                    else
                     {
-                        partie.TimeRemainingJ2 = Math.Max(0, partie.TimeRemainingJ2 - timePenaltySeconds);
+                        if (partie.TimeRemainingJ2 >= 0)
+                        {
+                            partie.TimeRemainingJ2 = Math.Max(0, partie.TimeRemainingJ2 - timePenaltySeconds);
+                        }
                     }
                 }
             }
-        }
 
-        return partie;
+            return partie;
+        }
+        finally
+        {
+            gameLock.Release();
+        }
     }
 
     public async Task<GuessResult> SubmitGuessAsync(string partieId, string dresseurId, string pokemonName)
     {
+        var gameLock = GetOrCreateGameLock(partieId);
+        await gameLock.WaitAsync();
+        try
+        {
         var partie = await GetGameAsync(partieId);
         bool isJ1 = dresseurId == partie.Dresseur1Id;
         
@@ -245,6 +267,11 @@ public class PartieService : IPartieService
                     IsInSameEvolutionChain = proximity.IsInSameEvolutionChain
                 };
             }
+        }
+        }
+        finally
+        {
+            gameLock.Release();
         }
     }
 
