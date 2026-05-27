@@ -9,12 +9,10 @@ namespace PokéDesc.API.Controllers;
 public class PokemonController : ControllerBase
 {
     private readonly IPokemonService _service;
-    private readonly ILogger<PokemonController> _logger;
 
-    public PokemonController(IPokemonService service, ILogger<PokemonController> logger)
+    public PokemonController(IPokemonService service)
     {
         _service = service;
-        _logger = logger;
     }
 
     /// <summary>
@@ -23,31 +21,23 @@ public class PokemonController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] int? page, [FromQuery] int? pageSize)
     {
-        try
+        // Si page et pageSize sont fournis, utiliser la pagination
+        if (page.HasValue && pageSize.HasValue && page.Value > 0 && pageSize.Value > 0)
         {
-            // Si page et pageSize sont fournis, utiliser la pagination
-            if (page.HasValue && pageSize.HasValue && page.Value > 0 && pageSize.Value > 0)
+            var (items, totalCount, totalPages) = await _service.GetPokemonsPaginatedAsync(page.Value, pageSize.Value);
+            return Ok(new
             {
-                var (items, totalCount, totalPages) = await _service.GetPokemonsPaginatedAsync(page.Value, pageSize.Value);
-                return Ok(new
-                {
-                    items,
-                    page = page.Value,
-                    pageSize = pageSize.Value,
-                    totalCount,
-                    totalPages
-                });
-            }
-            
-            // Sinon, retourner tous les pokÃ©mons
-            var pokemons = await _service.GetAllPokemonsAsync();
-            return Ok(pokemons);
+                items,
+                page = page.Value,
+                pageSize = pageSize.Value,
+                totalCount,
+                totalPages
+            });
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erreur lors de GetAll");
-            return StatusCode(500, new { message = "Erreur serveur" });
-        }
+
+        // Sinon, retourner tous les pokémons
+        var pokemons = await _service.GetAllPokemonsAsync();
+        return Ok(pokemons);
     }
 
     /// <summary>
@@ -56,16 +46,8 @@ public class PokemonController : ControllerBase
     [HttpGet("type/{typeName}")]
     public async Task<IActionResult> GetByType(string typeName)
     {
-        try
-        {
-            var pokemons = await _service.GetPokemonsByTypeAsync(typeName);
-            return Ok(pokemons);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erreur lors de GetByType({TypeName})", typeName);
-            return StatusCode(500, new { message = "Erreur serveur" });
-        }
+        var pokemons = await _service.GetPokemonsByTypeAsync(typeName);
+        return Ok(pokemons);
     }
 
     /// <summary>
@@ -74,16 +56,8 @@ public class PokemonController : ControllerBase
     [HttpGet("legendary")]
     public async Task<IActionResult> GetLegendary()
     {
-        try
-        {
-            var pokemons = await _service.GetLegendaryPokemonsAsync();
-            return Ok(pokemons);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erreur lors de GetLegendary");
-            return StatusCode(500, new { message = "Erreur serveur" });
-        }
+        var pokemons = await _service.GetLegendaryPokemonsAsync();
+        return Ok(pokemons);
     }
 
     /// <summary>
@@ -92,16 +66,8 @@ public class PokemonController : ControllerBase
     [HttpGet("mythical")]
     public async Task<IActionResult> GetMythical()
     {
-        try
-        {
-            var pokemons = await _service.GetMythicalPokemonsAsync();
-            return Ok(pokemons);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erreur lors de GetMythical");
-            return StatusCode(500, new { message = "Erreur serveur" });
-        }
+        var pokemons = await _service.GetMythicalPokemonsAsync();
+        return Ok(pokemons);
     }
 
     /// <summary>
@@ -110,16 +76,8 @@ public class PokemonController : ControllerBase
     [HttpGet("legendary-mythical")]
     public async Task<IActionResult> GetLegendaryOrMythical()
     {
-        try
-        {
-            var pokemons = await _service.GetLegendaryOrMythicalPokemonsAsync();
-            return Ok(pokemons);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erreur lors de GetLegendaryOrMythical");
-            return StatusCode(500, new { message = "Erreur serveur" });
-        }
+        var pokemons = await _service.GetLegendaryOrMythicalPokemonsAsync();
+        return Ok(pokemons);
     }
 
     /// <summary>
@@ -128,16 +86,8 @@ public class PokemonController : ControllerBase
     [HttpGet("base-evolution")]
     public async Task<IActionResult> GetBaseEvolution()
     {
-        try
-        {
-            var pokemons = await _service.GetBaseEvolutionPokemonsAsync();
-            return Ok(pokemons);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erreur lors de GetBaseEvolution");
-            return StatusCode(500, new { message = "Erreur serveur" });
-        }
+        var pokemons = await _service.GetBaseEvolutionPokemonsAsync();
+        return Ok(pokemons);
     }
 
     /// <summary>
@@ -146,20 +96,8 @@ public class PokemonController : ControllerBase
     [HttpGet("{id}/censored-description")]
     public async Task<IActionResult> GetCensoredDescription(string id)
     {
-        try
-        {
-            var descriptions = await _service.GetCensoredDescriptionAsync(id);
-            return Ok(new { descriptions });
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erreur lors de GetCensoredDescription({Id})", id);
-            return StatusCode(500, new { message = "Erreur serveur" });
-        }
+        var descriptions = await _service.GetCensoredDescriptionAsync(id);
+        return Ok(new { descriptions });
     }
 
     /// <summary>
@@ -168,20 +106,8 @@ public class PokemonController : ControllerBase
     [HttpGet("{id}/hints")]
     public async Task<IActionResult> GetHints(string id)
     {
-        try
-        {
-            var hints = await _service.GetPokemonHintsAsync(id);
-            return Ok(hints);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erreur lors de GetHints({Id})", id);
-            return StatusCode(500, new { message = "Erreur serveur" });
-        }
+        var hints = await _service.GetPokemonHintsAsync(id);
+        return Ok(hints);
     }
 
 }

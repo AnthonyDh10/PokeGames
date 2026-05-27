@@ -74,6 +74,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("Frontend");
+app.UseMiddleware<PokéDesc.API.Middleware.ExceptionMiddleware>();
 app.MapControllers();
 app.MapHub<ChatHub>("/chatHub");
 

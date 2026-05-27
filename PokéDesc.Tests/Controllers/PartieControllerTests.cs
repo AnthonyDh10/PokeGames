@@ -22,8 +22,7 @@ public class PartieControllerTests
     public PartieControllerTests()
     {
         _serviceMock = new Mock<IPartieService>();
-        var logger = new Mock<ILogger<PartieController>>();
-        _controller = new PartieController(_serviceMock.Object, logger.Object);
+        _controller = new PartieController(_serviceMock.Object);
     }
 
     private static Partie CreateTestPartie(string id = "partie-1", string dresseur1 = "d1") => new()
@@ -68,14 +67,13 @@ public class PartieControllerTests
     }
 
     [Fact]
-    public async Task JoinGame_WithInvalidCode_Returns404()
+    public async Task JoinGame_WithInvalidCode_ThrowsKeyNotFoundException()
     {
         _serviceMock.Setup(s => s.JoinGameAsync("BAD", "d2"))
             .ThrowsAsync(new KeyNotFoundException("Partie introuvable"));
 
-        var result = await _controller.JoinGame(new JoinGameRequest { CodeSession = "BAD", DresseurId = "d2" });
-
-        Assert.IsType<NotFoundObjectResult>(result);
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => _controller.JoinGame(new JoinGameRequest { CodeSession = "BAD", DresseurId = "d2" }));
     }
 
     // ─────────────────────────────────────────────
@@ -96,14 +94,12 @@ public class PartieControllerTests
     }
 
     [Fact]
-    public async Task GetGame_WithUnknownId_Returns404()
+    public async Task GetGame_WithUnknownId_ThrowsKeyNotFoundException()
     {
         _serviceMock.Setup(s => s.GetGameAsync("inexistant"))
             .ThrowsAsync(new KeyNotFoundException("Partie introuvable"));
 
-        var result = await _controller.GetGame("inexistant");
-
-        Assert.IsType<NotFoundObjectResult>(result);
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.GetGame("inexistant"));
     }
 
     // ─────────────────────────────────────────────
@@ -130,15 +126,14 @@ public class PartieControllerTests
     }
 
     [Fact]
-    public async Task SubmitGuess_WithUnknownPartie_Returns404()
+    public async Task SubmitGuess_WithUnknownPartie_ThrowsKeyNotFoundException()
     {
         _serviceMock.Setup(s => s.SubmitGuessAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
             .ThrowsAsync(new KeyNotFoundException("Partie introuvable"));
 
-        var result = await _controller.SubmitGuess("inexistant",
-            new SubmitGuessRequest { DresseurId = "d1", PokemonName = "Bulbizarre" });
-
-        Assert.IsType<NotFoundObjectResult>(result);
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => _controller.SubmitGuess("inexistant",
+                new SubmitGuessRequest { DresseurId = "d1", PokemonName = "Bulbizarre" }));
     }
 
     // ─────────────────────────────────────────────
@@ -158,27 +153,25 @@ public class PartieControllerTests
     }
 
     [Fact]
-    public async Task UseHint_WithUnknownHintType_Returns400()
+    public async Task UseHint_WithUnknownHintType_ThrowsArgumentException()
     {
         _serviceMock.Setup(s => s.UseHintAsync(It.IsAny<string>(), It.IsAny<string>(), "Inconnu"))
             .ThrowsAsync(new ArgumentException("Type d'indice inconnu"));
 
-        var result = await _controller.UseHint("partie-1",
-            new UseHintRequest { DresseurId = "d1", HintType = "Inconnu" });
-
-        Assert.IsType<BadRequestObjectResult>(result);
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _controller.UseHint("partie-1",
+                new UseHintRequest { DresseurId = "d1", HintType = "Inconnu" }));
     }
 
     [Fact]
-    public async Task UseHint_WithUnknownPartie_Returns404()
+    public async Task UseHint_WithUnknownPartie_ThrowsKeyNotFoundException()
     {
         _serviceMock.Setup(s => s.UseHintAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
             .ThrowsAsync(new KeyNotFoundException("Partie introuvable"));
 
-        var result = await _controller.UseHint("inexistant",
-            new UseHintRequest { DresseurId = "d1", HintType = "Type1" });
-
-        Assert.IsType<NotFoundObjectResult>(result);
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => _controller.UseHint("inexistant",
+                new UseHintRequest { DresseurId = "d1", HintType = "Type1" }));
     }
 
     // ─────────────────────────────────────────────
@@ -205,15 +198,14 @@ public class PartieControllerTests
     }
 
     [Fact]
-    public async Task StartGame_WithUnknownMode_Returns400()
+    public async Task StartGame_WithUnknownMode_ThrowsArgumentException()
     {
         _serviceMock.Setup(s => s.StartGameAsync(It.IsAny<string>(), "ModeInconnu",
                 It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<List<int>?>(), It.IsAny<int>()))
             .ThrowsAsync(new ArgumentException("Mode inconnu"));
 
-        var result = await _controller.StartGame("partie-1", new StartGameRequest { Mode = "ModeInconnu" });
-
-        Assert.IsType<BadRequestObjectResult>(result);
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _controller.StartGame("partie-1", new StartGameRequest { Mode = "ModeInconnu" }));
     }
 
     // ─────────────────────────────────────────────
@@ -232,14 +224,12 @@ public class PartieControllerTests
     }
 
     [Fact]
-    public void GetRemainingTime_WhenServiceThrows_Returns400()
+    public void GetRemainingTime_WhenServiceThrows_PropagatesException()
     {
         _serviceMock.Setup(s => s.GetRemainingTime(It.IsAny<string>(), It.IsAny<string>()))
             .Throws(new Exception("Partie introuvable"));
 
-        var result = _controller.GetRemainingTime("inexistant", "d1");
-
-        Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Throws<Exception>(() => _controller.GetRemainingTime("inexistant", "d1"));
     }
 
     // ─────────────────────────────────────────────

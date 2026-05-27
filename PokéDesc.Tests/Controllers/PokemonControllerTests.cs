@@ -21,8 +21,7 @@ public class PokemonControllerTests
     public PokemonControllerTests()
     {
         _serviceMock = new Mock<IPokemonService>();
-        var logger = new Mock<ILogger<PokemonController>>();
-        _controller = new PokemonController(_serviceMock.Object, logger.Object);
+        _controller = new PokemonController(_serviceMock.Object);
     }
 
     // ─────────────────────────────────────────────
@@ -57,14 +56,11 @@ public class PokemonControllerTests
     }
 
     [Fact]
-    public async Task GetAll_WhenServiceThrows_Returns500()
+    public async Task GetAll_WhenServiceThrows_PropagatesException()
     {
         _serviceMock.Setup(s => s.GetAllPokemonsAsync()).ThrowsAsync(new Exception("DB error"));
 
-        var result = await _controller.GetAll(page: null, pageSize: null);
-
-        var status = Assert.IsType<ObjectResult>(result);
-        Assert.Equal(500, status.StatusCode);
+        await Assert.ThrowsAsync<Exception>(() => _controller.GetAll(page: null, pageSize: null));
     }
 
     // ─────────────────────────────────────────────
@@ -152,14 +148,12 @@ public class PokemonControllerTests
     }
 
     [Fact]
-    public async Task GetCensoredDescription_WithUnknownId_Returns404()
+    public async Task GetCensoredDescription_WithUnknownId_ThrowsKeyNotFoundException()
     {
         _serviceMock.Setup(s => s.GetCensoredDescriptionAsync("999"))
             .ThrowsAsync(new KeyNotFoundException("Pokemon 999 introuvable"));
 
-        var result = await _controller.GetCensoredDescription("999");
-
-        Assert.IsType<NotFoundObjectResult>(result);
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.GetCensoredDescription("999"));
     }
 
     // ─────────────────────────────────────────────
@@ -179,14 +173,12 @@ public class PokemonControllerTests
     }
 
     [Fact]
-    public async Task GetHints_WithUnknownId_Returns404()
+    public async Task GetHints_WithUnknownId_ThrowsKeyNotFoundException()
     {
         _serviceMock.Setup(s => s.GetPokemonHintsAsync("999"))
             .ThrowsAsync(new KeyNotFoundException("Pokemon 999 introuvable"));
 
-        var result = await _controller.GetHints("999");
-
-        Assert.IsType<NotFoundObjectResult>(result);
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.GetHints("999"));
     }
 
     // ─────────────────────────────────────────────

@@ -3,6 +3,7 @@ using PokéDesc.Business.Constants;
 using PokéDesc.Business.Helpers;
 using PokéDesc.Business.Interfaces;
 using PokéDesc.Business.Models;
+using PokéDesc.Business.Strategies;
 using PokéDesc.Domain;
 using PokéDesc.Domain.Models;
 using PartieStatut = PokéDesc.Domain.PartieStatut;
@@ -18,6 +19,14 @@ public class PartieService : IPartieService
     private static readonly SemaphoreSlim _rematchLock = new(1, 1);
 
     private static readonly TimeSpan GameTtl = TimeSpan.FromHours(24);
+
+    private static readonly IReadOnlyDictionary<string, IGameModeStrategy> _strategies =
+        new IGameModeStrategy[]
+        {
+            new StandardModeStrategy(),
+            new TypesModeStrategy(),
+            new DeZoomModeStrategy(),
+        }.ToDictionary(s => s.Mode, StringComparer.OrdinalIgnoreCase);
 
     private static void CleanupOldGames()
     {
@@ -61,113 +70,12 @@ public class PartieService : IPartieService
         // Marquer le mode solo dans la partie
         partie.ModeSolo = isSolo;
 
-        if (mode == "Standard")
-        {
-            // Stocker les paramètres sur la partie
-            partie.NbPokemons = nbPokemons;
-            partie.SelectedGenerations = generations ?? Enumerable.Range(1, 8).ToList();
-            partie.TimerDurationSeconds = timerDuration;
-
-            // Récupérer les listes de Pokémons
-            var basePokemons = await _pokemonService.GetAllPokemonsAsync();
-            var legendaryMythicalPokemons = await _pokemonService.GetLegendaryOrMythicalPokemonsAsync();
-
-            // Filtrer par génération si nécessaire
-            var genNames = partie.SelectedGenerations
-                .Where(g => GameConstants.GenerationNames.ContainsKey(g))
-                .Select(g => GameConstants.GenerationNames[g])
-                .ToHashSet();
-
-            if (genNames.Count < 8)
-            {
-                basePokemons = basePokemons
-                    .Where(p => genNames.Contains(p.Generation?.NameEn ?? ""))
-                    .ToList();
-                legendaryMythicalPokemons = legendaryMythicalPokemons
-                    .Where(p => genNames.Contains(p.Generation?.NameEn ?? ""))
-                    .ToList();
-            }
-
-            // Filter out Pokémon without descriptions
-            basePokemons = basePokemons
-                .Where(p => p.Description != null && p.Description.Any())
-                .ToList();
-            legendaryMythicalPokemons = legendaryMythicalPokemons
-                .Where(p => p.Description != null && p.Description.Any())
-                .ToList();
-
-            if (basePokemons.Count == 0)
-                throw new ArgumentException("Aucun Pokémon de base trouvé pour les générations sélectionnées.");
-
-            // Générer les tirages communs pour déterminer le type de chaque position
-            var random = new Random();
-            var rarityDraws = new bool[nbPokemons];
-            for (int i = 0; i < nbPokemons; i++)
-            {
-                // 1% de chance d'avoir un légendaire/mythique (fallback sur basePokemons si pool vide)
-                rarityDraws[i] = legendaryMythicalPokemons.Count > 0 && random.Next(100) == 0;
-            }
-
-            // Génération d'une liste commune aux deux joueurs
-            partie.PokemonsToGuess = SelectPokemonsBasedOnDraws(rarityDraws, basePokemons, legendaryMythicalPokemons, random);
-            partie.Statut = PartieStatut.EnCours;
-
-            // Initialiser les timers pour chaque joueur
-            partie.TimerStartJ1 = DateTime.UtcNow;
-            partie.TimeRemainingJ1 = timerDuration >= 0 ? timerDuration : -1; // -1 = infini
-            partie.TimerStartJ2 = DateTime.UtcNow;
-            partie.TimeRemainingJ2 = timerDuration >= 0 ? timerDuration : -1; // -1 = infini
-        }
-        else if (mode == "Types")
-        {
-            partie.Statut = PartieStatut.EnCours;
-            partie.TimerStartJ1 = DateTime.UtcNow;
-            partie.TimerStartJ2 = DateTime.UtcNow;
-        }
-        else if (mode == "DeZoom")
-        {
-            partie.SelectedGenerations = generations ?? Enumerable.Range(1, 9).ToList();
-            partie.Statut = PartieStatut.EnCours;
-        }
-        else
-        {
+        if (!_strategies.TryGetValue(mode, out var strategy))
             throw new ArgumentException($"Mode de jeu '{mode}' inconnu.");
-        }
+
+        await strategy.ExecuteAsync(partie, new StartGameParams(nbPokemons, generations, timerDuration), _pokemonService);
 
         return partie;
-    }
-
-    private List<Pokemon> SelectPokemonsBasedOnDraws(
-        bool[] rarityDraws,
-        List<Pokemon> basePokemons,
-        List<Pokemon> legendaryMythicalPokemons,
-        Random random)
-    {
-        var selectedPokemons = new List<Pokemon>();
-        var selectedIds = new HashSet<string>();
-
-        foreach (var isRare in rarityDraws)
-        {
-            var sourceList = isRare ? legendaryMythicalPokemons : basePokemons;
-            var validPokemons = sourceList
-                .Where(p => p.Description != null && p.Description.Any() && !selectedIds.Contains(p.Id))
-                .ToList();
-
-            // Fallback sur la liste de base si le pool rare est épuisé ou vide
-            if (validPokemons.Count == 0)
-                validPokemons = basePokemons
-                    .Where(p => p.Description != null && p.Description.Any() && !selectedIds.Contains(p.Id))
-                    .ToList();
-
-            if (validPokemons.Count == 0)
-                throw new ArgumentException("Aucun Pokémon valide (avec description) trouvé pour la sélection.");
-
-            var selectedPokemon = validPokemons[random.Next(validPokemons.Count)];
-            selectedIds.Add(selectedPokemon.Id);
-            selectedPokemons.Add(selectedPokemon);
-        }
-
-        return selectedPokemons;
     }
 
     public async Task<Partie> JoinGameAsync(string codeSession, string dresseurId)
