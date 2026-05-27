@@ -49,7 +49,7 @@ public class StandardModeStrategy : IGameModeStrategy
         if (basePokemons.Count == 0)
             throw new ArgumentException("Aucun Pokémon de base trouvé pour les générations sélectionnées.");
 
-        var random = new Random();
+        var random = Random.Shared;
         var rarityDraws = new bool[parameters.NbPokemons];
         for (int i = 0; i < parameters.NbPokemons; i++)
             rarityDraws[i] = legendaryMythicalPokemons.Count > 0 && random.Next(100) == 0;

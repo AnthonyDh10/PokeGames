@@ -86,7 +86,6 @@ export async function startPartie(
 
 /**
  * Soumet une proposition de réponse pour le Pokémon en cours.
- * La valeur spéciale `'__TIMEOUT__'` est réservée au cas de dépassement de temps.
  *
  * @param partieId - Identifiant unique de la partie.
  * @param dresseurId - UUID de session du joueur qui propose.
@@ -95,6 +94,19 @@ export async function startPartie(
  */
 export async function submitGuess(partieId: string, dresseurId: string, pokemonName: string): Promise<GuessResultDto> {
   const { data } = await api.post<GuessResultDto>(`/api/partie/${partieId}/guess`, { dresseurId, pokemonName })
+  return data
+}
+
+/**
+ * Signale un timeout au serveur pour le Pokémon en cours.
+ * Le serveur enregistre le Pokémon comme raté et avance au suivant.
+ *
+ * @param partieId - Identifiant unique de la partie.
+ * @param dresseurId - UUID de session du joueur dont le temps est écoulé.
+ * @returns Le résultat du timeout (IsTurnFinished = true, IsTimeout = true).
+ */
+export async function notifyTimeout(partieId: string, dresseurId: string): Promise<GuessResultDto> {
+  const { data } = await api.post<GuessResultDto>(`/api/partie/${partieId}/timeout`, { dresseurId })
   return data
 }
 

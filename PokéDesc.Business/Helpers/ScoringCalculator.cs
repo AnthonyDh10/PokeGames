@@ -7,8 +7,8 @@ public static class ScoringCalculator
         int score = HintConfig.BaseScore;
         foreach (var hint in usedHints)
         {
-            if (HintConfig.Costs.TryGetValue(hint, out int cost))
-                score -= cost;
+            if (HintConfig.Hints.TryGetValue(hint, out var cost))
+                score -= cost.Points;
         }
         return Math.Max(0, score);
     }

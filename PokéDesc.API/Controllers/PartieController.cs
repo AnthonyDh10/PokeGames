@@ -57,6 +57,22 @@ public class PartieController : ControllerBase
         });
     }
 
+    [HttpPost("{partieId}/timeout")]
+    public async Task<IActionResult> NotifyTimeout(string partieId, [FromBody] TimeoutRequest request)
+    {
+        var result = await _partieService.NotifyTimeoutAsync(partieId, request.DresseurId);
+        return Ok(new GuessResultDto
+        {
+            IsCorrect = result.IsCorrect,
+            IsTurnFinished = result.IsTurnFinished,
+            IsGameFinished = result.IsGameFinished,
+            IsTimeout = result.IsTimeout,
+            Message = result.Message,
+            PointsEarned = result.PointsEarned,
+            UpdatedGame = PartieResponseDto.FromPartie(result.UpdatedGame),
+        });
+    }
+
     [HttpPost("{partieId}/hint")]
     public async Task<IActionResult> UseHint(string partieId, [FromBody] UseHintRequest request)
     {
@@ -88,9 +104,6 @@ public class PartieController : ControllerBase
     [HttpPost("{partieId}/rematch-ready")]
     public async Task<IActionResult> MarkRematchReady(string partieId, [FromBody] MarkRematchReadyRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.DresseurId))
-            return BadRequest("dresseurId est requis.");
-
         var status = await _partieService.MarkRematchReadyAsync(partieId, request.DresseurId);
         return Ok(status);
     }

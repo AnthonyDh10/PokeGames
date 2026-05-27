@@ -28,6 +28,11 @@ public interface IPartieService
     Task<GuessResult> SubmitGuessAsync(string partieId, string dresseurId, string pokemonName);
 
     /// <summary>
+    /// Signale un timeout pour le joueur en cours — avance au Pokémon suivant sans score.
+    /// </summary>
+    Task<GuessResult> NotifyTimeoutAsync(string partieId, string dresseurId);
+
+    /// <summary>
     /// Utilise un indice pour le Pokémon en cours.
     /// </summary>
     Task<Partie> UseHintAsync(string partieId, string dresseurId, string hintType);

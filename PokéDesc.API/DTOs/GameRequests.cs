@@ -169,3 +169,9 @@ public class ResetTimerRequest
     [Required]
     public string DresseurId { get; set; } = string.Empty;
 }
+
+public class TimeoutRequest
+{
+    [Required]
+    public string DresseurId { get; set; } = string.Empty;
+}

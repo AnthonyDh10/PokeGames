@@ -263,10 +263,12 @@ public class PartieControllerTests
     }
 
     [Fact]
-    public async Task MarkRematchReady_WithEmptyDresseurId_Returns400()
+    public async Task MarkRematchReady_WithEmptyDresseurId_ThrowsArgumentException()
     {
-        var result = await _controller.MarkRematchReady("partie-1", new MarkRematchReadyRequest { DresseurId = "" });
+        _serviceMock.Setup(s => s.MarkRematchReadyAsync("partie-1", ""))
+            .ThrowsAsync(new ArgumentException("dresseurId est requis."));
 
-        Assert.IsType<BadRequestObjectResult>(result);
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _controller.MarkRematchReady("partie-1", new MarkRematchReadyRequest { DresseurId = "" }));
     }
 }

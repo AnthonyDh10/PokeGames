@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useGameSession } from '../hooks/useGameSession'
 import { getAllPokemons, getHints } from '../services/pokemonService'
-import { submitGuess, useHint, resetTimer } from '../services/partieService'
+import { submitGuess, useHint, resetTimer, notifyTimeout } from '../services/partieService'
 import { useTimer } from '../hooks/useTimer'
 import { useGameState } from '../hooks/useGameState'
 import { computeRevealedHints } from '../utils/pokedescLogic'
@@ -186,7 +186,7 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
    */
   async function handleTimeout() {
     try {
-      const result = await submitGuess(partieId!, sessionId, '__TIMEOUT__')
+      const result = await notifyTimeout(partieId!, sessionId)
       setIsFinalPokemon(result.isGameFinished)
       try {
         const hints = await getHints(currentPokemonIdRef.current)

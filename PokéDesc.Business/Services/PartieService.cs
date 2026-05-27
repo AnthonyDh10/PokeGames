@@ -15,8 +15,8 @@ public class PartieService : IPartieService
     private readonly IPokemonService _pokemonService;
     // TODO: Injecter un Repository pour sauvegarder la Partie (ex: IPartieRepository)
     // Pour l'instant, on va simuler le stockage en mémoire ou supposer qu'il existe.
-    private static readonly ConcurrentDictionary<string, Partie> _gameStore = new();
-    private static readonly SemaphoreSlim _rematchLock = new(1, 1);
+    private readonly ConcurrentDictionary<string, Partie> _gameStore = new();
+    private readonly SemaphoreSlim _rematchLock = new(1, 1);
 
     private static readonly TimeSpan GameTtl = TimeSpan.FromHours(24);
 
@@ -28,7 +28,7 @@ public class PartieService : IPartieService
             new DeZoomModeStrategy(),
         }.ToDictionary(s => s.Mode, StringComparer.OrdinalIgnoreCase);
 
-    private static void CleanupOldGames()
+    private void CleanupOldGames()
     {
         var cutoff = DateTime.UtcNow - GameTtl;
         foreach (var key in _gameStore.Keys)
@@ -45,7 +45,7 @@ public class PartieService : IPartieService
         _pokemonService = pokemonService;
     }
 
-    public async Task<Partie> CreateGameAsync(string dresseurId)
+    public Task<Partie> CreateGameAsync(string dresseurId)
     {
         CleanupOldGames();
 
@@ -59,7 +59,7 @@ public class PartieService : IPartieService
         };
 
         _gameStore.TryAdd(partie.Id, partie);
-        return await Task.FromResult(partie);
+        return Task.FromResult(partie);
     }
 
     public async Task<Partie> StartGameAsync(string partieId, string mode, bool isSolo = false,
@@ -78,7 +78,7 @@ public class PartieService : IPartieService
         return partie;
     }
 
-    public async Task<Partie> JoinGameAsync(string codeSession, string dresseurId)
+    public Task<Partie> JoinGameAsync(string codeSession, string dresseurId)
     {
         // Normaliser le code de session (supprimer espaces et mettre en majuscules)
         var normalizedCode = codeSession?.Trim().ToUpper();
@@ -95,14 +95,14 @@ public class PartieService : IPartieService
         partie.Dresseur2Id = dresseurId;
         partie.Statut = PartieStatut.Pret; // Les deux joueurs sont connectés, en attente de démarrage
         
-        return await Task.FromResult(partie);
+        return Task.FromResult(partie);
     }
 
-    public async Task<Partie> GetGameAsync(string partieId)
+    public Task<Partie> GetGameAsync(string partieId)
     {
         if (!_gameStore.TryGetValue(partieId, out var partie))
             throw new KeyNotFoundException("Partie introuvable.");
-        return await Task.FromResult(partie);
+        return Task.FromResult(partie);
     }
 
     public async Task<Partie> UseHintAsync(string partieId, string dresseurId, string hintType)
@@ -113,7 +113,7 @@ public class PartieService : IPartieService
         bool isJ1 = dresseurId == partie.Dresseur1Id;
         var usedHints = isJ1 ? partie.UsedHintsJ1 : partie.UsedHintsJ2;
 
-        if (!HintConfig.Costs.ContainsKey(hintType))
+        if (!HintConfig.Hints.ContainsKey(hintType))
         {
             throw new ArgumentException($"Type d'indice '{hintType}' inconnu.");
         }
@@ -124,9 +124,9 @@ public class PartieService : IPartieService
             
             // Appliquer la pénalité de temps (sauf si timer infini)
             // La pénalité est un pourcentage de la durée totale du timer de la partie
-            if (HintConfig.TimePenalties.TryGetValue(hintType, out double penaltyPct) && partie.TimerDurationSeconds > 0)
+            if (HintConfig.Hints.TryGetValue(hintType, out var hintCost) && partie.TimerDurationSeconds > 0)
             {
-                double timePenaltySeconds = partie.TimerDurationSeconds * penaltyPct / 100.0;
+                double timePenaltySeconds = partie.TimerDurationSeconds * hintCost.TimePenaltyPct / 100.0;
                 if (isJ1)
                 {
                     if (partie.TimeRemainingJ1 >= 0)
@@ -151,11 +151,6 @@ public class PartieService : IPartieService
     {
         var partie = await GetGameAsync(partieId);
         bool isJ1 = dresseurId == partie.Dresseur1Id;
-        
-        if (pokemonName == "__TIMEOUT__")
-        {
-            return await HandleTimeout(partie, isJ1);
-        }
         
         bool isTimedOut = TimerCalculator.IsTimedOut(
             isJ1 ? partie.TimerStartJ1 : partie.TimerStartJ2,
@@ -272,7 +267,7 @@ public class PartieService : IPartieService
     public void ResetTimer(string partieId, string dresseurId)
     {
         if (!_gameStore.TryGetValue(partieId, out var partie))
-            return;
+            throw new KeyNotFoundException("Partie introuvable.");
             
         bool isJ1 = dresseurId == partie.Dresseur1Id;
         double timerDuration = partie.TimerDurationSeconds >= 0 ? partie.TimerDurationSeconds : -1;
@@ -321,6 +316,13 @@ public class PartieService : IPartieService
             .ToArray());
     }
 
+    public async Task<GuessResult> NotifyTimeoutAsync(string partieId, string dresseurId)
+    {
+        var partie = await GetGameAsync(partieId);
+        bool isJ1 = dresseurId == partie.Dresseur1Id;
+        return await HandleTimeout(partie, isJ1);
+    }
+
     private async Task<GuessResult> HandleTimeout(Partie partie, bool isJ1)
     {
         int currentIndex = isJ1 ? partie.CurrentIndexJ1 : partie.CurrentIndexJ2;
@@ -356,7 +358,7 @@ public class PartieService : IPartieService
     public double GetRemainingTime(string partieId, string dresseurId)
     {
         if (!_gameStore.TryGetValue(partieId, out var partie))
-            return 0;
+            throw new KeyNotFoundException("Partie introuvable.");
 
         bool isJ1 = dresseurId == partie.Dresseur1Id;
         return TimerCalculator.GetRemaining(
@@ -367,7 +369,7 @@ public class PartieService : IPartieService
     public int GetTimerDuration(string partieId)
     {
         if (!_gameStore.TryGetValue(partieId, out var partie))
-            return -1;
+            throw new KeyNotFoundException("Partie introuvable.");
         return partie.TimerDurationSeconds;
     }
 
@@ -381,8 +383,8 @@ public class PartieService : IPartieService
             return partie;
 
         // Valider les paramètres
-        if (nbPokemons < 1 || nbPokemons > 6)
-            throw new ArgumentException("Le nombre de Pokémon doit être entre 1 et 6.");
+        if (nbPokemons < GameConstants.MinPokemons || nbPokemons > GameConstants.MaxPokemons)
+            throw new ArgumentException($"Le nombre de Pokémon doit être entre {GameConstants.MinPokemons} et {GameConstants.MaxPokemons}.");
 
         // Mettre à jour les paramètres
         partie.NbPokemons = nbPokemons;
@@ -399,6 +401,9 @@ public class PartieService : IPartieService
 
     public async Task<RematchStatusDto> MarkRematchReadyAsync(string partieId, string dresseurId)
     {
+        if (string.IsNullOrWhiteSpace(dresseurId))
+            throw new ArgumentException("dresseurId est requis.", nameof(dresseurId));
+
         var partie = await GetGameAsync(partieId);
         bool isJ1 = dresseurId == partie.Dresseur1Id;
 
