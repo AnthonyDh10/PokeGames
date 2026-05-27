@@ -67,6 +67,23 @@ public class Partie
 
     // Métadonnées
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // ─────────────────────────────────────────────
+    // Méthodes domaine — invariants centralisés ici
+    // ─────────────────────────────────────────────
+
+    /// <summary>
+    /// Fait rejoindre un deuxième joueur. Lève une exception si la partie est déjà pleine.
+    /// Doit être appelé dans une section critique (lock) pour garantir l'atomicité.
+    /// </summary>
+    public void Join(string dresseurId)
+    {
+        if (!string.IsNullOrEmpty(Dresseur2Id))
+            throw new ArgumentException("Cette partie a déjà deux joueurs.");
+
+        Dresseur2Id = dresseurId;
+        Statut = PartieStatut.Pret;
+    }
 }
 
 public class CompletedPokemon

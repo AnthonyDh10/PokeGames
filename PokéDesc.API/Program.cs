@@ -1,6 +1,8 @@
 using PokéDesc.Data.Repositories;
 using PokéDesc.Business.Services;
 using PokéDesc.Business.Interfaces;
+using PokéDesc.Business.Strategies;
+using PokéDesc.Domain.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using PokéDesc.API.Hubs;
 
@@ -28,6 +30,10 @@ builder.Services.AddSingleton<ITypesRepository>(sp =>
 // --- Architecture N-tiers ---
 // Singleton : pas d'état mutable par requête, dépend de IPokemonRepository (Singleton)
 builder.Services.AddSingleton<IPokemonService, PokemonService>();
+// Singleton : stratégies sans état — injectées dans PartieService
+builder.Services.AddSingleton<IGameModeStrategy, StandardModeStrategy>();
+builder.Services.AddSingleton<IGameModeStrategy, TypesModeStrategy>();
+builder.Services.AddSingleton<IGameModeStrategy, DeZoomModeStrategy>();
 // Singleton : _gameStore est partagé globalement (état du serveur en mémoire)
 builder.Services.AddSingleton<IPartieService, PartieService>();
 builder.Services.AddSingleton<ITypesGameService, TypesGameService>();

@@ -23,13 +23,7 @@ public class PartieService : IPartieService
 
     private static readonly TimeSpan GameTtl = TimeSpan.FromHours(24);
 
-    private static readonly IReadOnlyDictionary<string, IGameModeStrategy> _strategies =
-        new IGameModeStrategy[]
-        {
-            new StandardModeStrategy(),
-            new TypesModeStrategy(),
-            new DeZoomModeStrategy(),
-        }.ToDictionary(s => s.Mode, StringComparer.OrdinalIgnoreCase);
+    private readonly IReadOnlyDictionary<string, IGameModeStrategy> _strategies;
 
     private void CleanupOldGames()
     {
@@ -49,9 +43,10 @@ public class PartieService : IPartieService
 
 
 
-    public PartieService(IPokemonService pokemonService)
+    public PartieService(IPokemonService pokemonService, IEnumerable<IGameModeStrategy> strategies)
     {
         _pokemonService = pokemonService;
+        _strategies = strategies.ToDictionary(s => s.Mode, StringComparer.OrdinalIgnoreCase);
     }
 
     public Task<Partie> CreateGameAsync(string dresseurId)
@@ -87,24 +82,29 @@ public class PartieService : IPartieService
         return partie;
     }
 
-    public Task<Partie> JoinGameAsync(string codeSession, string dresseurId)
+    public async Task<Partie> JoinGameAsync(string codeSession, string dresseurId)
     {
         // Normaliser le code de session (supprimer espaces et mettre en majuscules)
         var normalizedCode = codeSession?.Trim().ToUpper();
-        
-        var partie = _gameStore.Values.FirstOrDefault(p => 
+
+        var partie = _gameStore.Values.FirstOrDefault(p =>
             p.CodeSession?.Trim().ToUpper() == normalizedCode);
-            
+
         if (partie == null)
             throw new KeyNotFoundException("Code de session invalide.");
-        
-        if (!string.IsNullOrEmpty(partie.Dresseur2Id))
-            throw new ArgumentException("Cette partie a déjà deux joueurs.");
-        
-        partie.Dresseur2Id = dresseurId;
-        partie.Statut = PartieStatut.Pret; // Les deux joueurs sont connectés, en attente de démarrage
-        
-        return Task.FromResult(partie);
+
+        var gameLock = GetOrCreateGameLock(partie.Id);
+        await gameLock.WaitAsync();
+        try
+        {
+            // Re-vérification après acquisition du lock (double-check pattern)
+            partie.Join(dresseurId);
+            return partie;
+        }
+        finally
+        {
+            gameLock.Release();
+        }
     }
 
     public Task<Partie> GetGameAsync(string partieId)

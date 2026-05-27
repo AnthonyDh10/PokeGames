@@ -1,5 +1,6 @@
 using PokéDesc.Business.Constants;
 using PokéDesc.Business.Interfaces;
+using PokéDesc.Domain.Interfaces;
 using PokéDesc.Domain.Models;
 
 namespace PokéDesc.Business.Services;
@@ -9,6 +10,18 @@ public class DeZoomService : IDeZoomService
     private readonly List<Pokemon> _pokemons;
     private static readonly Dictionary<string, DeZoomGameState> _gameStore = new();
     private static readonly object _lock = new();
+    private static readonly TimeSpan GameTtl = TimeSpan.FromHours(24);
+
+    private static void CleanupOldGames()
+    {
+        var cutoff = DateTime.UtcNow - GameTtl;
+        var keysToRemove = _gameStore
+            .Where(kvp => kvp.Value.CreatedAt < cutoff)
+            .Select(kvp => kvp.Key)
+            .ToList();
+        foreach (var key in keysToRemove)
+            _gameStore.Remove(key);
+    }
 
 
 
@@ -45,18 +58,19 @@ public class DeZoomService : IDeZoomService
     {
         lock (_lock)
         {
+            CleanupOldGames();
+
             if (!_gameStore.TryGetValue(partieId, out var state))
             {
-                var random = new Random();
                 var pool = FilterByGenerations(selectedGenerations);
                 if (pool.Count == 0) pool = _pokemons; // fallback
-                var pokemon = pool[random.Next(pool.Count)];
+                var pokemon = pool[Random.Shared.Next(pool.Count)];
 
                 state = new DeZoomGameState
                 {
                     PartieId = partieId,
                     PokemonNameFr = pokemon.NameFr,
-                    SpriteUrl = PickSpriteUrl(pokemon, random),
+                    SpriteUrl = PickSpriteUrl(pokemon, Random.Shared),
                     DresseurId1 = dresseurId,
                     SelectedGenerations = selectedGenerations ?? Enumerable.Range(1, 9).ToList(),
                 };
@@ -276,16 +290,15 @@ public class DeZoomService : IDeZoomService
                 string newPartieId = Guid.NewGuid().ToString();
                 state.RematchPartieId = newPartieId;
 
-                var random = new Random();
                 var pool = FilterByGenerations(state.SelectedGenerations);
                 if (pool.Count == 0) pool = _pokemons;
-                var pokemon = pool[random.Next(pool.Count)];
+                var pokemon = pool[Random.Shared.Next(pool.Count)];
 
                 _gameStore[newPartieId] = new DeZoomGameState
                 {
                     PartieId = newPartieId,
                     PokemonNameFr = pokemon.NameFr,
-                    SpriteUrl = PickSpriteUrl(pokemon, random),
+                    SpriteUrl = PickSpriteUrl(pokemon, Random.Shared),
                     DresseurId1 = state.DresseurId1,
                     DresseurId2 = state.DresseurId2,
                     SelectedGenerations = state.SelectedGenerations,

@@ -1,5 +1,5 @@
 using System.Text.Json;
-using PokéDesc.Business.Interfaces;
+using PokéDesc.Domain.Interfaces;
 using PokéDesc.Domain.Models;
 
 namespace PokéDesc.Data.Repositories;

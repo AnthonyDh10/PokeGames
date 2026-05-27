@@ -29,4 +29,6 @@ public class DeZoomGameState
 
     // Paramètres de la partie
     public List<int> SelectedGenerations { get; set; } = Enumerable.Range(1, 9).ToList();
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

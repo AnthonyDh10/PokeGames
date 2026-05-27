@@ -2,6 +2,7 @@ using Xunit;
 using Moq;
 using PokéDesc.Business.Interfaces;
 using PokéDesc.Business.Services;
+using PokéDesc.Business.Strategies;
 using PokéDesc.Domain;
 using PokéDesc.Domain.Models;
 using PokéDesc.Tests.Helpers;
@@ -20,7 +21,15 @@ public class PartieServiceTests
     public PartieServiceTests()
     {
         _pokemonServiceMock = new Mock<IPokemonService>();
-        _service = new PartieService(_pokemonServiceMock.Object);
+
+        IGameModeStrategy[] strategies =
+        [
+            new StandardModeStrategy(),
+            new TypesModeStrategy(),
+            new DeZoomModeStrategy(),
+        ];
+
+        _service = new PartieService(_pokemonServiceMock.Object, strategies);
 
         // Setup par défaut pour les appels dans StartGameAsync
         var allPokemons = TestDataFactory.CreateAllPokemons()

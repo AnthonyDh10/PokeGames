@@ -1,4 +1,5 @@
 using PokéDesc.Business.Interfaces;
+using PokéDesc.Domain.Interfaces;
 using PokéDesc.Domain.Models;
 
 namespace PokéDesc.Business.Services;
@@ -8,6 +9,18 @@ public class TypesGameService : ITypesGameService
     private readonly List<TypeData> _types;
     private static readonly Dictionary<string, TypesGameState> _gameStore = new();
     private static readonly object _lock = new();
+    private static readonly TimeSpan GameTtl = TimeSpan.FromHours(24);
+
+    private static void CleanupOldGames()
+    {
+        var cutoff = DateTime.UtcNow - GameTtl;
+        var keysToRemove = _gameStore
+            .Where(kvp => kvp.Value.CreatedAt < cutoff)
+            .Select(kvp => kvp.Key)
+            .ToList();
+        foreach (var key in keysToRemove)
+            _gameStore.Remove(key);
+    }
 
     public TypesGameService(ITypesRepository repository)
     {
@@ -22,10 +35,11 @@ public class TypesGameService : ITypesGameService
     {
         lock (_lock)
         {
+            CleanupOldGames();
+
             if (!_gameStore.TryGetValue(partieId, out var state))
             {
-                var random = new Random();
-                var shuffled = _types.OrderBy(_ => random.Next()).ToList();
+                var shuffled = _types.OrderBy(_ => Random.Shared.Next()).ToList();
                 int type1Id = shuffled[0].Id;
                 int type2Id = shuffled[1].Id;
 
@@ -250,8 +264,7 @@ public class TypesGameService : ITypesGameService
                     DresseurId2 = state.DresseurId2,
                 };
                 // Set up new puzzle with two different types
-                var random = new Random();
-                var shuffled = _types.OrderBy(_ => random.Next()).ToList();
+                var shuffled = _types.OrderBy(_ => Random.Shared.Next()).ToList();
                 newState.Type1Id = shuffled[0].Id;
                 newState.Type2Id = shuffled[1].Id;
 

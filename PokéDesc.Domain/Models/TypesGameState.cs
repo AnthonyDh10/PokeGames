@@ -26,5 +26,7 @@ public class TypesGameState
 
     // Rematch
     public string? RematchPartieId { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
