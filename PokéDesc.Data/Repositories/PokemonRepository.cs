@@ -3,7 +3,7 @@ using PokéDesc.Domain.Models;
 
 namespace PokéDesc.Data.Repositories;
 
-public class PokemonRepository
+public class PokemonRepository : IPokemonRepository
 {
     private readonly List<Pokemon> _pokemons;
 

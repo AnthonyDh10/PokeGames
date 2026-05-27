@@ -11,28 +11,27 @@ var builder = WebApplication.CreateBuilder(args);
 // =================================================================
 
 // --- Données JSON (lecture seule, chargées une fois au démarrage) ---
-builder.Services.AddSingleton<PokemonRepository>(sp =>
+builder.Services.AddSingleton<IPokemonRepository>(sp =>
 {
     var env = sp.GetRequiredService<IWebHostEnvironment>();
     var dataPath = Path.Combine(env.ContentRootPath, "Data");
     return new PokemonRepository(dataPath);
 });
 
+builder.Services.AddSingleton<ITypesRepository>(sp =>
+{
+    var env = sp.GetRequiredService<IWebHostEnvironment>();
+    var dataPath = Path.Combine(env.ContentRootPath, "Data");
+    return new TypesRepository(dataPath);
+});
+
 // --- Architecture N-tiers ---
-// Singleton : pas d'état mutable par requête, dépend de PokemonRepository (Singleton)
+// Singleton : pas d'état mutable par requête, dépend de IPokemonRepository (Singleton)
 builder.Services.AddSingleton<IPokemonService, PokemonService>();
 // Singleton : _gameStore est partagé globalement (état du serveur en mémoire)
 builder.Services.AddSingleton<IPartieService, PartieService>();
-builder.Services.AddSingleton<ITypesGameService>(sp =>
-{
-    var env = sp.GetRequiredService<IWebHostEnvironment>();
-    return new TypesGameService(Path.Combine(env.ContentRootPath, "Data"));
-});
-builder.Services.AddSingleton<IDeZoomService>(sp =>
-{
-    var repo = sp.GetRequiredService<PokemonRepository>();
-    return new DeZoomService(repo);
-});
+builder.Services.AddSingleton<ITypesGameService, TypesGameService>();
+builder.Services.AddSingleton<IDeZoomService, DeZoomService>();
 
 // --- API ---
 builder.Services.AddControllers()

@@ -1,42 +1,9 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using PokéDesc.Business.Interfaces;
+using PokéDesc.Data.Models;
+using PokéDesc.Data.Repositories;
 using PokéDesc.Domain.Models;
 
 namespace PokéDesc.Business.Services;
-
-internal class TypeDamageRef
-{
-    [JsonPropertyName("name")]
-    public string Name { get; set; } = string.Empty;
-}
-
-internal class DamageRelations
-{
-    [JsonPropertyName("double_damage_from")]
-    public List<TypeDamageRef> DoubleDamageFrom { get; set; } = new();
-
-    [JsonPropertyName("half_damage_from")]
-    public List<TypeDamageRef> HalfDamageFrom { get; set; } = new();
-
-    [JsonPropertyName("no_damage_from")]
-    public List<TypeDamageRef> NoDamageFrom { get; set; } = new();
-}
-
-internal class TypeData
-{
-    [JsonPropertyName("id")]
-    public int Id { get; set; }
-
-    [JsonPropertyName("name_fr")]
-    public string NameFr { get; set; } = string.Empty;
-
-    [JsonPropertyName("name_en")]
-    public string NameEn { get; set; } = string.Empty;
-
-    [JsonPropertyName("damage_relations")]
-    public DamageRelations DamageRelations { get; set; } = new();
-}
 
 public class TypesGameService : ITypesGameService
 {
@@ -44,12 +11,10 @@ public class TypesGameService : ITypesGameService
     private static readonly Dictionary<string, TypesGameState> _gameStore = new();
     private static readonly object _lock = new();
 
-    public TypesGameService(string dataPath)
+    public TypesGameService(ITypesRepository repository)
     {
-        var json = File.ReadAllText(Path.Combine(dataPath, "all_types.json"));
-        _types = JsonSerializer.Deserialize<List<TypeData>>(json) ?? new();
-        if (_types.Count < 2)
-            throw new InvalidOperationException("Au moins 2 types sont nécessaires pour le jeu.");
+        // GetAllAsync() est synchrone en pratique (données en mémoire), .GetAwaiter().GetResult() est sûr ici.
+        _types = repository.GetAllAsync().GetAwaiter().GetResult();
     }
 
     public List<TypeSimpleDto> GetAllTypes() =>

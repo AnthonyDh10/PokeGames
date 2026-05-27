@@ -114,7 +114,7 @@ public static class TestDataFactory
             Id = Guid.NewGuid().ToString(),
             CodeSession = "TEST01",
             Dresseur1Id = dresseur1Id,
-            Statut = "EnCours",
+            Statut = PokéDesc.Domain.PartieStatut.EnCours,
             NbPokemons = 1,
             TimerDurationSeconds = 60,
             PokemonsToGuess = new List<Pokemon> { pokemon },

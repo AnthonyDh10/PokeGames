@@ -7,9 +7,9 @@ namespace PokéDesc.Business.Services;
 
 public class PokemonService : IPokemonService
 {
-    private readonly PokemonRepository _repository;
+    private readonly IPokemonRepository _repository;
 
-    public PokemonService(PokemonRepository repository)
+    public PokemonService(IPokemonRepository repository)
     {
         _repository = repository;
     }

@@ -54,7 +54,7 @@ public class PartieServiceTests
     {
         var partie = await _service.CreateGameAsync("dresseur-1");
 
-        Assert.Equal("EnAttente", partie.Statut);
+        Assert.Equal(PokéDesc.Domain.PartieStatut.EnAttente, partie.Statut);
     }
 
     [Fact]
@@ -116,7 +116,7 @@ public class PartieServiceTests
 
         var joined = await _service.JoinGameAsync(created.CodeSession, "dresseur-2");
 
-        Assert.Equal("Prêt", joined.Statut);
+        Assert.Equal(PokéDesc.Domain.PartieStatut.Pret, joined.Statut);
     }
 
     [Fact]
@@ -158,7 +158,7 @@ public class PartieServiceTests
 
         var started = await _service.StartGameAsync(created.Id, "Standard", isSolo: true, nbPokemons: 1);
 
-        Assert.Equal("EnCours", started.Statut);
+        Assert.Equal(PokéDesc.Domain.PartieStatut.EnCours, started.Statut);
     }
 
     [Fact]

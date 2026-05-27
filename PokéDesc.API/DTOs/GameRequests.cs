@@ -51,7 +51,7 @@ public class PartieResponseDto
         CodeSession = p.CodeSession,
         Dresseur1Id = p.Dresseur1Id,
         Dresseur2Id = p.Dresseur2Id,
-        Statut = p.Statut,
+        Statut = p.Statut.ToDisplayString(),
         ModeSolo = p.ModeSolo,
         NbPokemons = p.NbPokemons,
         SelectedGenerations = p.SelectedGenerations,

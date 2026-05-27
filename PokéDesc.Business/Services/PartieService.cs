@@ -4,6 +4,7 @@ using PokéDesc.Business.Interfaces;
 using PokéDesc.Business.Models;
 using PokéDesc.Domain;
 using PokéDesc.Domain.Models;
+using PartieStatut = PokéDesc.Domain.PartieStatut;
 
 namespace PokéDesc.Business.Services;
 
@@ -74,7 +75,7 @@ public class PartieService : IPartieService
             CodeSession = GenerateSessionCode(),
             Dresseur1Id = dresseurId,
             PokemonsToGuess = new List<Pokemon>(),
-            Statut = "EnAttente"
+            Statut = PartieStatut.EnAttente
         };
 
         _gameStore.TryAdd(partie.Id, partie);
@@ -138,7 +139,7 @@ public class PartieService : IPartieService
 
             // Génération d'une liste commune aux deux joueurs
             partie.PokemonsToGuess = SelectPokemonsBasedOnDraws(rarityDraws, basePokemons, legendaryMythicalPokemons, random);
-            partie.Statut = "EnCours";
+            partie.Statut = PartieStatut.EnCours;
 
             // Initialiser les timers pour chaque joueur
             partie.TimerStartJ1 = DateTime.UtcNow;
@@ -148,14 +149,14 @@ public class PartieService : IPartieService
         }
         else if (mode == "Types")
         {
-            partie.Statut = "EnCours";
+            partie.Statut = PartieStatut.EnCours;
             partie.TimerStartJ1 = DateTime.UtcNow;
             partie.TimerStartJ2 = DateTime.UtcNow;
         }
         else if (mode == "DeZoom")
         {
             partie.SelectedGenerations = generations ?? Enumerable.Range(1, 9).ToList();
-            partie.Statut = "EnCours";
+            partie.Statut = PartieStatut.EnCours;
         }
         else
         {
@@ -213,7 +214,7 @@ public class PartieService : IPartieService
             throw new ArgumentException("Cette partie a déjà deux joueurs.");
         
         partie.Dresseur2Id = dresseurId;
-        partie.Statut = "Prêt"; // Les deux joueurs sont connectés, en attente de démarrage
+        partie.Statut = PartieStatut.Pret; // Les deux joueurs sont connectés, en attente de démarrage
         
         return await Task.FromResult(partie);
     }
@@ -560,7 +561,7 @@ public class PartieService : IPartieService
 
         // Ne pas modifier les paramètres si la partie est déjà en cours
         // (protège TimerDurationSeconds contre une mise à jour tardive du lobby)
-        if (partie.Statut == "EnCours")
+        if (partie.Statut == PartieStatut.EnCours)
             return partie;
 
         // Valider les paramètres
@@ -602,7 +603,7 @@ public class PartieService : IPartieService
                     if (!string.IsNullOrEmpty(partie.Dresseur2Id))
                     {
                         newPartie.Dresseur2Id = partie.Dresseur2Id;
-                        newPartie.Statut = "Prêt";
+                        newPartie.Statut = PartieStatut.Pret;
                     }
                     await StartGameAsync(newPartie.Id, "Standard", partie.ModeSolo, partie.NbPokemons, partie.SelectedGenerations, partie.TimerDurationSeconds);
                     partie.RematchPartieId = newPartie.Id;

@@ -13,7 +13,7 @@ public class DeZoomService : IDeZoomService
 
 
 
-    public DeZoomService(PokemonRepository repository)
+    public DeZoomService(IPokemonRepository repository)
     {
         // GetAllAsync() est synchrone en pratique (données en mémoire), .GetAwaiter().GetResult() est sûr ici.
         _pokemons = repository.GetAllAsync().GetAwaiter().GetResult()

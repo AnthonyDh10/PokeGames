@@ -31,7 +31,7 @@ public class PartieControllerTests
         Id = id,
         CodeSession = "ABC123",
         Dresseur1Id = dresseur1,
-        Statut = "EnAttente",
+        Statut = PokéDesc.Domain.PartieStatut.EnAttente,
     };
 
     // ─────────────────────────────────────────────
@@ -189,7 +189,7 @@ public class PartieControllerTests
     public async Task StartGame_Returns200WithStartedPartie()
     {
         var partie = CreateTestPartie();
-        partie.Statut = "EnCours";
+        partie.Statut = PokéDesc.Domain.PartieStatut.EnCours;
         _serviceMock.Setup(s => s.StartGameAsync("partie-1", "Standard", true, 1, null, 60))
             .ReturnsAsync(partie);
 
