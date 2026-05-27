@@ -11,7 +11,7 @@ public class TypesModeStrategy : IGameModeStrategy
 {
     public string Mode => "Types";
 
-    public Task ExecuteAsync(Partie partie, StartGameParams parameters, IPokemonService pokemonService)
+    public Task ExecuteAsync(Partie partie, StartGameParams parameters)
     {
         partie.Statut = PartieStatut.EnCours;
         partie.TimerStartJ1 = DateTime.UtcNow;

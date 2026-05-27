@@ -1,9 +1,7 @@
-using System.Collections.Concurrent;
 using PokéDesc.Business.Constants;
 using PokéDesc.Business.Helpers;
 using PokéDesc.Business.Interfaces;
 using PokéDesc.Business.Models;
-using PokéDesc.Business.Strategies;
 using PokéDesc.Domain;
 using PokéDesc.Domain.Models;
 using PartieStatut = PokéDesc.Domain.PartieStatut;
@@ -13,56 +11,35 @@ namespace PokéDesc.Business.Services;
 public class PartieService : IPartieService
 {
     private readonly IPokemonService _pokemonService;
-    // TODO: Injecter un Repository pour sauvegarder la Partie (ex: IPartieRepository)
-    // Pour l'instant, on va simuler le stockage en mémoire ou supposer qu'il existe.
-    private readonly ConcurrentDictionary<string, Partie> _gameStore = new();
+    private readonly IGameSessionStore _sessionStore;
     // Lock global pour la création de revanche (double-check pattern)
     private readonly SemaphoreSlim _rematchLock = new(1, 1);
-    // Un SemaphoreSlim par partie pour protéger les mutations concurrentes (J1 + J2 simultanés)
-    private readonly ConcurrentDictionary<string, SemaphoreSlim> _gameLocks = new();
 
     private static readonly TimeSpan GameTtl = TimeSpan.FromHours(24);
 
     private readonly IReadOnlyDictionary<string, IGameModeStrategy> _strategies;
 
-    private void CleanupOldGames()
-    {
-        var cutoff = DateTime.UtcNow - GameTtl;
-        foreach (var key in _gameStore.Keys)
-        {
-            if (_gameStore.TryGetValue(key, out var p) && p.CreatedAt < cutoff)
-            {
-                if (_gameStore.TryRemove(key, out _))
-                    _gameLocks.TryRemove(key, out _);
-            }
-        }
-    }
-
-    private SemaphoreSlim GetOrCreateGameLock(string partieId)
-        => _gameLocks.GetOrAdd(partieId, _ => new SemaphoreSlim(1, 1));
-
-
-
-    public PartieService(IPokemonService pokemonService, IEnumerable<IGameModeStrategy> strategies)
+    public PartieService(IPokemonService pokemonService, IGameSessionStore sessionStore, IEnumerable<IGameModeStrategy> strategies)
     {
         _pokemonService = pokemonService;
+        _sessionStore = sessionStore;
         _strategies = strategies.ToDictionary(s => s.Mode, StringComparer.OrdinalIgnoreCase);
     }
 
     public Task<Partie> CreateGameAsync(string dresseurId)
     {
-        CleanupOldGames();
+        _sessionStore.Cleanup(GameTtl);
 
         var partie = new Partie
         {
-            Id = Guid.NewGuid().ToString(), // Simulé, MongoDB le ferait auto
+            Id = Guid.NewGuid().ToString(),
             CodeSession = GenerateSessionCode(),
             Dresseur1Id = dresseurId,
             PokemonsToGuess = new List<Pokemon>(),
             Statut = PartieStatut.EnAttente
         };
 
-        _gameStore.TryAdd(partie.Id, partie);
+        _sessionStore.Add(partie);
         return Task.FromResult(partie);
     }
 
@@ -77,27 +54,22 @@ public class PartieService : IPartieService
         if (!_strategies.TryGetValue(mode, out var strategy))
             throw new ArgumentException($"Mode de jeu '{mode}' inconnu.");
 
-        await strategy.ExecuteAsync(partie, new StartGameParams(nbPokemons, generations, timerDuration), _pokemonService);
+        await strategy.ExecuteAsync(partie, new StartGameParams(nbPokemons, generations, timerDuration));
 
         return partie;
     }
 
     public async Task<Partie> JoinGameAsync(string codeSession, string dresseurId)
     {
-        // Normaliser le code de session (supprimer espaces et mettre en majuscules)
-        var normalizedCode = codeSession?.Trim().ToUpper();
-
-        var partie = _gameStore.Values.FirstOrDefault(p =>
-            p.CodeSession?.Trim().ToUpper() == normalizedCode);
+        var partie = _sessionStore.FindByCode(codeSession);
 
         if (partie == null)
             throw new KeyNotFoundException("Code de session invalide.");
 
-        var gameLock = GetOrCreateGameLock(partie.Id);
+        var gameLock = _sessionStore.GetOrCreateLock(partie.Id);
         await gameLock.WaitAsync();
         try
         {
-            // Re-vérification après acquisition du lock (double-check pattern)
             partie.Join(dresseurId);
             return partie;
         }
@@ -108,15 +80,11 @@ public class PartieService : IPartieService
     }
 
     public Task<Partie> GetGameAsync(string partieId)
-    {
-        if (!_gameStore.TryGetValue(partieId, out var partie))
-            throw new KeyNotFoundException("Partie introuvable.");
-        return Task.FromResult(partie);
-    }
+        => Task.FromResult(_sessionStore.Get(partieId));
 
     public async Task<Partie> UseHintAsync(string partieId, string dresseurId, string hintType)
     {
-        var gameLock = GetOrCreateGameLock(partieId);
+        var gameLock = _sessionStore.GetOrCreateLock(partieId);
         await gameLock.WaitAsync();
         try
         {
@@ -167,7 +135,7 @@ public class PartieService : IPartieService
 
     public async Task<GuessResult> SubmitGuessAsync(string partieId, string dresseurId, string pokemonName)
     {
-        var gameLock = GetOrCreateGameLock(partieId);
+        var gameLock = _sessionStore.GetOrCreateLock(partieId);
         await gameLock.WaitAsync();
         try
         {
@@ -293,8 +261,7 @@ public class PartieService : IPartieService
 
     public void ResetTimer(string partieId, string dresseurId)
     {
-        if (!_gameStore.TryGetValue(partieId, out var partie))
-            throw new KeyNotFoundException("Partie introuvable.");
+        var partie = _sessionStore.Get(partieId);
             
         bool isJ1 = dresseurId == partie.Dresseur1Id;
         double timerDuration = partie.TimerDurationSeconds >= 0 ? partie.TimerDurationSeconds : -1;
@@ -345,9 +312,18 @@ public class PartieService : IPartieService
 
     public async Task<GuessResult> NotifyTimeoutAsync(string partieId, string dresseurId)
     {
-        var partie = await GetGameAsync(partieId);
-        bool isJ1 = dresseurId == partie.Dresseur1Id;
-        return await HandleTimeout(partie, isJ1);
+        var gameLock = _sessionStore.GetOrCreateLock(partieId);
+        await gameLock.WaitAsync();
+        try
+        {
+            var partie = await GetGameAsync(partieId);
+            bool isJ1 = dresseurId == partie.Dresseur1Id;
+            return await HandleTimeout(partie, isJ1);
+        }
+        finally
+        {
+            gameLock.Release();
+        }
     }
 
     private async Task<GuessResult> HandleTimeout(Partie partie, bool isJ1)
@@ -384,8 +360,7 @@ public class PartieService : IPartieService
 
     public double GetRemainingTime(string partieId, string dresseurId)
     {
-        if (!_gameStore.TryGetValue(partieId, out var partie))
-            throw new KeyNotFoundException("Partie introuvable.");
+        var partie = _sessionStore.Get(partieId);
 
         bool isJ1 = dresseurId == partie.Dresseur1Id;
         return TimerCalculator.GetRemaining(
@@ -395,8 +370,7 @@ public class PartieService : IPartieService
 
     public int GetTimerDuration(string partieId)
     {
-        if (!_gameStore.TryGetValue(partieId, out var partie))
-            throw new KeyNotFoundException("Partie introuvable.");
+        var partie = _sessionStore.Get(partieId);
         return partie.TimerDurationSeconds;
     }
 

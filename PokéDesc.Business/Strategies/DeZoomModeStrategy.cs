@@ -11,7 +11,7 @@ public class DeZoomModeStrategy : IGameModeStrategy
 {
     public string Mode => "DeZoom";
 
-    public Task ExecuteAsync(Partie partie, StartGameParams parameters, IPokemonService pokemonService)
+    public Task ExecuteAsync(Partie partie, StartGameParams parameters)
     {
         partie.SelectedGenerations = parameters.Generations ?? Enumerable.Range(1, 9).ToList();
         partie.Statut = PartieStatut.EnCours;

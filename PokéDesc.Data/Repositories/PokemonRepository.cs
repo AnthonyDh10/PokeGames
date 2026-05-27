@@ -22,12 +22,14 @@ public class PokemonRepository : IPokemonRepository
         _pokemons = JsonSerializer.Deserialize<List<Pokemon>>(json, options)!;
 
         // Id = string du numéro de Pokédex (remplace l'ancien ObjectId MongoDB)
+        // Tri par numéro de Pokédex une seule fois à l'initialisation (Singleton)
         foreach (var p in _pokemons)
             p.Id = p.PokedexNumber.ToString();
+        _pokemons.Sort((a, b) => a.PokedexNumber.CompareTo(b.PokedexNumber));
     }
 
     public Task<List<Pokemon>> GetAllAsync()
-        => Task.FromResult(_pokemons.OrderBy(p => p.PokedexNumber).ToList());
+        => Task.FromResult(_pokemons.ToList());
 
     public Task<(List<Pokemon> items, int totalCount)> GetPaginatedAsync(int page, int pageSize)
     {
@@ -36,11 +38,11 @@ public class PokemonRepository : IPokemonRepository
         return Task.FromResult((items, sorted.Count));
     }
 
-    public Task<Pokemon> GetByIdAsync(string id)
-        => Task.FromResult(_pokemons.FirstOrDefault(p => p.Id == id)!);
+    public Task<Pokemon?> GetByIdAsync(string id)
+        => Task.FromResult(_pokemons.FirstOrDefault(p => p.Id == id));
 
-    public Task<Pokemon> GetByPokedexNumberAsync(int pokedexNumber)
-        => Task.FromResult(_pokemons.FirstOrDefault(p => p.PokedexNumber == pokedexNumber)!);
+    public Task<Pokemon?> GetByPokedexNumberAsync(int pokedexNumber)
+        => Task.FromResult(_pokemons.FirstOrDefault(p => p.PokedexNumber == pokedexNumber));
 
     public Task<List<Pokemon>> GetByTypeAsync(string typeName)
         => Task.FromResult(_pokemons

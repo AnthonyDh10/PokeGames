@@ -15,9 +15,6 @@ public class PokemonController : ControllerBase
         _service = service;
     }
 
-    /// <summary>
-    /// RÃ©cupÃ¨re tous les PokÃ©mon
-    /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] int? page, [FromQuery] int? pageSize)
     {
@@ -40,9 +37,6 @@ public class PokemonController : ControllerBase
         return Ok(pokemons);
     }
 
-    /// <summary>
-    /// RÃ©cupÃ¨re tous les PokÃ©mon d'un type donnÃ©
-    /// </summary>
     [HttpGet("type/{typeName}")]
     public async Task<IActionResult> GetByType(string typeName)
     {
@@ -50,9 +44,6 @@ public class PokemonController : ControllerBase
         return Ok(pokemons);
     }
 
-    /// <summary>
-    /// RÃ©cupÃ¨re tous les PokÃ©mon lÃ©gendaires
-    /// </summary>
     [HttpGet("legendary")]
     public async Task<IActionResult> GetLegendary()
     {
@@ -60,9 +51,6 @@ public class PokemonController : ControllerBase
         return Ok(pokemons);
     }
 
-    /// <summary>
-    /// RÃ©cupÃ¨re tous les PokÃ©mon mythiques
-    /// </summary>
     [HttpGet("mythical")]
     public async Task<IActionResult> GetMythical()
     {
@@ -70,9 +58,6 @@ public class PokemonController : ControllerBase
         return Ok(pokemons);
     }
 
-    /// <summary>
-    /// RÃ©cupÃ¨re tous les PokÃ©mon lÃ©gendaires ou mythiques
-    /// </summary>
     [HttpGet("legendary-mythical")]
     public async Task<IActionResult> GetLegendaryOrMythical()
     {
@@ -80,9 +65,6 @@ public class PokemonController : ControllerBase
         return Ok(pokemons);
     }
 
-    /// <summary>
-    /// RÃ©cupÃ¨re tous les PokÃ©mon de base (premiers de leur chaÃ®ne d'Ã©volution)
-    /// </summary>
     [HttpGet("base-evolution")]
     public async Task<IActionResult> GetBaseEvolution()
     {
@@ -90,9 +72,6 @@ public class PokemonController : ControllerBase
         return Ok(pokemons);
     }
 
-    /// <summary>
-    /// RÃ©cupÃ¨re la description censurÃ©e d'un PokÃ©mon
-    /// </summary>
     [HttpGet("{id}/censored-description")]
     public async Task<IActionResult> GetCensoredDescription(string id)
     {
@@ -100,9 +79,6 @@ public class PokemonController : ControllerBase
         return Ok(new { descriptions });
     }
 
-    /// <summary>
-    /// RÃ©cupÃ¨re les indices pour deviner un PokÃ©mon
-    /// </summary>
     [HttpGet("{id}/hints")]
     public async Task<IActionResult> GetHints(string id)
     {

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PokéDesc.Business.Interfaces;
+using PokéDesc.API.DTOs;
 
 namespace PokéDesc.API.Controllers;
 
@@ -76,18 +77,4 @@ public class DeZoomController : ControllerBase
         var status = _deZoomService.MarkRematchReady(partieId, dresseurId);
         return Ok(status);
     }
-}
-
-public class DeZoomGuessRequest
-{
-    public string DresseurId { get; set; } = string.Empty;
-    public string PokemonNameFr { get; set; } = string.Empty;
-    public int ElapsedSeconds { get; set; }
-    public int AttemptCount { get; set; }
-}
-
-public class DeZoomSkipRequest
-{
-    public string DresseurId { get; set; } = string.Empty;
-    public int ElapsedSeconds { get; set; }
 }

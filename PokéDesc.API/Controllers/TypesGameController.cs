@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PokéDesc.Business.Interfaces;
+using PokéDesc.API.DTOs;
 
 namespace PokéDesc.API.Controllers;
 
@@ -60,13 +61,4 @@ public class TypesGameController : ControllerBase
         );
         return Ok(result);
     }
-}
-
-public class TypesGuessRequest
-{
-    public string DresseurId { get; set; } = string.Empty;
-    public int Type1Id { get; set; }
-    public int? Type2Id { get; set; }
-    public int ElapsedSeconds { get; set; }
-    public int AttemptCount { get; set; }
 }

@@ -34,7 +34,8 @@ builder.Services.AddSingleton<IPokemonService, PokemonService>();
 builder.Services.AddSingleton<IGameModeStrategy, StandardModeStrategy>();
 builder.Services.AddSingleton<IGameModeStrategy, TypesModeStrategy>();
 builder.Services.AddSingleton<IGameModeStrategy, DeZoomModeStrategy>();
-// Singleton : _gameStore est partagé globalement (état du serveur en mémoire)
+// Singleton : stockage in-memory des parties actives (état du serveur)
+builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
 builder.Services.AddSingleton<IPartieService, PartieService>();
 builder.Services.AddSingleton<ITypesGameService, TypesGameService>();
 builder.Services.AddSingleton<IDeZoomService, DeZoomService>();
@@ -78,7 +79,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 app.UseCors("Frontend");
 app.UseMiddleware<PokéDesc.API.Middleware.ExceptionMiddleware>();
 app.MapControllers();

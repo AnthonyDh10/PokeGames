@@ -11,16 +11,23 @@ namespace PokéDesc.Business.Strategies;
 /// </summary>
 public class StandardModeStrategy : IGameModeStrategy
 {
+    private readonly IPokemonService _pokemonService;
+
+    public StandardModeStrategy(IPokemonService pokemonService)
+    {
+        _pokemonService = pokemonService;
+    }
+
     public string Mode => "Standard";
 
-    public async Task ExecuteAsync(Partie partie, StartGameParams parameters, IPokemonService pokemonService)
+    public async Task ExecuteAsync(Partie partie, StartGameParams parameters)
     {
         partie.NbPokemons = parameters.NbPokemons;
         partie.SelectedGenerations = parameters.Generations ?? Enumerable.Range(1, 8).ToList();
         partie.TimerDurationSeconds = parameters.TimerDuration;
 
-        var basePokemons = await pokemonService.GetAllPokemonsAsync();
-        var legendaryMythicalPokemons = await pokemonService.GetLegendaryOrMythicalPokemonsAsync();
+        var basePokemons = await _pokemonService.GetAllPokemonsAsync();
+        var legendaryMythicalPokemons = await _pokemonService.GetLegendaryOrMythicalPokemonsAsync();
 
         // Filtrer par génération si nécessaire
         var genNames = partie.SelectedGenerations

@@ -2,6 +2,7 @@ using Xunit;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using PokéDesc.API.Controllers;
+using PokéDesc.API.DTOs;
 using PokéDesc.Business.Interfaces;
 using PokéDesc.Domain;
 

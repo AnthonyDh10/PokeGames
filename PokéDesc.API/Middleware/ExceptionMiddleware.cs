@@ -34,6 +34,15 @@ public class ExceptionMiddleware
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsJsonAsync(new { message = ex.Message });
         }
+        catch (BadHttpRequestException ex)
+        {
+            // Erreur cliente (corps tronqué, connexion coupée) — pas un bug serveur
+            _logger.LogWarning("Bad HTTP request on {Method} {Path}: {Message}",
+                context.Request.Method, context.Request.Path, ex.Message);
+            context.Response.StatusCode = ex.StatusCode;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(new { message = "Requête invalide." });
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unhandled exception on {Method} {Path}",

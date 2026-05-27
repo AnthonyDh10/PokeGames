@@ -24,12 +24,12 @@ public class PartieServiceTests
 
         IGameModeStrategy[] strategies =
         [
-            new StandardModeStrategy(),
+            new StandardModeStrategy(_pokemonServiceMock.Object),
             new TypesModeStrategy(),
             new DeZoomModeStrategy(),
         ];
 
-        _service = new PartieService(_pokemonServiceMock.Object, strategies);
+        _service = new PartieService(_pokemonServiceMock.Object, new GameSessionStore(), strategies);
 
         // Setup par défaut pour les appels dans StartGameAsync
         var allPokemons = TestDataFactory.CreateAllPokemons()

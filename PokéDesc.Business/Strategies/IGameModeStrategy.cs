@@ -1,7 +1,7 @@
 using PokéDesc.Business.Interfaces;
 using PokéDesc.Domain;
 
-namespace PokéDesc.Business.Strategies;
+namespace PokéDesc.Business.Interfaces;
 
 /// <summary>
 /// Paramètres transmis à chaque stratégie de mode de jeu lors du démarrage.
@@ -15,6 +15,7 @@ public record StartGameParams(
 /// Contrat d'une stratégie de mode de jeu.
 /// Chaque mode (Standard, Types, DeZoom…) implémente cette interface
 /// pour configurer la <see cref="Partie"/> en cours de démarrage.
+/// IPokemonService est injecté dans le constructeur de chaque stratégie concrète.
 /// </summary>
 public interface IGameModeStrategy
 {
@@ -22,5 +23,5 @@ public interface IGameModeStrategy
     string Mode { get; }
 
     /// <summary>Configure la partie et applique les règles propres au mode.</summary>
-    Task ExecuteAsync(Partie partie, StartGameParams parameters, IPokemonService pokemonService);
+    Task ExecuteAsync(Partie partie, StartGameParams parameters);
 }
