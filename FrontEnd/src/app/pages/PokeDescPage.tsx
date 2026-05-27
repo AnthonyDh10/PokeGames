@@ -30,7 +30,7 @@ export default function PokeDescPage() {
     allPokemons, filteredPokemons, searchTerm, selectedPokemonName,
     isSubmitting, guessResultMessage, lastGuessCorrect, proximityResult,
     showSuccessModal, showFailureModal, showDescriptionModal,
-    revealedPokemonSprite, isFinalPokemon, isTimeout,
+    revealedPokemonSprite, revealedPokemonName, isFinalPokemon, isTimeout,
     changeDescriptionIndex, updateSearch, selectPokemon, clearSelection,
     openDescriptionModal, closeDescriptionModal,
     handleSubmitGuess, handleRequestHint, proceedAfterModal, isHintLocked,
@@ -105,7 +105,7 @@ export default function PokeDescPage() {
           <FailureModal
             show={showFailureModal}
             sprite={revealedPokemonSprite}
-            pokemonName={allPokemons.find((p) => p.id === currentPokemonId)?.nameFr ?? 'Pokémon inconnu'}
+            pokemonName={revealedPokemonName}
             isFinalPokemon={isFinalPokemon}
             isTimeout={isTimeout}
             onProceed={proceedAfterModal}

@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using PokéDesc.Business.Constants;
+using PokéDesc.Business.Helpers;
 using PokéDesc.Business.Interfaces;
 using PokéDesc.Business.Models;
 using PokéDesc.Domain;
@@ -16,36 +17,6 @@ public class PartieService : IPartieService
     private static readonly ConcurrentDictionary<string, Partie> _gameStore = new();
     private static readonly SemaphoreSlim _rematchLock = new(1, 1);
 
-    // Configuration des coûts des indices
-    private static readonly Dictionary<string, int> HintCosts = new()
-    {
-        { "Type1", 20 },
-        { "Type2", 20 },
-        { "Generation", 15 },
-        { "Category", 5 },
-        { "Stats", 5 },
-        { "Height", 5 },
-        { "Weight", 5 },
-        { "Abilities", 5 },
-        { "Sprite", 50 }
-    };
-    
-    // Pénalités de temps en % de la durée totale du timer de la partie
-    private static readonly Dictionary<string, double> HintTimePenalties = new()
-    {
-        { "Type1", 20.0 },
-        { "Type2", 20.0 },
-        { "Generation", 15.0 },
-        { "Category", 5.0 },
-        { "Stats", 5.0 },
-        { "Height", 5.0 },
-        { "Weight", 5.0 },
-        { "Abilities", 5.0 },
-        { "Sprite", 50.0 }
-    };
-
-    private const int MaxAttempts = 3;
-    private const int BaseScore = 100;
     private static readonly TimeSpan GameTtl = TimeSpan.FromHours(24);
 
     private static void CleanupOldGames()
@@ -234,7 +205,7 @@ public class PartieService : IPartieService
         bool isJ1 = dresseurId == partie.Dresseur1Id;
         var usedHints = isJ1 ? partie.UsedHintsJ1 : partie.UsedHintsJ2;
 
-        if (!HintCosts.ContainsKey(hintType))
+        if (!HintConfig.Costs.ContainsKey(hintType))
         {
             throw new ArgumentException($"Type d'indice '{hintType}' inconnu.");
         }
@@ -245,7 +216,7 @@ public class PartieService : IPartieService
             
             // Appliquer la pénalité de temps (sauf si timer infini)
             // La pénalité est un pourcentage de la durée totale du timer de la partie
-            if (HintTimePenalties.TryGetValue(hintType, out double penaltyPct) && partie.TimerDurationSeconds > 0)
+            if (HintConfig.TimePenalties.TryGetValue(hintType, out double penaltyPct) && partie.TimerDurationSeconds > 0)
             {
                 double timePenaltySeconds = partie.TimerDurationSeconds * penaltyPct / 100.0;
                 if (isJ1)
@@ -278,7 +249,9 @@ public class PartieService : IPartieService
             return await HandleTimeout(partie, isJ1);
         }
         
-        bool isTimedOut = CheckTimeout(partie, isJ1);
+        bool isTimedOut = TimerCalculator.IsTimedOut(
+            isJ1 ? partie.TimerStartJ1 : partie.TimerStartJ2,
+            isJ1 ? partie.TimeRemainingJ1 : partie.TimeRemainingJ2);
         if (isTimedOut)
         {
             return await HandleTimeout(partie, isJ1);
@@ -296,42 +269,16 @@ public class PartieService : IPartieService
         bool isCorrect = string.Equals(targetPokemon.NameFr, pokemonName, StringComparison.OrdinalIgnoreCase);
 
         // --- LOGIQUE DE PROXIMITÉ ---
-        bool hasOneTypeInCommon = false;
-        bool hasPerfectTypeMatch = false;
-        bool hasSameGeneration = false;
-        bool isInSameEvolutionChain = false;
-
-        // On ne calcule la proximité que si la réponse est fausse pour optimiser, 
-        // mais si tu en as besoin tout le temps, tu peux sortir ce bloc du if(!isCorrect).
+        var proximity = new ProximityResult();
         if (!isCorrect)
         {
             var guessedPokemon = await _pokemonService.GetPokemonByNameAsync(pokemonName);
-            
-            // Si le joueur a tapé un vrai nom de Pokémon existant
-            if (guessedPokemon != null)
-            {
-                // 1 & 2. Comparaison des Types
-                var targetTypes = targetPokemon.Types?.Select(t => t.Name).ToList() ?? new List<string>();
-                var guessTypes = guessedPokemon.Types?.Select(t => t.Name).ToList() ?? new List<string>();
-                
-                int commonTypesCount = targetTypes.Intersect(guessTypes, StringComparer.OrdinalIgnoreCase).Count();
-                
-                hasOneTypeInCommon = commonTypesCount >= 1;
-                hasPerfectTypeMatch = (targetTypes.Count == guessTypes.Count && commonTypesCount == targetTypes.Count);
-
-                // 3. Comparaison de la Génération
-                hasSameGeneration = targetPokemon.Generation?.NameEn == guessedPokemon.Generation?.NameEn 
-                                    && !string.IsNullOrEmpty(targetPokemon.Generation?.NameEn);
-
-                // 4. Comparaison de la Chaîne d'évolution
-                isInSameEvolutionChain = targetPokemon.EvolutionChain?.BasePokemon == guessedPokemon.EvolutionChain?.BasePokemon 
-                                        && !string.IsNullOrEmpty(targetPokemon.EvolutionChain?.BasePokemon);
-            }
+            proximity = ProximityCalculator.Calculate(targetPokemon, guessedPokemon);
         }
 
         if (isCorrect)
         {
-            int points = CalculateScore(isJ1 ? partie.UsedHintsJ1 : partie.UsedHintsJ2);
+            int points = ScoringCalculator.Calculate(isJ1 ? partie.UsedHintsJ1 : partie.UsedHintsJ2);
             
             if (isJ1) partie.ScoreJ1 += points;
             else partie.ScoreJ2 += points;
@@ -361,7 +308,7 @@ public class PartieService : IPartieService
 
             int attemptsUsed = isJ1 ? partie.AttemptsUsedJ1 : partie.AttemptsUsedJ2;
 
-            if (attemptsUsed >= MaxAttempts)
+            if (attemptsUsed >= HintConfig.MaxAttempts)
             {
                 RecordCompletedPokemon(partie, isJ1, targetPokemon, false, 0);
                 AdvanceToNextPokemon(partie, isJ1);
@@ -374,10 +321,10 @@ public class PartieService : IPartieService
                     Message = $"Dommage, c'était {targetPokemon.NameFr}. Tu passes au suivant.",
                     UpdatedGame = partie,
                     IsGameFinished = CheckIfGameFinished(partie, isJ1),
-                    HasOneTypeInCommon = hasOneTypeInCommon,
-                    HasPerfectTypeMatch = hasPerfectTypeMatch,
-                    HasSameGeneration = hasSameGeneration,
-                    IsInSameEvolutionChain = isInSameEvolutionChain
+                    HasOneTypeInCommon = proximity.HasOneTypeInCommon,
+                    HasPerfectTypeMatch = proximity.HasPerfectTypeMatch,
+                    HasSameGeneration = proximity.HasSameGeneration,
+                    IsInSameEvolutionChain = proximity.IsInSameEvolutionChain
                 };
             }
             else
@@ -387,12 +334,12 @@ public class PartieService : IPartieService
                     IsCorrect = false,
                     IsTurnFinished = false,
                     PointsEarned = 0,
-                    Message = $"Mauvaise réponse. Il te reste {MaxAttempts - attemptsUsed} essais.",
+                    Message = $"Mauvaise réponse. Il te reste {HintConfig.MaxAttempts - attemptsUsed} essais.",
                     UpdatedGame = partie,
-                    HasOneTypeInCommon = hasOneTypeInCommon,
-                    HasPerfectTypeMatch = hasPerfectTypeMatch,
-                    HasSameGeneration = hasSameGeneration,
-                    IsInSameEvolutionChain = isInSameEvolutionChain
+                    HasOneTypeInCommon = proximity.HasOneTypeInCommon,
+                    HasPerfectTypeMatch = proximity.HasPerfectTypeMatch,
+                    HasSameGeneration = proximity.HasSameGeneration,
+                    IsInSameEvolutionChain = proximity.IsInSameEvolutionChain
                 };
             }
         }
@@ -452,19 +399,6 @@ public class PartieService : IPartieService
             partie.CompletedPokemonsJ2.Add(completedPokemon);
     }
 
-    private int CalculateScore(List<string> usedHints)
-    {
-        int score = BaseScore;
-        foreach (var hint in usedHints)
-        {
-            if (HintCosts.TryGetValue(hint, out int cost))
-            {
-                score -= cost;
-            }
-        }
-        return Math.Max(0, score); // Pas de score négatif
-    }
-
     private bool CheckIfGameFinished(Partie partie, bool isJ1)
     {
         int index = isJ1 ? partie.CurrentIndexJ1 : partie.CurrentIndexJ2;
@@ -477,22 +411,6 @@ public class PartieService : IPartieService
         return new string(Enumerable.Range(0, 6)
             .Select(_ => chars[Random.Shared.Next(chars.Length)])
             .ToArray());
-    }
-
-    private bool CheckTimeout(Partie partie, bool isJ1)
-    {
-        DateTime? timerStart = isJ1 ? partie.TimerStartJ1 : partie.TimerStartJ2;
-        double timeRemaining = isJ1 ? partie.TimeRemainingJ1 : partie.TimeRemainingJ2;
-
-        if (timerStart == null)
-            return false;
-
-        // Si le timer est infini (-1), pas de timeout
-        if (timeRemaining < 0)
-            return false;
-
-        var elapsed = (DateTime.UtcNow - timerStart.Value).TotalSeconds;
-        return elapsed >= timeRemaining;
     }
 
     private async Task<GuessResult> HandleTimeout(Partie partie, bool isJ1)
@@ -533,19 +451,9 @@ public class PartieService : IPartieService
             return 0;
 
         bool isJ1 = dresseurId == partie.Dresseur1Id;
-        DateTime? timerStart = isJ1 ? partie.TimerStartJ1 : partie.TimerStartJ2;
-        double timeRemaining = isJ1 ? partie.TimeRemainingJ1 : partie.TimeRemainingJ2;
-
-        if (timerStart == null)
-            return timeRemaining < 0 ? 0 : timeRemaining;
-
-        var elapsed = (DateTime.UtcNow - timerStart.Value).TotalSeconds;
-
-        // Mode infini : retourner le temps écoulé (stopwatch ascendant)
-        if (timeRemaining < 0)
-            return elapsed;
-
-        return Math.Max(0, timeRemaining - elapsed);
+        return TimerCalculator.GetRemaining(
+            isJ1 ? partie.TimerStartJ1 : partie.TimerStartJ2,
+            isJ1 ? partie.TimeRemainingJ1 : partie.TimeRemainingJ2);
     }
 
     public int GetTimerDuration(string partieId)

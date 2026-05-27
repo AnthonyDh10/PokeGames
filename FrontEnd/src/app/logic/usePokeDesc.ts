@@ -53,6 +53,8 @@ export interface UsePokeDescReturn {
   showDescriptionModal: boolean
   /** Sprite du Pokémon révélé à l'issue d'une tentative (correcte ou échouée). */
   revealedPokemonSprite: string
+  /** Nom français du Pokémon révélé à l'issue d'un échec. */
+  revealedPokemonName: string
   /** `true` si le Pokémon en cours est le dernier de la liste. */
   isFinalPokemon: boolean
   /** `true` si la tentative a été conclue par un dépassement de temps. */
@@ -102,6 +104,7 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
   const [showFailureModal, setShowFailureModal] = useState(false)
   const [showDescriptionModal, setShowDescriptionModal] = useState(false)
   const [revealedPokemonSprite, setRevealedPokemonSprite] = useState('')
+  const [revealedPokemonName, setRevealedPokemonName] = useState('')
   const [isFinalPokemon, setIsFinalPokemon] = useState(false)
   const [isTimeout, setIsTimeout] = useState(false)
 
@@ -199,6 +202,8 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
     } catch (err) {
       console.error('[Timeout] Échec de la soumission du timeout :', err)
     }
+    const timeoutPokemon = allPokemons.find(p => p.pokedexNumber === Number(currentPokemonIdRef.current))
+    setRevealedPokemonName(timeoutPokemon?.nameFr ?? '')
     setIsTimeout(true)
     setShowFailureModal(true)
   }
@@ -269,6 +274,8 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
       } else if (result.isTurnFinished || result.isTimeout) {
         stopTimer()
         setRevealedPokemonSprite(currentPokemonSprite)
+        const failedPokemon = allPokemons.find(p => p.pokedexNumber === Number(currentPokemonId))
+        setRevealedPokemonName(failedPokemon?.nameFr ?? '')
         setIsFinalPokemon(result.isGameFinished)
         setIsTimeout(result.isTimeout)
         setShowFailureModal(true)
@@ -305,6 +312,7 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
     setLastGuessCorrect(false)
     setGuessResultMessage('')
     setIsFinalPokemon(false)
+    setRevealedPokemonName('')
     clearChenMessages()
     if (isFinalPokemon) {
       navigate(`/resultats/${partieId}`)
@@ -354,6 +362,7 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
     showFailureModal,
     showDescriptionModal,
     revealedPokemonSprite,
+    revealedPokemonName,
     isFinalPokemon,
     isTimeout,
     // Actions nommées
