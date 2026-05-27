@@ -10,10 +10,12 @@ namespace PokéDesc.API.Controllers;
 public class PartieController : ControllerBase
 {
     private readonly IPartieService _partieService;
+    private readonly ITimerService _timerService;
 
-    public PartieController(IPartieService partieService)
+    public PartieController(IPartieService partieService, ITimerService timerService)
     {
         _partieService = partieService;
+        _timerService = timerService;
     }
 
     [HttpPost("create")]
@@ -111,15 +113,15 @@ public class PartieController : ControllerBase
     [HttpGet("{partieId}/timer/{dresseurId}")]
     public IActionResult GetRemainingTime(string partieId, string dresseurId)
     {
-        var remainingTime = _partieService.GetRemainingTime(partieId, dresseurId);
-        var timerDurationSeconds = _partieService.GetTimerDuration(partieId);
+        var remainingTime = _timerService.GetRemainingTime(partieId, dresseurId);
+        var timerDurationSeconds = _timerService.GetTimerDuration(partieId);
         return Ok(new { TimeRemaining = remainingTime, TimerDurationSeconds = timerDurationSeconds });
     }
 
     [HttpPost("{partieId}/timer/reset")]
     public IActionResult ResetTimer(string partieId, [FromBody] ResetTimerRequest request)
     {
-        _partieService.ResetTimer(partieId, request.DresseurId);
+        _timerService.ResetTimer(partieId, request.DresseurId);
         return Ok();
     }
 }

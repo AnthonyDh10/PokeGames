@@ -118,10 +118,8 @@ public static class TestDataFactory
             NbPokemons = 1,
             TimerDurationSeconds = 60,
             PokemonsToGuess = new List<Pokemon> { pokemon },
-            TimerStartJ1 = DateTime.UtcNow,
-            TimeRemainingJ1 = 60.0,
-            TimerStartJ2 = DateTime.UtcNow,
-            TimeRemainingJ2 = 60.0,
+            StateJ1 = new() { TimerStart = DateTime.UtcNow, TimeRemaining = 60.0 },
+            StateJ2 = new() { TimerStart = DateTime.UtcNow, TimeRemaining = 60.0 },
         };
     }
 }

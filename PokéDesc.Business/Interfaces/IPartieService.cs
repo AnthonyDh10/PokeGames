@@ -43,21 +43,6 @@ public interface IPartieService
     Task<Partie> GetGameAsync(string partieId);
 
     /// <summary>
-    /// Récupère le temps restant pour un joueur.
-    /// </summary>
-    double GetRemainingTime(string partieId, string dresseurId);
-
-    /// <summary>
-    /// Récupère la durée totale du timer de la partie (telle que configurée au démarrage).
-    /// </summary>
-    int GetTimerDuration(string partieId);
-
-    /// <summary>
-    /// Réinitialise le timer pour un joueur.
-    /// </summary>
-    void ResetTimer(string partieId, string dresseurId);
-
-    /// <summary>
     /// Met à jour les paramètres de la partie (nombre de Pokémon, générations sélectionnées et durée du timer).
     /// </summary>
     Task<Partie> UpdateGameSettingsAsync(string partieId, int nbPokemons, List<int>? generations, int? timerDuration);

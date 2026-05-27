@@ -17,12 +17,14 @@ namespace PokéDesc.Tests.Controllers;
 public class PartieControllerTests
 {
     private readonly Mock<IPartieService> _serviceMock;
+    private readonly Mock<ITimerService> _timerServiceMock;
     private readonly PartieController _controller;
 
     public PartieControllerTests()
     {
         _serviceMock = new Mock<IPartieService>();
-        _controller = new PartieController(_serviceMock.Object);
+        _timerServiceMock = new Mock<ITimerService>();
+        _controller = new PartieController(_serviceMock.Object, _timerServiceMock.Object);
     }
 
     private static Partie CreateTestPartie(string id = "partie-1", string dresseur1 = "d1") => new()
@@ -215,8 +217,8 @@ public class PartieControllerTests
     [Fact]
     public void GetRemainingTime_Returns200WithTimerData()
     {
-        _serviceMock.Setup(s => s.GetRemainingTime("partie-1", "d1")).Returns(45.5);
-        _serviceMock.Setup(s => s.GetTimerDuration("partie-1")).Returns(60);
+        _timerServiceMock.Setup(s => s.GetRemainingTime("partie-1", "d1")).Returns(45.5);
+        _timerServiceMock.Setup(s => s.GetTimerDuration("partie-1")).Returns(60);
 
         var result = _controller.GetRemainingTime("partie-1", "d1");
 
@@ -226,7 +228,7 @@ public class PartieControllerTests
     [Fact]
     public void GetRemainingTime_WhenServiceThrows_PropagatesException()
     {
-        _serviceMock.Setup(s => s.GetRemainingTime(It.IsAny<string>(), It.IsAny<string>()))
+        _timerServiceMock.Setup(s => s.GetRemainingTime(It.IsAny<string>(), It.IsAny<string>()))
             .Throws(new Exception("Partie introuvable"));
 
         Assert.Throws<Exception>(() => _controller.GetRemainingTime("inexistant", "d1"));
@@ -239,7 +241,7 @@ public class PartieControllerTests
     [Fact]
     public void ResetTimer_Returns200()
     {
-        _serviceMock.Setup(s => s.ResetTimer("partie-1", "d1"));
+        _timerServiceMock.Setup(s => s.ResetTimer("partie-1", "d1"));
 
         var result = _controller.ResetTimer("partie-1", new ResetTimerRequest { DresseurId = "d1" });
 

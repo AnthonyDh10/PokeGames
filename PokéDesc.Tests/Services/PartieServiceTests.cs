@@ -202,7 +202,7 @@ public class PartieServiceTests
         await _service.UseHintAsync(created.Id, "dresseur-1", "Type1");
 
         var partie = await _service.GetGameAsync(created.Id);
-        Assert.Contains("Type1", partie.UsedHintsJ1);
+        Assert.Contains("Type1", partie.StateJ1.UsedHints);
     }
 
     [Fact]
@@ -225,7 +225,7 @@ public class PartieServiceTests
         await _service.UseHintAsync(created.Id, "dresseur-1", "Category");
 
         var partie = await _service.GetGameAsync(created.Id);
-        Assert.Single(partie.UsedHintsJ1.Where(h => h == "Category"));
+        Assert.Single(partie.StateJ1.UsedHints.Where(h => h == "Category"));
     }
 
     // ─────────────────────────────────────────────
@@ -303,26 +303,6 @@ public class PartieServiceTests
         var result = await _service.SubmitGuessAsync(created.Id, "dresseur-1", "Bulbizarre");
 
         Assert.True(result.PointsEarned > 0);
-    }
-
-    // ─────────────────────────────────────────────
-    // ResetTimer
-    // ─────────────────────────────────────────────
-
-    [Fact]
-    public async Task ResetTimer_ForJ1_ResetsTimeRemaining()
-    {
-        var created = await _service.CreateGameAsync("dresseur-1");
-        await _service.StartGameAsync(created.Id, "Standard", isSolo: true, nbPokemons: 1, timerDuration: 60);
-
-        // Simulate time passing by reducing timer
-        var partie = await _service.GetGameAsync(created.Id);
-        partie.TimeRemainingJ1 = 10;
-
-        _service.ResetTimer(created.Id, "dresseur-1");
-
-        var updated = await _service.GetGameAsync(created.Id);
-        Assert.Equal(60, updated.TimeRemainingJ1, precision: 1);
     }
 
     // ─────────────────────────────────────────────

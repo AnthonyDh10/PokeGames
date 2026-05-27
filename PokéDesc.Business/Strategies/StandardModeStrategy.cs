@@ -64,10 +64,11 @@ public class StandardModeStrategy : IGameModeStrategy
         partie.PokemonsToGuess = SelectPokemons(rarityDraws, basePokemons, legendaryMythicalPokemons, random);
         partie.Statut = PartieStatut.EnCours;
 
-        partie.TimerStartJ1 = DateTime.UtcNow;
-        partie.TimeRemainingJ1 = parameters.TimerDuration >= 0 ? parameters.TimerDuration : -1;
-        partie.TimerStartJ2 = DateTime.UtcNow;
-        partie.TimeRemainingJ2 = parameters.TimerDuration >= 0 ? parameters.TimerDuration : -1;
+        double initialTime = parameters.TimerDuration >= 0 ? parameters.TimerDuration : -1.0;
+        partie.StateJ1.TimerStart = DateTime.UtcNow;
+        partie.StateJ1.TimeRemaining = initialTime;
+        partie.StateJ2.TimerStart = DateTime.UtcNow;
+        partie.StateJ2.TimeRemaining = initialTime;
     }
 
     private static List<Pokemon> SelectPokemons(

@@ -37,6 +37,7 @@ builder.Services.AddSingleton<IGameModeStrategy, DeZoomModeStrategy>();
 // Singleton : stockage in-memory des parties actives (état du serveur)
 builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
 builder.Services.AddSingleton<IPartieService, PartieService>();
+builder.Services.AddSingleton<ITimerService, TimerService>();
 builder.Services.AddSingleton<ITypesGameService, TypesGameService>();
 builder.Services.AddSingleton<IDeZoomService, DeZoomService>();
 

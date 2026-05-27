@@ -75,7 +75,7 @@ public class PokemonControllerTests
 
         var result = await _controller.GetByType("Psy");
 
-        var ok = Assert.IsType<OkObjectResult>(result);
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
         var data = Assert.IsAssignableFrom<List<Pokemon>>(ok.Value);
         Assert.Equal(2, data.Count);
     }
@@ -92,7 +92,7 @@ public class PokemonControllerTests
 
         var result = await _controller.GetLegendary();
 
-        var ok = Assert.IsType<OkObjectResult>(result);
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
         var data = Assert.IsAssignableFrom<List<Pokemon>>(ok.Value);
         Assert.Single(data);
     }
@@ -109,7 +109,7 @@ public class PokemonControllerTests
 
         var result = await _controller.GetMythical();
 
-        var ok = Assert.IsType<OkObjectResult>(result);
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
         var data = Assert.IsAssignableFrom<List<Pokemon>>(ok.Value);
         Assert.Single(data);
     }
@@ -126,7 +126,7 @@ public class PokemonControllerTests
 
         var result = await _controller.GetLegendaryOrMythical();
 
-        var ok = Assert.IsType<OkObjectResult>(result);
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
         var data = Assert.IsAssignableFrom<List<Pokemon>>(ok.Value);
         Assert.Equal(2, data.Count);
     }
@@ -193,6 +193,6 @@ public class PokemonControllerTests
 
         var result = await _controller.GetBaseEvolution();
 
-        Assert.IsType<OkObjectResult>(result);
+        Assert.IsType<OkObjectResult>(result.Result);
     }
 }

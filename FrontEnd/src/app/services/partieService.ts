@@ -182,8 +182,7 @@ export async function updateGameSettings(
 export async function markRematchReady(partieId: string, dresseurId: string): Promise<RematchStatusDto> {
   const { data } = await api.post<RematchStatusDto>(
     `/api/partie/${partieId}/rematch-ready`,
-    {},
-    { params: { dresseurId } }
+    { dresseurId }
   )
   return data
 }

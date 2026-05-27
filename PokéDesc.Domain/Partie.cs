@@ -27,42 +27,14 @@ public class Partie
     public List<int> SelectedGenerations { get; set; } = new() { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     public int TimerDurationSeconds { get; set; } = 60; // Durée du timer en secondes (-1 = infini)
 
-    // --- Logique du Jeu ---
-
     // La liste des Pokémon à deviner, commune aux deux joueurs
     public List<Pokemon> PokemonsToGuess { get; set; } = new List<Pokemon>();
 
-    // Progression Joueur 1
-    public int CurrentIndexJ1 { get; set; } = 0;
-    public int ScoreJ1 { get; set; } = 0;
-
-    // État du tour actuel (Joueur 1)
-    public int AttemptsUsedJ1 { get; set; } = 0;
-    public List<string> UsedHintsJ1 { get; set; } = new List<string>();
-
-    // Timer Joueur 1
-    public DateTime? TimerStartJ1 { get; set; }
-    public double TimeRemainingJ1 { get; set; } = 60.0; // secondes
-
-    // Progression Joueur 2
-    public int CurrentIndexJ2 { get; set; } = 0;
-    public int ScoreJ2 { get; set; } = 0;
-
-    // État du tour actuel (Joueur 2)
-    public int AttemptsUsedJ2 { get; set; } = 0;
-    public List<string> UsedHintsJ2 { get; set; } = new List<string>();
-
-    // Timer Joueur 2
-    public DateTime? TimerStartJ2 { get; set; }
-    public double TimeRemainingJ2 { get; set; } = 60.0; // secondes
-
-    // Historique des Pokémons complétés
-    public List<CompletedPokemon> CompletedPokemonsJ1 { get; set; } = new List<CompletedPokemon>();
-    public List<CompletedPokemon> CompletedPokemonsJ2 { get; set; } = new List<CompletedPokemon>();
+    // État de jeu par joueur — remplace les paires de champs J1/J2 dupliqués
+    public PlayerGameState StateJ1 { get; set; } = new();
+    public PlayerGameState StateJ2 { get; set; } = new();
 
     // Revanche
-    public bool RematchReadyJ1 { get; set; }
-    public bool RematchReadyJ2 { get; set; }
     public string? RematchPartieId { get; set; }
 
     // Métadonnées
@@ -71,6 +43,9 @@ public class Partie
     // ─────────────────────────────────────────────
     // Méthodes domaine — invariants centralisés ici
     // ─────────────────────────────────────────────
+
+    /// <summary>Retourne l'état du joueur demandé.</summary>
+    public PlayerGameState GetState(bool isJ1) => isJ1 ? StateJ1 : StateJ2;
 
     /// <summary>
     /// Fait rejoindre un deuxième joueur. Lève une exception si la partie est déjà pleine.

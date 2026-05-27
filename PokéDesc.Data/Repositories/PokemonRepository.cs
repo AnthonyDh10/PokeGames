@@ -33,9 +33,8 @@ public class PokemonRepository : IPokemonRepository
 
     public Task<(List<Pokemon> items, int totalCount)> GetPaginatedAsync(int page, int pageSize)
     {
-        var sorted = _pokemons.OrderBy(p => p.PokedexNumber).ToList();
-        var items = sorted.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-        return Task.FromResult((items, sorted.Count));
+        var items = _pokemons.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        return Task.FromResult((items, _pokemons.Count));
     }
 
     public Task<Pokemon?> GetByIdAsync(string id)
