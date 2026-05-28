@@ -2,6 +2,7 @@
 using PokéDesc.Business.Interfaces;
 using PokéDesc.Business.Models;
 using PokéDesc.API.DTOs;
+using PokéDesc.Domain;
 
 namespace PokéDesc.API.Controllers;
 
@@ -22,64 +23,42 @@ public class PartieController : ControllerBase
     public async Task<IActionResult> CreateGame([FromBody] CreateGameRequest request)
     {
         var partie = await _partieService.CreateGameAsync(request.DresseurId);
-        return Ok(PartieResponseDto.FromPartie(partie));
+        return OkWithPartie(partie);
     }
 
     [HttpPost("join")]
     public async Task<IActionResult> JoinGame([FromBody] JoinGameRequest request)
     {
         var partie = await _partieService.JoinGameAsync(request.CodeSession, request.DresseurId);
-        return Ok(PartieResponseDto.FromPartie(partie));
+        return OkWithPartie(partie);
     }
 
     [HttpGet("{partieId}")]
     public async Task<IActionResult> GetGame(string partieId)
     {
         var partie = await _partieService.GetGameAsync(partieId);
-        return Ok(PartieResponseDto.FromPartie(partie));
+        return OkWithPartie(partie);
     }
 
     [HttpPost("{partieId}/guess")]
     public async Task<IActionResult> SubmitGuess(string partieId, [FromBody] SubmitGuessRequest request)
     {
         var result = await _partieService.SubmitGuessAsync(partieId, request.DresseurId, request.PokemonName);
-        return Ok(new GuessResultDto
-        {
-            IsCorrect = result.IsCorrect,
-            IsTurnFinished = result.IsTurnFinished,
-            IsGameFinished = result.IsGameFinished,
-            IsTimeout = result.IsTimeout,
-            Message = result.Message,
-            PointsEarned = result.PointsEarned,
-            UpdatedGame = PartieResponseDto.FromPartie(result.UpdatedGame),
-            HasOneTypeInCommon = result.HasOneTypeInCommon,
-            HasPerfectTypeMatch = result.HasPerfectTypeMatch,
-            HasSameGeneration = result.HasSameGeneration,
-            IsInSameEvolutionChain = result.IsInSameEvolutionChain,
-        });
+        return Ok(MapGuessResult(result));
     }
 
     [HttpPost("{partieId}/timeout")]
     public async Task<IActionResult> NotifyTimeout(string partieId, [FromBody] TimeoutRequest request)
     {
         var result = await _partieService.NotifyTimeoutAsync(partieId, request.DresseurId);
-        return Ok(new GuessResultDto
-        {
-            IsCorrect = result.IsCorrect,
-            IsTurnFinished = result.IsTurnFinished,
-            IsGameFinished = result.IsGameFinished,
-            IsTimeout = result.IsTimeout,
-            Message = result.Message,
-            PointsEarned = result.PointsEarned,
-            UpdatedGame = PartieResponseDto.FromPartie(result.UpdatedGame),
-        });
+        return Ok(MapGuessResult(result));
     }
 
     [HttpPost("{partieId}/hint")]
     public async Task<IActionResult> UseHint(string partieId, [FromBody] UseHintRequest request)
     {
         var partie = await _partieService.UseHintAsync(partieId, request.DresseurId, request.HintType);
-        return Ok(PartieResponseDto.FromPartie(partie));
+        return OkWithPartie(partie);
     }
 
     [HttpPost("{partieId}/start")]
@@ -93,14 +72,14 @@ public class PartieController : ControllerBase
             request.Generations,
             request.TimerDuration
         );
-        return Ok(PartieResponseDto.FromPartie(partie));
+        return OkWithPartie(partie);
     }
 
     [HttpPut("{partieId}/settings")]
     public async Task<IActionResult> UpdateGameSettings(string partieId, [FromBody] UpdateGameSettingsRequest request)
     {
         var partie = await _partieService.UpdateGameSettingsAsync(partieId, request.NbPokemons, request.Generations, request.TimerDuration);
-        return Ok(PartieResponseDto.FromPartie(partie));
+        return OkWithPartie(partie);
     }
 
     [HttpPost("{partieId}/rematch-ready")]
@@ -124,4 +103,24 @@ public class PartieController : ControllerBase
         _timerService.ResetTimer(partieId, request.DresseurId);
         return Ok();
     }
+
+    // ── Helpers privés ───────────────────────────────────────────────────────
+
+    private OkObjectResult OkWithPartie(Partie partie)
+        => Ok(PartieResponseDto.FromPartie(partie));
+
+    private static GuessResultDto MapGuessResult(GuessResult result) => new()
+    {
+        IsCorrect = result.IsCorrect,
+        IsTurnFinished = result.IsTurnFinished,
+        IsGameFinished = result.IsGameFinished,
+        IsTimeout = result.IsTimeout,
+        Message = result.Message,
+        PointsEarned = result.PointsEarned,
+        UpdatedGame = PartieResponseDto.FromPartie(result.UpdatedGame),
+        HasOneTypeInCommon = result.HasOneTypeInCommon,
+        HasPerfectTypeMatch = result.HasPerfectTypeMatch,
+        HasSameGeneration = result.HasSameGeneration,
+        IsInSameEvolutionChain = result.IsInSameEvolutionChain,
+    };
 }

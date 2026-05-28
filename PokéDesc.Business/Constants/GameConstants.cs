@@ -5,6 +5,12 @@ public static class GameConstants
     public const int MinPokemons = 1;
     public const int MaxPokemons = 6;
 
+    /// <summary>Nombre maximum de tentatives pour les mini-jeux (DeZoom, TypesGame).</summary>
+    public const int MaxAttempts = 3;
+
+    /// <summary>Durée de vie d'une session de jeu inactive.</summary>
+    public static readonly TimeSpan GameTtl = TimeSpan.FromHours(24);
+
     public static readonly Dictionary<int, string> GenerationNames = new()
     {
         { 1, "generation-i" },   { 2, "generation-ii" },  { 3, "generation-iii" },

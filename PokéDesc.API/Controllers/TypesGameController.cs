@@ -6,7 +6,7 @@ namespace PokéDesc.API.Controllers;
 
 [ApiController]
 [Route("api/types-game")]
-public class TypesGameController : ControllerBase
+public class TypesGameController : MiniGameControllerBase
 {
     private readonly ITypesGameService _typesGameService;
 
@@ -24,8 +24,7 @@ public class TypesGameController : ControllerBase
     [HttpGet("{partieId}")]
     public IActionResult GetGame(string partieId, [FromQuery] string dresseurId)
     {
-        if (string.IsNullOrWhiteSpace(dresseurId))
-            return BadRequest("dresseurId est requis.");
+        if (ValidateDresseurId(dresseurId) is { } err) return err;
 
         var dto = _typesGameService.GetOrCreateGame(partieId, dresseurId);
         return Ok(dto);
@@ -41,8 +40,7 @@ public class TypesGameController : ControllerBase
     [HttpPost("{partieId}/rematch-ready")]
     public IActionResult MarkRematchReady(string partieId, [FromQuery] string dresseurId)
     {
-        if (string.IsNullOrWhiteSpace(dresseurId))
-            return BadRequest("dresseurId est requis.");
+        if (ValidateDresseurId(dresseurId) is { } err) return err;
 
         var status = _typesGameService.MarkRematchReady(partieId, dresseurId);
         return Ok(status);

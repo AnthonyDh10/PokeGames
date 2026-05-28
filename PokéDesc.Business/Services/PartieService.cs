@@ -151,7 +151,7 @@ public class PartieService : IPartieService
                 {
                     RecordCompletedPokemon(state, targetPokemon, false, 0);
                     AdvanceToNextPokemon(state);
-                    return new GuessResult
+                    var result1 = new GuessResult
                     {
                         IsCorrect = false,
                         IsTurnFinished = true,
@@ -159,26 +159,22 @@ public class PartieService : IPartieService
                         Message = $"Dommage, c'était {targetPokemon.NameFr}. Tu passes au suivant.",
                         UpdatedGame = partie,
                         IsGameFinished = CheckIfGameFinished(partie, state),
-                        HasOneTypeInCommon = proximity.HasOneTypeInCommon,
-                        HasPerfectTypeMatch = proximity.HasPerfectTypeMatch,
-                        HasSameGeneration = proximity.HasSameGeneration,
-                        IsInSameEvolutionChain = proximity.IsInSameEvolutionChain
                     };
+                    ApplyProximity(result1, proximity);
+                    return result1;
                 }
                 else
                 {
-                    return new GuessResult
+                    var result2 = new GuessResult
                     {
                         IsCorrect = false,
                         IsTurnFinished = false,
                         PointsEarned = 0,
                         Message = $"Mauvaise réponse. Il te reste {HintConfig.MaxAttempts - state.AttemptsUsed} essais.",
                         UpdatedGame = partie,
-                        HasOneTypeInCommon = proximity.HasOneTypeInCommon,
-                        HasPerfectTypeMatch = proximity.HasPerfectTypeMatch,
-                        HasSameGeneration = proximity.HasSameGeneration,
-                        IsInSameEvolutionChain = proximity.IsInSameEvolutionChain
                     };
+                    ApplyProximity(result2, proximity);
+                    return result2;
                 }
             }
         }
@@ -256,6 +252,14 @@ public class PartieService : IPartieService
     }
 
     // Méthodes privées
+
+    private static void ApplyProximity(GuessResult result, ProximityResult proximity)
+    {
+        result.HasOneTypeInCommon = proximity.HasOneTypeInCommon;
+        result.HasPerfectTypeMatch = proximity.HasPerfectTypeMatch;
+        result.HasSameGeneration = proximity.HasSameGeneration;
+        result.IsInSameEvolutionChain = proximity.IsInSameEvolutionChain;
+    }
 
     private static void AdvanceToNextPokemon(PlayerGameState state)
     {

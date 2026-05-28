@@ -1,32 +1,23 @@
 #nullable enable
 
+using PokéDesc.Domain.Interfaces;
+
 namespace PokéDesc.Domain.Models;
 
-public class TypesGameState
+public class TypesGameState : IMiniGameState
 {
     public string PartieId { get; set; } = string.Empty;
     public int Type1Id { get; set; }
-    public int Type2Id { get; set; } // Always two different types
+    public int Type2Id { get; set; }
 
-    // J1 — premier joueur à rejoindre
-    public string? DresseurId1 { get; set; }
-    public bool IsGuessedJ1 { get; set; }
-    public bool WasCorrectJ1 { get; set; }
-    public int? ElapsedSecondsJ1 { get; set; }
-    public int? AttemptCountJ1 { get; set; }
-    public bool RematchReadyJ1 { get; set; }
+    public MiniGamePlayerState Player1 { get; set; } = new();
+    public MiniGamePlayerState Player2 { get; set; } = new();
 
-    // J2 — deuxième joueur à rejoindre
-    public string? DresseurId2 { get; set; }
-    public bool IsGuessedJ2 { get; set; }
-    public bool WasCorrectJ2 { get; set; }
-    public int? ElapsedSecondsJ2 { get; set; }
-    public int? AttemptCountJ2 { get; set; }
-    public bool RematchReadyJ2 { get; set; }
-
-    // Rematch
     public string? RematchPartieId { get; set; }
-
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>Retourne l'état du joueur identifié par son id.</summary>
+    public MiniGamePlayerState GetPlayer(string dresseurId)
+        => dresseurId == Player1.DresseurId ? Player1 : Player2;
 }
 

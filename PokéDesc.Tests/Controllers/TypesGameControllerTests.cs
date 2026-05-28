@@ -4,6 +4,7 @@ using Moq;
 using PokéDesc.API.Controllers;
 using PokéDesc.API.DTOs;
 using PokéDesc.Business.Interfaces;
+using PokéDesc.Business.Models;
 
 namespace PokéDesc.Tests.Controllers;
 
@@ -78,7 +79,7 @@ public class TypesGameControllerTests
     [Fact]
     public void MarkRematchReady_WithDresseurId_Returns200()
     {
-        _serviceMock.Setup(s => s.MarkRematchReady("partie-1", "d1")).Returns(new TypesRematchStatusDto());
+        _serviceMock.Setup(s => s.MarkRematchReady("partie-1", "d1")).Returns(new RematchStatusDto());
 
         var result = _controller.MarkRematchReady("partie-1", "d1");
 

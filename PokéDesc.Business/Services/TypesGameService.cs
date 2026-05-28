@@ -1,293 +1,249 @@
+﻿using PokéDesc.Business.Constants;
 using PokéDesc.Business.Interfaces;
+using PokéDesc.Business.Models;
 using PokéDesc.Domain.Interfaces;
 using PokéDesc.Domain.Models;
 
 namespace PokéDesc.Business.Services;
 
-public class TypesGameService : ITypesGameService
+public class TypesGameService : MiniGameServiceBase<TypesGameState>, ITypesGameService
 {
-    private readonly List<TypeData> _types;
-    private static readonly Dictionary<string, TypesGameState> _gameStore = new();
-    private static readonly object _lock = new();
-    private static readonly TimeSpan GameTtl = TimeSpan.FromHours(24);
+    private readonly ITypesRepository _typesRepository;
 
-    private static void CleanupOldGames()
+    public TypesGameService(IMiniGameStore<TypesGameState> store, ITypesRepository typesRepository)
+        : base(store)
     {
-        var cutoff = DateTime.UtcNow - GameTtl;
-        var keysToRemove = _gameStore
-            .Where(kvp => kvp.Value.CreatedAt < cutoff)
-            .Select(kvp => kvp.Key)
-            .ToList();
-        foreach (var key in keysToRemove)
-            _gameStore.Remove(key);
+        _typesRepository = typesRepository;
     }
 
-    public TypesGameService(ITypesRepository repository)
-    {
-        // GetAllAsync() est synchrone en pratique (données en mémoire), .GetAwaiter().GetResult() est sûr ici.
-        _types = repository.GetAllAsync().GetAwaiter().GetResult();
-    }
-
-    public List<TypeSimpleDto> GetAllTypes() =>
-        _types.Select(t => new TypeSimpleDto { Id = t.Id, NameFr = t.NameFr }).ToList();
+    private List<TypeData> AllTypes() => _typesRepository.GetAllAsync().GetAwaiter().GetResult();
 
     public TypesGameDto GetOrCreateGame(string partieId, string dresseurId)
     {
-        lock (_lock)
+        lock (Lock)
         {
-            CleanupOldGames();
+            Store.Cleanup(GameConstants.GameTtl);
 
-            if (!_gameStore.TryGetValue(partieId, out var state))
+            var state = Store.Get(partieId);
+            if (state == null)
             {
-                var shuffled = _types.OrderBy(_ => Random.Shared.Next()).ToList();
-                int type1Id = shuffled[0].Id;
-                int type2Id = shuffled[1].Id;
+                var types = AllTypes();
+                var type1 = types[Random.Shared.Next(types.Count)];
+
+                // 50 % de chance d'avoir un deuxième type différent
+                TypeData? type2 = null;
+                if (Random.Shared.Next(2) == 0)
+                {
+                    var candidates = types.Where(t => t.Id != type1.Id).ToList();
+                    if (candidates.Count > 0)
+                        type2 = candidates[Random.Shared.Next(candidates.Count)];
+                }
 
                 state = new TypesGameState
                 {
                     PartieId = partieId,
-                    Type1Id = type1Id,
-                    Type2Id = type2Id,
-                    DresseurId1 = dresseurId,
+                    Type1Id = type1.Id,
+                    Type2Id = type2?.Id ?? 0,
+                    Player1 = new MiniGamePlayerState { DresseurId = dresseurId },
                 };
-                _gameStore[partieId] = state;
-            }
-            else if (state.DresseurId1 != dresseurId && state.DresseurId2 == null)
-            {
-                state.DresseurId2 = dresseurId;
-            }
 
-            return BuildDto(state);
-        }
-    }
-
-    public TypesGuessResult SubmitGuess(string partieId, string dresseurId, int type1Id, int? type2Id, int elapsedSeconds, int attemptCount)
-    {
-        lock (_lock)
-        {
-            if (!_gameStore.TryGetValue(partieId, out var state))
-                return new TypesGuessResult { IsCorrect = false, Message = "Partie introuvable." };
-
-            bool isJ1 = dresseurId == state.DresseurId1;
-            bool alreadyGuessed = isJ1 ? state.IsGuessedJ1 : state.IsGuessedJ2;
-            if (alreadyGuessed)
-            {
-                var t1Cached = _types.First(t => t.Id == state.Type1Id);
-                var t2Cached = _types.First(t => t.Id == state.Type2Id);
-                var answer = $"{t1Cached.NameFr} / {t2Cached.NameFr}";
-                return new TypesGuessResult { IsCorrect = true, Message = $"Bravo ! C'était {answer}.", CorrectType1NameFr = t1Cached.NameFr, CorrectType2NameFr = t2Cached.NameFr };
-            }
-
-            // La réponse doit toujours être une paire (type2Id ne peut pas être null)
-            if (type2Id == null)
-            {
-                return new TypesGuessResult { IsCorrect = false, Message = "Vous devez sélectionner deux types !" };
-            }
-
-            var secretSet = new HashSet<int> { state.Type1Id, state.Type2Id };
-            var guessSet = new HashSet<int> { type1Id, type2Id.Value };
-            bool isCorrect = secretSet.SetEquals(guessSet);
-
-            if (isCorrect)
-            {
-                if (isJ1)
-                {
-                    state.IsGuessedJ1 = true;
-                    state.WasCorrectJ1 = true;
-                    state.ElapsedSecondsJ1 = elapsedSeconds;
-                    state.AttemptCountJ1 = attemptCount;
-                }
-                else
-                {
-                    state.IsGuessedJ2 = true;
-                    state.WasCorrectJ2 = true;
-                    state.ElapsedSecondsJ2 = elapsedSeconds;
-                    state.AttemptCountJ2 = attemptCount;
-                }
-
-                var t1 = _types.First(t => t.Id == state.Type1Id);
-                var t2 = _types.First(t => t.Id == state.Type2Id);
-                var answerStr = $"{t1.NameFr} / {t2.NameFr}";
-                return new TypesGuessResult
-                {
-                    IsCorrect = true,
-                    Message = $"Bravo ! C'était {answerStr}.",
-                    CorrectType1NameFr = t1.NameFr,
-                    CorrectType2NameFr = t2.NameFr,
-                };
-            }
-
-            // Mauvaise réponse : stocker la tentative, et finir la partie si 3 tentatives épuisées
-            if (isJ1)
-            {
-                state.AttemptCountJ1 = attemptCount;
-                if (attemptCount >= 3)
-                {
-                    state.IsGuessedJ1 = true;
-                    state.ElapsedSecondsJ1 = elapsedSeconds;
-                }
+                Store.Set(partieId, state);
             }
             else
             {
-                state.AttemptCountJ2 = attemptCount;
-                if (attemptCount >= 3)
-                {
-                    state.IsGuessedJ2 = true;
-                    state.ElapsedSecondsJ2 = elapsedSeconds;
-                }
+                EnsurePlayer2(state, dresseurId);
             }
 
-            var intersection = guessSet.Intersect(secretSet).ToList();
-            string? partialMatchFr = intersection.Count == 1
-                ? _types.FirstOrDefault(t => t.Id == intersection[0])?.NameFr
+            var allTypes = AllTypes();
+            var t1 = allTypes.First(t => t.Id == state.Type1Id);
+            var t2 = state.Type2Id != 0 ? allTypes.FirstOrDefault(t => t.Id == state.Type2Id) : null;
+
+            return new TypesGameDto { Interactions = BuildInteractions(t1, t2, allTypes) };
+        }
+    }
+
+    public TypesGuessResult SubmitGuess(string partieId, string dresseurId, int type1Id, int? type2Id,
+        int elapsedSeconds, int attemptCount)
+    {
+        lock (Lock)
+        {
+            var state = Store.Get(partieId)
+                ?? throw new KeyNotFoundException($"Partie {partieId} introuvable.");
+
+            var player = GetPlayer(state, dresseurId);
+            if (player.IsGuessed)
+                return new TypesGuessResult { IsCorrect = false, Message = "Vous avez déjà terminé." };
+
+            // Un type est correct s'il correspond à type1 OU type2 du Pokémon cible
+            bool hasType1 = type1Id == state.Type1Id || type1Id == state.Type2Id;
+            bool hasType2 = !type2Id.HasValue || (type2Id.Value == state.Type1Id || type2Id.Value == state.Type2Id);
+            bool correctCount = type2Id.HasValue == (state.Type2Id != 0);
+            bool isCorrect = hasType1 && hasType2 && correctCount;
+
+            var allTypes = AllTypes();
+
+            if (isCorrect)
+            {
+                RecordCorrectGuess(player, elapsedSeconds, attemptCount);
+                return new TypesGuessResult
+                {
+                    IsCorrect = true,
+                    Message = "Bravo ! Bonne combinaison de types !",
+                    CorrectType1NameFr = allTypes.FirstOrDefault(t => t.Id == state.Type1Id)?.NameFr,
+                    CorrectType2NameFr = state.Type2Id != 0
+                        ? allTypes.FirstOrDefault(t => t.Id == state.Type2Id)?.NameFr
+                        : null,
+                };
+            }
+
+            RecordFailedAttempt(player, elapsedSeconds, attemptCount);
+
+            // Correspondance partielle : au moins un type correct
+            string? partialMatchType = null;
+            if (type1Id == state.Type1Id || type1Id == state.Type2Id)
+                partialMatchType = allTypes.FirstOrDefault(t => t.Id == type1Id)?.NameFr;
+            else if (type2Id.HasValue && (type2Id.Value == state.Type1Id || type2Id.Value == state.Type2Id))
+                partialMatchType = allTypes.FirstOrDefault(t => t.Id == type2Id.Value)?.NameFr;
+
+            var correctType1Fr = allTypes.FirstOrDefault(t => t.Id == state.Type1Id)?.NameFr;
+            var correctType2Fr = state.Type2Id != 0
+                ? allTypes.FirstOrDefault(t => t.Id == state.Type2Id)?.NameFr
                 : null;
+
+            string message = player.IsGuessed
+                ? $"Raté ! C'était {correctType1Fr}{(correctType2Fr != null ? $" / {correctType2Fr}" : "")}."
+                : $"Mauvaise réponse ! Il vous reste {GameConstants.MaxAttempts - attemptCount} essai(s).";
 
             return new TypesGuessResult
             {
                 IsCorrect = false,
-                Message = $"Mauvaise réponse. Il te reste {3 - attemptCount} essais.",
-                PartialMatchTypeFr = partialMatchFr,
+                Message = message,
+                CorrectType1NameFr = player.IsGuessed ? correctType1Fr : null,
+                CorrectType2NameFr = player.IsGuessed ? correctType2Fr : null,
+                PartialMatchTypeFr = partialMatchType,
             };
         }
     }
 
     public TypesGameResultsDto GetResults(string partieId)
     {
-        lock (_lock)
+        lock (Lock)
         {
-            if (!_gameStore.TryGetValue(partieId, out var state))
-                return new TypesGameResultsDto();
+            var state = Store.Get(partieId)
+                ?? throw new KeyNotFoundException($"Partie {partieId} introuvable.");
 
-            var t1 = _types.First(t => t.Id == state.Type1Id);
-            var t2 = _types.First(t => t.Id == state.Type2Id);
-
-            var player2 = state.DresseurId2 != null
-                ? new TypesPlayerResultDto
-                {
-                    DresseurId = state.DresseurId2,
-                    HasFinished = state.IsGuessedJ2,
-                    WasCorrect = state.WasCorrectJ2,
-                    ElapsedSeconds = state.ElapsedSecondsJ2,
-                    AttemptCount = state.AttemptCountJ2,
-                }
-                : null;
+            var allTypes = AllTypes();
+            var type1 = allTypes.FirstOrDefault(t => t.Id == state.Type1Id);
+            var type2 = state.Type2Id != 0 ? allTypes.FirstOrDefault(t => t.Id == state.Type2Id) : null;
 
             return new TypesGameResultsDto
             {
-                Interactions = BuildDto(state).Interactions,
-                CorrectType1NameFr = t1.NameFr,
-                CorrectType2NameFr = t2.NameFr,
-                Player1 = new TypesPlayerResultDto
-                {
-                    DresseurId = state.DresseurId1,
-                    HasFinished = state.IsGuessedJ1,
-                    WasCorrect = state.WasCorrectJ1,
-                    ElapsedSeconds = state.ElapsedSecondsJ1,
-                    AttemptCount = state.AttemptCountJ1,
-                },
-                Player2 = player2,
-                BothFinished = state.IsGuessedJ1 && (state.DresseurId2 == null || state.IsGuessedJ2),
+                Interactions = BuildInteractions(type1, type2, allTypes),
+                CorrectType1NameFr = type1?.NameFr,
+                CorrectType2NameFr = type2?.NameFr,
+                Player1 = BuildPlayerResultDto(state.Player1),
+                Player2 = state.Player2.DresseurId != null ? BuildPlayerResultDto(state.Player2) : null,
+                BothFinished = BothFinished(state),
             };
         }
     }
 
-    private TypesGameDto BuildDto(TypesGameState state)
+    public RematchStatusDto MarkRematchReady(string partieId, string dresseurId)
     {
-        var buckets = new Dictionary<string, List<string>>
+        lock (Lock)
         {
-            ["x4"] = new(),
-            ["x2"] = new(),
-            ["x1"] = new(),
-            ["x0.5"] = new(),
-            ["x0.25"] = new(),
-            ["x0"] = new(),
-        };
+            var state = Store.Get(partieId)
+                ?? throw new KeyNotFoundException($"Partie {partieId} introuvable.");
 
-        var defType1 = _types.First(t => t.Id == state.Type1Id);
-        var defType2 = _types.First(t => t.Id == state.Type2Id);
-
-        foreach (var attacker in _types)
-        {
-            double mult = ComputeMultiplier(attacker.NameEn, defType1, defType2);
-            string bucket = mult switch
+            return MarkRematchCore(state, dresseurId, newId => new TypesGameState
             {
-                4.0 => "x4",
-                2.0 => "x2",
-                0.5 => "x0.5",
-                0.25 => "x0.25",
-                0.0 => "x0",
-                _ => "x1",
-            };
-            buckets[bucket].Add(attacker.NameFr);
+                PartieId = newId,
+                Type1Id = state.Type1Id,
+                Type2Id = state.Type2Id,
+                Player1 = new MiniGamePlayerState { DresseurId = state.Player1.DresseurId },
+                Player2 = state.Player2.DresseurId != null
+                    ? new MiniGamePlayerState { DresseurId = state.Player2.DresseurId }
+                    : new MiniGamePlayerState(),
+            });
+        }
+    }
+
+    public List<TypeSimpleDto> GetAllTypes()
+    {
+        return AllTypes()
+            .Select(t => new TypeSimpleDto { Id = t.Id, NameFr = t.NameFr })
+            .ToList();
+    }
+
+    // ── Helper privé ─────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Calcule les interactions défensives réelles et retourne un dictionnaire
+    /// avec les clés "x4", "x2", "x1", "x0.5", "x0.25", "x0" (noms FR).
+    /// Utilise un multiplicateur entier ×4 pour éviter les erreurs virgule flottante.
+    /// </summary>
+    private static Dictionary<string, List<string>> BuildInteractions(
+        TypeData? type1, TypeData? type2, List<TypeData> allTypes)
+    {
+        if (type1 == null) return new();
+
+        // Index NameEn → NameFr
+        var enToFr = allTypes.ToDictionary(
+            t => t.NameEn, t => t.NameFr, StringComparer.OrdinalIgnoreCase);
+
+        // Ensembles de résistances/faiblesses (clés = NameEn PokeAPI)
+        var t1x2  = ToSet(type1.DamageRelations.DoubleDamageFrom);
+        var t1x05 = ToSet(type1.DamageRelations.HalfDamageFrom);
+        var t1x0  = ToSet(type1.DamageRelations.NoDamageFrom);
+
+        HashSet<string> t2x2 = new(), t2x05 = new(), t2x0 = new();
+        if (type2 != null)
+        {
+            t2x2  = ToSet(type2.DamageRelations.DoubleDamageFrom);
+            t2x05 = ToSet(type2.DamageRelations.HalfDamageFrom);
+            t2x0  = ToSet(type2.DamageRelations.NoDamageFrom);
         }
 
-        return new TypesGameDto
+        var groups = new Dictionary<string, List<string>>();
+
+        foreach (var atk in allTypes)
         {
-            Interactions = buckets,
-        };
-    }
+            string en = atk.NameEn;
 
-    private static double ComputeMultiplier(string attackerNameEn, TypeData def1, TypeData? def2)
-    {
-        double mult = 1.0;
-        mult *= GetMultiplierAgainstSingle(attackerNameEn, def1);
-        if (def2 != null)
-            mult *= GetMultiplierAgainstSingle(attackerNameEn, def2);
-        return mult;
-    }
+            // Multiplicateur entier (×4 pour éviter les flottants) : 4 = x1
+            int mult4 = 4;
+            if      (t1x0.Contains(en))  mult4 = 0;
+            else if (t1x2.Contains(en))  mult4 = 8;
+            else if (t1x05.Contains(en)) mult4 = 2;
 
-    public TypesRematchStatusDto MarkRematchReady(string partieId, string dresseurId)
-    {
-        lock (_lock)
-        {
-            if (!_gameStore.TryGetValue(partieId, out var state))
-                return new TypesRematchStatusDto();
-
-            bool isJ1 = dresseurId == state.DresseurId1;
-            if (isJ1)
-                state.RematchReadyJ1 = true;
-            else
-                state.RematchReadyJ2 = true;
-
-            // If both are ready and rematch partieId not yet created, create it
-            bool bothReady = state.RematchReadyJ1 && (state.DresseurId2 == null || state.RematchReadyJ2);
-            if (bothReady && string.IsNullOrEmpty(state.RematchPartieId))
+            if (type2 != null)
             {
-                string newPartieId = Guid.NewGuid().ToString();
-                state.RematchPartieId = newPartieId;
-
-                // Pre-create the new game with the same players
-                var newState = new TypesGameState
-                {
-                    PartieId = newPartieId,
-                    DresseurId1 = state.DresseurId1,
-                    DresseurId2 = state.DresseurId2,
-                };
-                // Set up new puzzle with two different types
-                var shuffled = _types.OrderBy(_ => Random.Shared.Next()).ToList();
-                newState.Type1Id = shuffled[0].Id;
-                newState.Type2Id = shuffled[1].Id;
-
-                _gameStore[newPartieId] = newState;
+                if      (t2x0.Contains(en))  mult4 = 0;        // immunité totale
+                else if (t2x2.Contains(en))  mult4 *= 2;       // ×2 → peut donner ×4
+                else if (t2x05.Contains(en)) mult4 /= 2;       // ÷2 → peut donner ×0.25
             }
 
-            return new TypesRematchStatusDto
+            string key = mult4 switch
             {
-                Player1Ready = state.RematchReadyJ1,
-                Player2Ready = state.RematchReadyJ2 || state.DresseurId2 == null,
-                RematchPartieId = state.RematchPartieId,
+                16 => "x4",
+                8  => "x2",
+                4  => "x1",
+                2  => "x0.5",
+                1  => "x0.25",
+                0  => "x0",
+                _  => $"x{mult4 / 4.0}",
             };
+
+            string nameFr = enToFr.TryGetValue(en, out var fr) ? fr : en;
+
+            if (!groups.TryGetValue(key, out var list))
+                groups[key] = list = new List<string>();
+            list.Add(nameFr);
         }
+
+        return groups;
     }
 
-    private static double GetMultiplierAgainstSingle(string attackerNameEn, TypeData defender)
-    {
-        if (defender.DamageRelations.NoDamageFrom.Any(r => r.Name == attackerNameEn))
-            return 0.0;
-        if (defender.DamageRelations.DoubleDamageFrom.Any(r => r.Name == attackerNameEn))
-            return 2.0;
-        if (defender.DamageRelations.HalfDamageFrom.Any(r => r.Name == attackerNameEn))
-            return 0.5;
-        return 1.0;
-    }
+    private static HashSet<string> ToSet(IEnumerable<TypeDamageRef> refs) =>
+        refs.Select(r => r.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
 }

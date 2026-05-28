@@ -6,7 +6,7 @@ namespace PokéDesc.API.Controllers;
 
 [ApiController]
 [Route("api/dezoom")]
-public class DeZoomController : ControllerBase
+public class DeZoomController : MiniGameControllerBase
 {
     private readonly IDeZoomService _deZoomService;
     private readonly IPartieService _partieService;
@@ -20,8 +20,7 @@ public class DeZoomController : ControllerBase
     [HttpGet("{partieId}")]
     public async Task<IActionResult> GetGame(string partieId, [FromQuery] string dresseurId)
     {
-        if (string.IsNullOrWhiteSpace(dresseurId))
-            return BadRequest("dresseurId est requis.");
+        if (ValidateDresseurId(dresseurId) is { } err) return err;
 
         List<int>? selectedGenerations = null;
         try
@@ -61,8 +60,7 @@ public class DeZoomController : ControllerBase
     [HttpPost("{partieId}/skip")]
     public IActionResult SkipPokemon(string partieId, [FromBody] DeZoomSkipRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.DresseurId))
-            return BadRequest("dresseurId est requis.");
+        if (ValidateDresseurId(request.DresseurId) is { } err) return err;
 
         var result = _deZoomService.SkipPokemon(partieId, request.DresseurId, request.ElapsedSeconds);
         return Ok(result);
@@ -71,8 +69,7 @@ public class DeZoomController : ControllerBase
     [HttpPost("{partieId}/rematch-ready")]
     public IActionResult MarkRematchReady(string partieId, [FromQuery] string dresseurId)
     {
-        if (string.IsNullOrWhiteSpace(dresseurId))
-            return BadRequest("dresseurId est requis.");
+        if (ValidateDresseurId(dresseurId) is { } err) return err;
 
         var status = _deZoomService.MarkRematchReady(partieId, dresseurId);
         return Ok(status);

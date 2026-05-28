@@ -136,7 +136,7 @@ public class DeZoomControllerTests
     [Fact]
     public void MarkRematchReady_WithDresseurId_Returns200()
     {
-        _deZoomServiceMock.Setup(s => s.MarkRematchReady("partie-1", "d1")).Returns(new DeZoomRematchStatusDto());
+        _deZoomServiceMock.Setup(s => s.MarkRematchReady("partie-1", "d1")).Returns(new PokéDesc.Business.Models.RematchStatusDto());
 
         var result = _controller.MarkRematchReady("partie-1", "d1");
 
