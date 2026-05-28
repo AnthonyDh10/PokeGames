@@ -9,31 +9,17 @@ namespace PokéDesc.API.Controllers;
 public class DeZoomController : MiniGameControllerBase
 {
     private readonly IDeZoomService _deZoomService;
-    private readonly IPartieService _partieService;
 
-    public DeZoomController(IDeZoomService deZoomService, IPartieService partieService)
+    public DeZoomController(IDeZoomService deZoomService)
     {
         _deZoomService = deZoomService;
-        _partieService = partieService;
     }
 
     [HttpGet("{partieId}")]
-    public async Task<IActionResult> GetGame(string partieId, [FromQuery] string dresseurId)
+    public IActionResult GetGame(string partieId, [FromQuery] string dresseurId, [FromQuery] List<int>? generations)
     {
         if (ValidateDresseurId(dresseurId) is { } err) return err;
-
-        List<int>? selectedGenerations = null;
-        try
-        {
-            var partie = await _partieService.GetGameAsync(partieId);
-            selectedGenerations = partie.SelectedGenerations?.Count > 0 ? partie.SelectedGenerations : null;
-        }
-        catch
-        {
-            // Partie introuvable → pas de filtre de génération
-        }
-
-        var dto = _deZoomService.GetOrCreateGame(partieId, dresseurId, selectedGenerations);
+        var dto = _deZoomService.GetOrCreateGame(partieId, dresseurId, generations);
         return Ok(dto);
     }
 

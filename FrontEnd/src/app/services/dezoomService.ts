@@ -9,9 +9,19 @@ import type { DeZoomGameDto, DeZoomGuessResultDto, DeZoomGameResultsDto, DeZoomR
  * @param dresseurId - UUID de session du joueur.
  * @returns L'état de la partie Dézoom incluant l'URL de l'image zoomée.
  */
-export async function getDeZoomGame(partieId: string, dresseurId: string): Promise<DeZoomGameDto> {
+export async function getDeZoomGame(
+  partieId: string,
+  dresseurId: string,
+  generations?: number[],
+): Promise<DeZoomGameDto> {
   const { data } = await api.get<DeZoomGameDto>(`/api/dezoom/${partieId}`, {
-    params: { dresseurId },
+    params: {
+      dresseurId,
+      ...(generations && generations.length > 0 ? { generations } : {}),
+    },
+    paramsSerializer: {
+      indexes: null,
+    },
   })
   return data
 }

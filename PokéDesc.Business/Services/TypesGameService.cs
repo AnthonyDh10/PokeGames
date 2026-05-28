@@ -25,39 +25,43 @@ public class TypesGameService : MiniGameServiceBase<TypesGameState>, ITypesGameS
             Store.Cleanup(GameConstants.GameTtl);
 
             var state = Store.Get(partieId);
-            if (state == null)
+            bool needsInit = state == null || state.Type1Id == 0;
+
+            var allTypes = AllTypes();
+
+            if (needsInit)
             {
-                var types = AllTypes();
-                var type1 = types[Random.Shared.Next(types.Count)];
+                var type1 = allTypes[Random.Shared.Next(allTypes.Count)];
 
                 // 50 % de chance d'avoir un deuxième type différent
                 TypeData? type2 = null;
                 if (Random.Shared.Next(2) == 0)
                 {
-                    var candidates = types.Where(t => t.Id != type1.Id).ToList();
+                    var candidates = allTypes.Where(t => t.Id != type1.Id).ToList();
                     if (candidates.Count > 0)
                         type2 = candidates[Random.Shared.Next(candidates.Count)];
                 }
 
-                state = new TypesGameState
+                if (state == null)
                 {
-                    PartieId = partieId,
-                    Type1Id = type1.Id,
-                    Type2Id = type2?.Id ?? 0,
-                    Player1 = new MiniGamePlayerState { DresseurId = dresseurId },
-                };
+                    state = new TypesGameState
+                    {
+                        PartieId = partieId,
+                        Player1 = new MiniGamePlayerState { DresseurId = dresseurId },
+                    };
+                }
 
+                state.Type1Id = type1.Id;
+                state.Type2Id = type2?.Id ?? 0;
                 Store.Set(partieId, state);
-            }
-            else
-            {
-                EnsurePlayer2(state, dresseurId);
+
+                return new TypesGameDto { Interactions = BuildInteractions(type1, type2, allTypes) };
             }
 
-            var allTypes = AllTypes();
+            EnsurePlayer2(state, dresseurId);
+
             var t1 = allTypes.First(t => t.Id == state.Type1Id);
             var t2 = state.Type2Id != 0 ? allTypes.FirstOrDefault(t => t.Id == state.Type2Id) : null;
-
             return new TypesGameDto { Interactions = BuildInteractions(t1, t2, allTypes) };
         }
     }
@@ -155,11 +159,11 @@ public class TypesGameService : MiniGameServiceBase<TypesGameState>, ITypesGameS
             var state = Store.Get(partieId)
                 ?? throw new KeyNotFoundException($"Partie {partieId} introuvable.");
 
+            // Type1Id/Type2Id intentionnellement omis (valeur 0) : GetOrCreateGame
+            // détectera l'état non initialisé et choisira de nouveaux types.
             return MarkRematchCore(state, dresseurId, newId => new TypesGameState
             {
                 PartieId = newId,
-                Type1Id = state.Type1Id,
-                Type2Id = state.Type2Id,
                 Player1 = new MiniGamePlayerState { DresseurId = state.Player1.DresseurId },
                 Player2 = state.Player2.DresseurId != null
                     ? new MiniGamePlayerState { DresseurId = state.Player2.DresseurId }

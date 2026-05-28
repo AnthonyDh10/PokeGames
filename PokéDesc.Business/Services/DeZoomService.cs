@@ -32,9 +32,14 @@ public class DeZoomService : MiniGameServiceBase<DeZoomGameState>, IDeZoomServic
             Store.Cleanup(GameConstants.GameTtl);
 
             var state = Store.Get(partieId);
-            if (state == null)
+            bool needsInit = state == null || string.IsNullOrEmpty(state.PokemonNameFr);
+
+            if (needsInit)
             {
-                var generations = selectedGenerations ?? Enumerable.Range(1, 9).ToList();
+                var generations = (state?.SelectedGenerations is { Count: > 0 } sg ? sg : null)
+                    ?? selectedGenerations
+                    ?? Enumerable.Range(1, 9).ToList();
+
                 var genNames = generations
                     .Select(GenerationEnName)
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -47,15 +52,18 @@ public class DeZoomService : MiniGameServiceBase<DeZoomGameState>, IDeZoomServic
 
                 var pokemon = pool[Random.Shared.Next(pool.Count)];
 
-                state = new DeZoomGameState
+                if (state == null)
                 {
-                    PartieId = partieId,
-                    PokemonNameFr = pokemon.NameFr,
-                    SpriteUrl = pokemon.Sprites?.FrontDefault ?? string.Empty,
-                    Player1 = new MiniGamePlayerState { DresseurId = dresseurId },
-                    SelectedGenerations = generations,
-                };
+                    state = new DeZoomGameState
+                    {
+                        PartieId = partieId,
+                        Player1 = new MiniGamePlayerState { DresseurId = dresseurId },
+                        SelectedGenerations = generations,
+                    };
+                }
 
+                state.PokemonNameFr = pokemon.NameFr;
+                state.SpriteUrl = pokemon.Sprites?.FrontDefault ?? string.Empty;
                 Store.Set(partieId, state);
             }
             else
@@ -179,16 +187,16 @@ public class DeZoomService : MiniGameServiceBase<DeZoomGameState>, IDeZoomServic
             var state = Store.Get(partieId)
                 ?? throw new KeyNotFoundException($"Partie {partieId} introuvable.");
 
+            // PokemonNameFr/SpriteUrl intentionnellement omis : GetOrCreateGame
+            // détectera l'état non initialisé et choisira un nouveau Pokémon.
             return MarkRematchCore(state, dresseurId, newId => new DeZoomGameState
             {
                 PartieId = newId,
-                PokemonNameFr = state.PokemonNameFr,
-                SpriteUrl = state.SpriteUrl,
+                SelectedGenerations = state.SelectedGenerations,
                 Player1 = new MiniGamePlayerState { DresseurId = state.Player1.DresseurId },
                 Player2 = state.Player2.DresseurId != null
                     ? new MiniGamePlayerState { DresseurId = state.Player2.DresseurId }
                     : new MiniGamePlayerState(),
-                SelectedGenerations = state.SelectedGenerations,
             });
         }
     }

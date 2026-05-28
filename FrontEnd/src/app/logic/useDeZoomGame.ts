@@ -134,11 +134,14 @@ export function useDeZoomGame(partieId: string | undefined): UseDeZoomGameReturn
     setIsLoading(true)
     ;(async () => {
       try {
-        const [g, pkms] = await Promise.all([getDeZoomGame(partieId, sessionId), getAllPokemons()])
+        const [{ sessionCode: code, selectedGenerations: gens }, pkms] = await Promise.all([
+          loadSessionInfo(partieId),
+          getAllPokemons(),
+        ])
+        const g = await getDeZoomGame(partieId, sessionId, gens)
         setGame(g)
         setAttemptCount(g.attemptCount)
         setPokemons(pkms.sort((a, b) => a.nameFr.localeCompare(b.nameFr)))
-        const { sessionCode: code, selectedGenerations: gens } = await loadSessionInfo(partieId)
         setSessionCode(code)
         if (gens.length > 0) setSelectedGenerations(gens)
         clearChenMessages()

@@ -4,7 +4,6 @@ using Moq;
 using PokéDesc.API.Controllers;
 using PokéDesc.API.DTOs;
 using PokéDesc.Business.Interfaces;
-using PokéDesc.Domain;
 
 namespace PokéDesc.Tests.Controllers;
 
@@ -14,14 +13,12 @@ namespace PokéDesc.Tests.Controllers;
 public class DeZoomControllerTests
 {
     private readonly Mock<IDeZoomService> _deZoomServiceMock;
-    private readonly Mock<IPartieService> _partieServiceMock;
     private readonly DeZoomController _controller;
 
     public DeZoomControllerTests()
     {
         _deZoomServiceMock = new Mock<IDeZoomService>();
-        _partieServiceMock = new Mock<IPartieService>();
-        _controller = new DeZoomController(_deZoomServiceMock.Object, _partieServiceMock.Object);
+        _controller = new DeZoomController(_deZoomServiceMock.Object);
     }
 
     // ─────────────────────────────────────────────
@@ -29,39 +26,22 @@ public class DeZoomControllerTests
     // ─────────────────────────────────────────────
 
     [Fact]
-    public async Task GetGame_WithDresseurId_Returns200()
+    public void GetGame_WithDresseurId_Returns200()
     {
-        _partieServiceMock.Setup(s => s.GetGameAsync("partie-1"))
-            .ReturnsAsync(new Partie { Id = "partie-1", Dresseur1Id = "d1" });
-
         _deZoomServiceMock.Setup(s => s.GetOrCreateGame("partie-1", "d1", null))
             .Returns(new DeZoomGameDto());
 
-        var result = await _controller.GetGame("partie-1", "d1");
+        var result = _controller.GetGame("partie-1", "d1", null);
 
         Assert.IsType<OkObjectResult>(result);
     }
 
     [Fact]
-    public async Task GetGame_WithoutDresseurId_Returns400()
+    public void GetGame_WithoutDresseurId_Returns400()
     {
-        var result = await _controller.GetGame("partie-1", "");
+        var result = _controller.GetGame("partie-1", "", null);
 
         Assert.IsType<BadRequestObjectResult>(result);
-    }
-
-    [Fact]
-    public async Task GetGame_WhenPartieNotFound_StillReturns200WithNoGenerationFilter()
-    {
-        _partieServiceMock.Setup(s => s.GetGameAsync("inconnue"))
-            .ThrowsAsync(new KeyNotFoundException("Partie introuvable"));
-
-        _deZoomServiceMock.Setup(s => s.GetOrCreateGame("inconnue", "d1", null))
-            .Returns(new DeZoomGameDto());
-
-        var result = await _controller.GetGame("inconnue", "d1");
-
-        Assert.IsType<OkObjectResult>(result);
     }
 
     // ─────────────────────────────────────────────
