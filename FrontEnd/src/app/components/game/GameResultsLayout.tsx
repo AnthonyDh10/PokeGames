@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react'
-import Card from './Card'
-import { colors } from '../design/colors'
+﻿import type { ReactNode } from 'react'
+import Card from '../primitives/Card'
+import { colors } from '../../design/colors'
 
 /** Props du composant `GameResultsLayout`. */
 interface GameResultsLayoutProps {

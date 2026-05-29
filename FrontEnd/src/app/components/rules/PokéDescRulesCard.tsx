@@ -1,9 +1,9 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { colors } from "../design/colors";
-import Card from "./Card";
-import PixelButton, { pixelClipPathSm } from "./PixelButton";
-import pokedescLogo from "./images/pokedesc-logo.png";
+import { colors } from "../../design/colors";
+import Card from "../primitives/Card";
+import PixelButton, { pixelClipPathSm } from "../primitives/PixelButton";
+import pokedescLogo from "../images/pokedesc-logo.png";
 
 interface GameRulesPage {
   title: React.ReactNode;

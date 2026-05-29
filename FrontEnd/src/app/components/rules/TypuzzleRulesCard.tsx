@@ -1,10 +1,10 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { colors } from "../design/colors";
-import Card from "./Card";
-import PixelButton, { pixelClipPathSm } from "./PixelButton";
+import { colors } from "../../design/colors";
+import Card from "../primitives/Card";
+import PixelButton, { pixelClipPathSm } from "../primitives/PixelButton";
 // N'oublie pas d'importer le bon logo pour Typuzzle
-import typuzzleLogo from "./images/type-logo.png";
+import typuzzleLogo from "../images/type-logo.png";
 
 interface GameRulesPage {
   title: React.ReactNode;

@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, type ReactNode } from "react";
+﻿import { useState, useEffect, useRef, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import GameCard from "../components/GameCard";
+import GameCard from "../components/game/GameCard";
 import { useChatStore } from "../store/chatStore";
 import { colors } from "../design/colors";
 import pokeballFace from "../components/images/pokéball_face.png";

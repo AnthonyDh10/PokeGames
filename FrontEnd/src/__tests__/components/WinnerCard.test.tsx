@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+﻿import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import WinnerCard from '../../app/components/WinnerCard';
+import WinnerCard from '../../app/components/game/WinnerCard';
 
 describe('WinnerCard — mode solo', () => {
   it('affiche "VICTOIRE !" en mode solo', () => {

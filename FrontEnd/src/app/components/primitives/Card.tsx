@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion'
+﻿import { motion } from 'framer-motion'
 import { PokeballDecor } from './Pokeball'
-import { colors } from '../design/colors'
+import { colors } from '../../design/colors'
 
 /** Props du composant `Card`. */
 interface CardProps {

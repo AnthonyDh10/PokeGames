@@ -1,4 +1,4 @@
-import { colors } from '../design/colors'
+﻿import { colors } from '../../design/colors'
 
 /** Props du composant `Timer`. */
 interface TimerProps {

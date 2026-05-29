@@ -1,9 +1,9 @@
-import type { ReactNode } from 'react'
-import Card from './Card'
-import Timer from './Timer'
-import AttemptsDisplay from './AttemptsDisplay'
-import { colors } from '../design/colors'
-import { getGenerationsDisplay } from '../utils/pokedescLogic'
+﻿import type { ReactNode } from 'react'
+import Card from '../primitives/Card'
+import Timer from '../primitives/Timer'
+import AttemptsDisplay from '../primitives/AttemptsDisplay'
+import { colors } from '../../design/colors'
+import { getGenerationsDisplay } from '../../utils/pokedescLogic'
 
 interface GameHeaderProps {
   /** Titre affiché dans la barre colorée de la carte */

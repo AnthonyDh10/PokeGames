@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react'
-import { useChenStore } from '../store/chenStore'
-import { colors } from '../design/colors'
-import oakChibi from './images/oak-chibi.png'
+﻿import { useEffect, useRef } from 'react'
+import { useChenStore } from '../../store/chenStore'
+import { colors } from '../../design/colors'
+import oakChibi from '../images/oak-chibi.png'
 
 const pixelClipPath = `polygon(
   16px 0px, calc(100% - 16px) 0px,

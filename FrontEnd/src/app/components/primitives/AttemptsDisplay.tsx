@@ -1,4 +1,4 @@
-import Pokeball from './images/pokéball_face.png'
+﻿import Pokeball from '../images/pokéball_face.png'
 
 /** Props du composant `AttemptsDisplay`. */
 interface AttemptsDisplayProps {

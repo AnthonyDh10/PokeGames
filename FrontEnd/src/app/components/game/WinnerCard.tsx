@@ -1,5 +1,5 @@
-import Card from './Card'
-import { colors } from '../design/colors'
+﻿import Card from '../primitives/Card'
+import { colors } from '../../design/colors'
 
 /** Props du composant `WinnerCard`. */
 interface WinnerCardProps {

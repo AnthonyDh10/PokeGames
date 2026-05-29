@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { colors } from '../design/colors'
-import { normalizeString } from '../utils/normalize'
-import SubCard from './SubCard'
+import { colors } from '../../design/colors'
+import { normalizeString } from '../../utils/normalize'
+import SubCard from '../primitives/SubCard'
 
 export interface SearchableItem {
   id: number | string

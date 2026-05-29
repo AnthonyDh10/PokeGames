@@ -1,12 +1,12 @@
-import { useNavigate, useLocation } from "react-router-dom";
+﻿import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { colors } from "../design/colors";
-import PixelButton, { pixelClipPathLg, pixelClipPathSm } from "./PixelButton";
-import Pokeball from "../components/images/pokéball_face.png";
-import pokedescLogo from "../components/images/pokedesc-logo.png";
-import typeLogo from "../components/images/type-logo.png";
-import dezoomLogo from "../components/images/dezoom-logo.png";
-import rulesLogo from "../components/images/rules-icon.png";
+import { colors } from "../../design/colors";
+import PixelButton, { pixelClipPathLg, pixelClipPathSm } from "../primitives/PixelButton";
+import Pokeball from "../images/pokéball_face.png";
+import pokedescLogo from "../images/pokedesc-logo.png";
+import typeLogo from "../images/type-logo.png";
+import dezoomLogo from "../images/dezoom-logo.png";
+import rulesLogo from "../images/rules-icon.png";
 
 /** Props du composant `Sidebar`. */
 interface SidebarProps {

@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+﻿import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import DescriptionCard from '../../app/components/DescriptionCard';
+import DescriptionCard from '../../app/components/pokedesc/DescriptionCard';
 
 const descriptions = ['Première description', 'Deuxième description', 'Troisième description'];
 

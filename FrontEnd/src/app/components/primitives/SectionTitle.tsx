@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
-import { colors } from '../design/colors'
+﻿import type { ReactNode } from 'react'
+import { colors } from '../../design/colors'
 
 /** Props du composant `SectionTitle`. */
 type SectionTitleProps = {

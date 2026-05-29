@@ -1,9 +1,9 @@
-import Card from './Card'
-import HPBar from './HPBar'
-import Timer from './Timer'
-import Pokeball from './images/pokéball_face.png'
-import { colors } from '../design/colors'
-import { getGenerationsDisplay } from '../utils/pokedescLogic'
+﻿import Card from '../primitives/Card'
+import HPBar from '../primitives/HPBar'
+import Timer from '../primitives/Timer'
+import Pokeball from '../images/pokéball_face.png'
+import { colors } from '../../design/colors'
+import { getGenerationsDisplay } from '../../utils/pokedescLogic'
 
 /** Props du composant `PokeDescHeader`. */
 interface PokeDescHeaderProps {

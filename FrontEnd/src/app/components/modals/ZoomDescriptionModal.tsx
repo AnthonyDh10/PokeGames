@@ -1,4 +1,4 @@
-import Card from '../Card'
+﻿import Card from '../primitives/Card'
 import { colors } from '../../design/colors'
 
 /** Props du composant `ZoomDescriptionModal`. */

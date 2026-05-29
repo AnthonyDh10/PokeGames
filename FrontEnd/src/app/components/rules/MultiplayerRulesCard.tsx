@@ -1,7 +1,7 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Card from "./Card";
-import { colors } from "../design/colors";
+import Card from "../primitives/Card";
+import { colors } from "../../design/colors";
 
 interface GameRulesPage {
   title: React.ReactNode;

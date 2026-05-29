@@ -1,12 +1,12 @@
-import { useParams, useNavigate } from 'react-router-dom'
+﻿import { useParams, useNavigate } from 'react-router-dom'
 import { colors } from '../design/colors'
 import { useDeZoomGame, SPRITE_DISPLAY } from '../logic/useDeZoomGame'
-import Card from '../components/Card'
-import GameHeader from '../components/GameHeader'
-import GameLayout from '../components/GameLayout'
-import PixelButton from '../components/PixelButton'
-import SubCard from '../components/SubCard'
-import PokemonSearchInput from '../components/PokemonSearchInput'
+import Card from '../components/primitives/Card'
+import GameHeader from '../components/game/GameHeader'
+import GameLayout from '../components/game/GameLayout'
+import PixelButton from '../components/primitives/PixelButton'
+import SubCard from '../components/primitives/SubCard'
+import PokemonSearchInput from '../components/game/PokemonSearchInput'
 
 export default function DeZoomGamePage() {
   const { partieId } = useParams<{ partieId: string }>()

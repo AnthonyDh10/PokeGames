@@ -1,5 +1,5 @@
-import Card from '../Card'
-import PixelButton from '../PixelButton'
+﻿import Card from '../primitives/Card'
+import PixelButton from '../primitives/PixelButton'
 import { colors } from '../../design/colors'
 
 /** Props du composant `FailureModal`. */

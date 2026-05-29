@@ -1,9 +1,9 @@
-import Card from './Card'
-import SubCard from './SubCard'
-import PixelButton from './PixelButton'
-import PokemonSearchInput from './PokemonSearchInput'
-import { colors } from '../design/colors'
-import type { PokemonDto } from '../types/pokemon'
+﻿import Card from '../primitives/Card'
+import SubCard from '../primitives/SubCard'
+import PixelButton from '../primitives/PixelButton'
+import PokemonSearchInput from '../game/PokemonSearchInput'
+import { colors } from '../../design/colors'
+import type { PokemonDto } from '../../types/pokemon'
 
 /** Props du composant `AnswerCard`. */
 interface AnswerCardProps {

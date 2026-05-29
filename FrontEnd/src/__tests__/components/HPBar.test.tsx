@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import HPBar from '../../app/components/HPBar';
+import HPBar from '../../app/components/primitives/HPBar';
 
 // framer-motion est mocké via vitest.setup.ts ou via le __mocks__ folder.
 // Si ce n'est pas le cas, on le mock ici.

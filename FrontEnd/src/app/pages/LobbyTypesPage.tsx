@@ -1,4 +1,4 @@
-import LobbyPage from '../components/LobbyPage'
+﻿import LobbyPage from '../components/game/LobbyPage'
 import { colors } from '../design/colors'
 
 const THEME = {

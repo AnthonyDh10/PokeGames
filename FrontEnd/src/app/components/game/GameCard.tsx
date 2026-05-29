@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { PokeballDecor } from "./Pokeball";
+import { PokeballDecor } from "../primitives/Pokeball";
 
 interface GameCardProps {
   title: ReactNode;

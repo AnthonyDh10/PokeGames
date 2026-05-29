@@ -1,5 +1,5 @@
-import React from 'react'
-import { colors } from '../design/colors'
+﻿import React from 'react'
+import { colors } from '../../design/colors'
 
 /**
  * Props du composant `SubCard`.

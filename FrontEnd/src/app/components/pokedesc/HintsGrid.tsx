@@ -1,8 +1,8 @@
-import Card from './Card'
-import PixelButton, { pixelClipPathSm } from './PixelButton'
-import { colors } from '../design/colors'
-import { HINTS_CONFIG, HINTS_DATA } from '../utils/pokedescConstants'
-import type { RevealedHints } from '../hooks/useGameState'
+﻿import Card from '../primitives/Card'
+import PixelButton, { pixelClipPathSm } from '../primitives/PixelButton'
+import { colors } from '../../design/colors'
+import { HINTS_CONFIG, HINTS_DATA } from '../../utils/pokedescConstants'
+import type { RevealedHints } from '../../hooks/useGameState'
 
 /** Props du composant `HintsGrid`. */
 interface HintsGridProps {

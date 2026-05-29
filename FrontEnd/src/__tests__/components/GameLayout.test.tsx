@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+﻿import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import GameLayout from '../../app/components/GameLayout';
+import GameLayout from '../../app/components/game/GameLayout';
 
 describe('GameLayout — état de chargement', () => {
   it('affiche "Chargement..." si isLoading=true', () => {

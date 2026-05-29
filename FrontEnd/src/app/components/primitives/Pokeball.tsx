@@ -1,4 +1,4 @@
-import { colors } from "../design/colors";
+﻿import { colors } from "../../design/colors";
 
 interface PokeballProps {
   onClick?: () => void;

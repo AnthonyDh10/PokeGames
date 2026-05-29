@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+﻿import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import PixelButton, { pixelClipPathLg, pixelClipPathSm } from '../../app/components/PixelButton';
+import PixelButton, { pixelClipPathLg, pixelClipPathSm } from '../../app/components/primitives/PixelButton';
 
 const defaultColors = {
   colorBorder: '#000044',

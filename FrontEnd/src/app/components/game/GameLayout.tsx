@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
-import { colors } from '../design/colors'
+﻿import type { ReactNode } from 'react'
+import { colors } from '../../design/colors'
 
 interface GameLayoutProps {
   /** Slot pleine largeur au-dessus des colonnes (header avec titre, score, timer…) */

@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import PokemonSearchInput, { SearchableItem } from '../../app/components/PokemonSearchInput';
+import PokemonSearchInput, { SearchableItem } from '../../app/components/game/PokemonSearchInput';
 import { normalizeString } from '../../app/utils/normalize';
 
 describe('normalizeString', () => {

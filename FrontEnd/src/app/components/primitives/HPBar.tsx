@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion'
-import { colors } from '../design/colors'
+﻿import { motion } from 'framer-motion'
+import { colors } from '../../design/colors'
 import SubCard from './SubCard'
 
 /** Props du composant `HPBar`. */

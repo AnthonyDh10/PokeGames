@@ -1,14 +1,14 @@
-import { useState, useRef } from "react";
-import GameCard from "../components/GameCard";
+﻿import { useState, useRef } from "react";
+import GameCard from "../components/game/GameCard";
 import { colors } from "../design/colors";
 import pokedescLogo from "../components/images/pokedesc-logo-transparant.png";
 import typeLogo from "../components/images/type-logo.png";
 import dezoomLogo from "../components/images/dezoom-logo.png";
-import Card from "../components/Card";
-import PokéDescRulesCard from "../components/PokéDescRulesCard";
-import TypuzzleRulesCard from "../components/TypuzzleRulesCard";
-import DézoomRulesCard from "../components/DézoomRulesCard";
-import MultiplayerRulesCard from "../components/MultiplayerRulesCard";
+import Card from "../components/primitives/Card";
+import PokéDescRulesCard from "../components/rules/PokéDescRulesCard";
+import TypuzzleRulesCard from "../components/rules/TypuzzleRulesCard";
+import DézoomRulesCard from "../components/rules/DézoomRulesCard";
+import MultiplayerRulesCard from "../components/rules/MultiplayerRulesCard";
 
 const GAMES = [
   {

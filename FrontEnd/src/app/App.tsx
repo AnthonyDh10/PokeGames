@@ -1,15 +1,15 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { colors } from "./design/colors";
 import { useLocation } from "react-router-dom";
-import Sidebar from "./components/Sidebar";
-import TopBar from "./components/TopBar";
-import Footer from "./components/Footer";
-import ChatPanel from "./components/ChatPanel";
-import ChenPanel from "./components/ChenPanel";
+import Sidebar from "./components/layout/Sidebar";
+import TopBar from "./components/layout/TopBar";
+import Footer from "./components/layout/Footer";
+import ChatPanel from "./components/chat/ChatPanel";
+import ChenPanel from "./components/chat/ChenPanel";
 import lab from "./components/images/lab2.png";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useNavigationBehavior } from "./hooks/useNavigationBehavior";
-import AppRoutes, { isChenVisible, isChatVisible } from "./components/AppRoutes";
+import AppRoutes, { isChenVisible, isChatVisible } from "./components/layout/AppRoutes";
 
 /**
  * Composant racine de l'application.
