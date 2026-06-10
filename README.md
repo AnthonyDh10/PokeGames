@@ -1,8 +1,6 @@
 # PokéGames
 
-PokéGames est une application web de mini-jeux sur le thème Pokémon, pensée pour tester les connaissances des joueurs de manière rapide, ludique et compétitive.
-
-Projet portfolio développé par Anthony DINH.
+PokéGames est une application web de mini-jeux sur le thème Pokémon, pensée pour tester les connaissances des joueurs de manière rapide et ludique, seul ou entre amis.
 
 ## Vision du projet
 
@@ -65,8 +63,7 @@ PokeGames/
 ## Roadmap
 
 - ajout de nouveaux mini-jeux
-- déploiement public de la plateforme
-- amélioration de l'expérience multijoueur temps réel
+- ajout d'un mode multijoueur à plus de deux
 - optimisation UX/UI et animations de jeu
 
 ## Déploiement
