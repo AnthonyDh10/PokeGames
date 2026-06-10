@@ -1,6 +1,7 @@
-# PokéGames
+# PokéMini Games
 
-PokéGames est une application web de mini-jeux sur le thème Pokémon, pensée pour tester les connaissances des joueurs de manière rapide et ludique, seul ou entre amis.
+PokéMini Games est une application web de mini-jeux sur le thème Pokémon, pensée pour tester les connaissances des joueurs de manière rapide et ludique, seul ou entre amis.
+Testez l'application ici : https://poke-minigames.vercel.app
 
 ## Vision du projet
 
