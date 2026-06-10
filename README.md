@@ -16,14 +16,18 @@ L'objectif est de proposer une base solide pour enrichir progressivement le cata
 
 ### 1) PokéDesc
 Le joueur doit deviner le Pokémon à partir d'une description censurée et d'indices.
+<img width="2492" height="1267" alt="image" src="https://github.com/user-attachments/assets/9a6b73ee-8217-4bd1-9781-c2308f7119df" />
 
 ### 2) Typuzzle
 Mini-jeu orienté connaissances de la table des types Pokémon.
+<img width="2488" height="1267" alt="image" src="https://github.com/user-attachments/assets/6ddd0c42-559c-491a-8108-56bc54b9e236" />
 
 ### 3) Dézoom
 Le joueur identifie un Pokémon à partir d'une image progressivement dézoomée. Aurez-vous la chance de rencontrez des Pokémon chromatiques lors de vos parties ?
+<img width="2490" height="1266" alt="image" src="https://github.com/user-attachments/assets/1a4a141c-1feb-4e9a-ab6b-670e7963710b" />
 
-## Mode multijoueur pour affrontez vos amis !
+## Mode multijoueur pour affrontez vos amis ! Discutez avec eux lors de vos parties ! 
+<img width="2494" height="1274" alt="image" src="https://github.com/user-attachments/assets/b2d7aabe-df0b-4550-9617-c0bf5e19a1d8" />
 
 
 ## Stack technique
