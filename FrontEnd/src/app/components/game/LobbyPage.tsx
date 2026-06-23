@@ -7,6 +7,7 @@ import PixelButton, { pixelClipPathSm, pixelClipPathLg } from '../primitives/Pix
 import { useSessionStore } from '../../store/sessionStore'
 import { useChatStore } from '../../store/chatStore'
 import { createPartie, joinPartie, getPartie, startPartie, updateGameSettings } from '../../services/partieService'
+import { lobbyService } from '../../services/lobbyService'
 import type { PartieDto } from '../../types/partie'
 import type { GameSettings } from '../../pages/LobbyPokedescPage'
 import { colors } from '../../design/colors'
@@ -74,7 +75,6 @@ export default function LobbyPage({
   const [errorMessage, setErrorMessage] = useState('')
   const [joinErrorMessage, setJoinErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
-  const autoRefreshRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const prevSettingsRef = useRef<GameSettings | null>(null)
 
   // Sync partie state to chat context
@@ -101,7 +101,7 @@ export default function LobbyPage({
 
   useEffect(() => {
     return () => {
-      if (autoRefreshRef.current) clearInterval(autoRefreshRef.current)
+      lobbyService.disconnect()
     }
   }, [])
 
@@ -115,7 +115,7 @@ export default function LobbyPage({
         setPartie(p)
         setCurrentPartieId(p.id)
         setIsPlayer1(p.dresseur1Id === sessionId)
-        startAutoRefresh(p.id)
+        subscribeToLobby(p.id)
       })
       .catch(() => setErrorMessage('Impossible de charger la partie.'))
       .finally(() => setIsLoading(false))
@@ -155,42 +155,28 @@ export default function LobbyPage({
     }
   }, [isPlayer1, currentPartieId, getSettings])
 
-  function startAutoRefresh(partieId: string) {
-    if (autoRefreshRef.current) clearInterval(autoRefreshRef.current)
-    
-    // Fonction pour mettre à jour la partie
-    const refreshPartie = async () => {
-      try {
-        const updated = await getPartie(partieId)
+  // S'abonne aux mises à jour temps réel de la partie via SignalR (remplace le polling HTTP).
+  // L'état initial est déjà fourni par la réponse REST de create/join/getPartie ;
+  // le serveur pousse ensuite LobbyUpdated (arrivée d'un joueur…) et GameStarted (démarrage).
+  function subscribeToLobby(partieId: string) {
+    lobbyService.connect(partieId, {
+      onLobbyUpdated: (updated) => {
         setPartie((prev) => {
-          if (prev?.statut !== updated.statut) {
-            if (updated.statut === 'Prêt') {
-              setSuccessMessage('Le joueur 2 a rejoint ! Vous pouvez démarrer la partie.')
-            }
-            if (updated.statut === 'EnCours') {
-              clearInterval(autoRefreshRef.current!)
-              navigate(`${gameRoute}/${partieId}`)
-            }
+          if (prev?.statut !== updated.statut && updated.statut === 'Prêt') {
+            setSuccessMessage('Le joueur 2 a rejoint ! Vous pouvez démarrer la partie.')
           }
           return updated
         })
-      } catch {
-        // silent
-      }
-    }
-
-    // Appel immédiat pour détecter les changements rapides
-    refreshPartie()
-
-    // Puis polling toutes les 2 secondes
-    autoRefreshRef.current = setInterval(refreshPartie, 2000)
+      },
+      onGameStarted: (updated) => {
+        setPartie(updated)
+        navigate(`${gameRoute}/${updated.id}`)
+      },
+    })
   }
 
-  function stopAutoRefresh() {
-    if (autoRefreshRef.current) {
-      clearInterval(autoRefreshRef.current)
-      autoRefreshRef.current = null
-    }
+  function unsubscribeFromLobby() {
+    lobbyService.disconnect()
   }
 
   function handleSetPseudo(e: React.FormEvent) {
@@ -208,7 +194,7 @@ export default function LobbyPage({
       setCurrentPartieId(p.id)
       setIsPlayer1(p.dresseur1Id === sessionId)
       setSuccessMessage(`Partie créée ! Code : ${p.codeSession}`)
-      startAutoRefresh(p.id)
+      subscribeToLobby(p.id)
     } catch {
       setErrorMessage('Erreur lors de la création de la partie.')
     } finally {
@@ -230,7 +216,7 @@ export default function LobbyPage({
       setCurrentPartieId(p.id)
       setIsPlayer1(p.dresseur1Id === sessionId)
       setSuccessMessage('Vous avez rejoint la partie !')
-      startAutoRefresh(p.id)
+      subscribeToLobby(p.id)
     } catch (err: any) {
       const status = err?.response?.status
       if (status === 404) setJoinErrorMessage('Code de session invalide ou partie introuvable')
@@ -268,7 +254,7 @@ export default function LobbyPage({
   }
 
   function handleCancel() {
-    stopAutoRefresh()
+    unsubscribeFromLobby()
     setCurrentPartieId('')
     setPartie(null)
     setSuccessMessage('')

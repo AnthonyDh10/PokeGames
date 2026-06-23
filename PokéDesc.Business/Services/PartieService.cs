@@ -12,14 +12,16 @@ public class PartieService : IPartieService
 {
     private readonly IPokemonService _pokemonService;
     private readonly IGameSessionStore _sessionStore;
+    private readonly ILobbyNotifier _notifier;
     private readonly SemaphoreSlim _rematchLock = new(1, 1);
     private static readonly TimeSpan GameTtl = TimeSpan.FromHours(24);
     private readonly IReadOnlyDictionary<string, IGameModeStrategy> _strategies;
 
-    public PartieService(IPokemonService pokemonService, IGameSessionStore sessionStore, IEnumerable<IGameModeStrategy> strategies)
+    public PartieService(IPokemonService pokemonService, IGameSessionStore sessionStore, IEnumerable<IGameModeStrategy> strategies, ILobbyNotifier notifier)
     {
         _pokemonService = pokemonService;
         _sessionStore = sessionStore;
+        _notifier = notifier;
         _strategies = strategies.ToDictionary(s => s.Mode, StringComparer.OrdinalIgnoreCase);
     }
 
@@ -46,6 +48,7 @@ public class PartieService : IPartieService
         if (!_strategies.TryGetValue(mode, out var strategy))
             throw new ArgumentException($"Mode de jeu '{mode}' inconnu.");
         await strategy.ExecuteAsync(partie, new StartGameParams(nbPokemons, generations, timerDuration));
+        await _notifier.NotifyGameStarted(partie.Id);
         return partie;
     }
 
@@ -59,12 +62,13 @@ public class PartieService : IPartieService
         try
         {
             partie.Join(dresseurId);
-            return partie;
         }
         finally
         {
             gameLock.Release();
         }
+        await _notifier.NotifyLobbyUpdated(partie.Id);
+        return partie;
     }
 
     public Task<Partie> GetGameAsync(string partieId)
@@ -74,9 +78,10 @@ public class PartieService : IPartieService
     {
         var gameLock = _sessionStore.GetOrCreateLock(partieId);
         await gameLock.WaitAsync();
+        Partie partie;
         try
         {
-            var partie = await GetGameAsync(partieId);
+            partie = await GetGameAsync(partieId);
             var state = partie.GetState(dresseurId == partie.Dresseur1Id);
             if (!HintConfig.Hints.ContainsKey(hintType))
                 throw new ArgumentException($"Type d'indice '{hintType}' inconnu.");
@@ -90,15 +95,23 @@ public class PartieService : IPartieService
                         state.TimeRemaining = Math.Max(0, state.TimeRemaining - penalty);
                 }
             }
-            return partie;
         }
         finally
         {
             gameLock.Release();
         }
+        await _notifier.NotifyLobbyUpdated(partieId);
+        return partie;
     }
 
     public async Task<GuessResult> SubmitGuessAsync(string partieId, string dresseurId, string pokemonName)
+    {
+        var result = await SubmitGuessInternalAsync(partieId, dresseurId, pokemonName);
+        await _notifier.NotifyLobbyUpdated(partieId);
+        return result;
+    }
+
+    private async Task<GuessResult> SubmitGuessInternalAsync(string partieId, string dresseurId, string pokemonName)
     {
         var gameLock = _sessionStore.GetOrCreateLock(partieId);
         await gameLock.WaitAsync();
@@ -188,16 +201,19 @@ public class PartieService : IPartieService
     {
         var gameLock = _sessionStore.GetOrCreateLock(partieId);
         await gameLock.WaitAsync();
+        GuessResult result;
         try
         {
             var partie = await GetGameAsync(partieId);
             bool isJ1 = dresseurId == partie.Dresseur1Id;
-            return HandleTimeout(partie, isJ1);
+            result = HandleTimeout(partie, isJ1);
         }
         finally
         {
             gameLock.Release();
         }
+        await _notifier.NotifyLobbyUpdated(partieId);
+        return result;
     }
 
     public async Task<Partie> UpdateGameSettingsAsync(string partieId, int nbPokemons, List<int>? generations, int? timerDuration)
@@ -211,6 +227,7 @@ public class PartieService : IPartieService
         partie.SelectedGenerations = generations ?? Enumerable.Range(1, 8).ToList();
         if (timerDuration.HasValue)
             partie.TimerDurationSeconds = timerDuration.Value;
+        await _notifier.NotifyLobbyUpdated(partie.Id);
         return partie;
     }
 
@@ -243,6 +260,7 @@ public class PartieService : IPartieService
                 _rematchLock.Release();
             }
         }
+        await _notifier.NotifyLobbyUpdated(partie.Id);
         return new RematchStatusDto
         {
             Player1Ready = partie.StateJ1.RematchReady,

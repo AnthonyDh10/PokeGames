@@ -29,7 +29,7 @@ public class PartieServiceTests
             new DeZoomModeStrategy(),
         ];
 
-        _service = new PartieService(_pokemonServiceMock.Object, new GameSessionStore(), strategies);
+        _service = new PartieService(_pokemonServiceMock.Object, new GameSessionStore(), strategies, Mock.Of<ILobbyNotifier>());
 
         // Setup par défaut pour les appels dans StartGameAsync
         var allPokemons = TestDataFactory.CreateAllPokemons()

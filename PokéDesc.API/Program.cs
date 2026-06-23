@@ -5,6 +5,7 @@ using PokéDesc.Business.Strategies;
 using PokéDesc.Domain.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using PokéDesc.API.Hubs;
+using PokéDesc.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +40,8 @@ builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
 // Singleton : stores in-memory génériques pour les mini-jeux (DeZoom, TypesGame)
 builder.Services.AddSingleton(typeof(IMiniGameStore<>), typeof(MiniGameStore<>));
 builder.Services.AddSingleton<IPartieService, PartieService>();
+// Singleton : push temps réel du lobby/jeu via SignalR (implémente l'abstraction Business ILobbyNotifier)
+builder.Services.AddSingleton<ILobbyNotifier, LobbyNotifier>();
 builder.Services.AddSingleton<ITimerService, TimerService>();
 builder.Services.AddSingleton<ITypesGameService, TypesGameService>();
 builder.Services.AddSingleton<IDeZoomService, DeZoomService>();
@@ -88,5 +91,6 @@ app.UseCors("Frontend");
 app.UseMiddleware<PokéDesc.API.Middleware.ExceptionMiddleware>();
 app.MapControllers();
 app.MapHub<ChatHub>("/chatHub");
+app.MapHub<GameHub>("/gameHub");
 
 app.Run();

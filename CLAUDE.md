@@ -195,15 +195,15 @@ Events serveur → client : `LobbyUpdated`, `GameStarted`, `PlayerKicked`.
 **Objectif :** remplacer le polling 2 s par du push SignalR, **sans toucher au modèle de données**, pour isoler le risque et prouver le pattern.
 
 **Back-end**
-- [ ] `PokéDesc.API/Hubs/GameHub.cs` *(nouveau)* — `JoinRoom`/`LeaveRoom` par `partieId`, calqué sur `ChatHub`.
-- [ ] `PokéDesc.Business/Interfaces/ILobbyNotifier.cs` *(nouveau)* — abstraction (Business ne référence pas SignalR).
-- [ ] `PokéDesc.API/Services/LobbyNotifier.cs` *(nouveau)* — implémente `ILobbyNotifier` via `IHubContext<GameHub>`.
-- [ ] `PartieService.cs` — injecter `ILobbyNotifier` ; appeler `NotifyLobbyUpdated` après join/start/settings/guess/hint/timeout/rematch.
-- [ ] `Program.cs` — `MapHub<GameHub>("/gameHub")` + DI de `ILobbyNotifier`.
+- [x] `PokéDesc.API/Hubs/GameHub.cs` *(nouveau)* — `JoinRoom`/`LeaveRoom` par `partieId`, calqué sur `ChatHub`.
+- [x] `PokéDesc.Business/Interfaces/ILobbyNotifier.cs` *(nouveau)* — abstraction (Business ne référence pas SignalR).
+- [x] `PokéDesc.API/Services/LobbyNotifier.cs` *(nouveau)* — implémente `ILobbyNotifier` via `IHubContext<GameHub>`.
+- [x] `PartieService.cs` — injecter `ILobbyNotifier` ; appeler `NotifyLobbyUpdated` après join/settings/guess/hint/timeout/rematch et `NotifyGameStarted` au start.
+- [x] `Program.cs` — `MapHub<GameHub>("/gameHub")` + DI de `ILobbyNotifier`.
 
 **Front-end**
-- [ ] `FrontEnd/src/app/services/lobbyService.ts` *(nouveau)* — connexion `GameHub`, écoute `LobbyUpdated` / `GameStarted`.
-- [ ] `LobbyPage.tsx` — retirer `startAutoRefresh` / `setInterval`, s'abonner au push. UI 2 slots **inchangée**.
+- [x] `FrontEnd/src/app/services/lobbyService.ts` *(nouveau)* — connexion `GameHub`, écoute `LobbyUpdated` / `GameStarted`.
+- [x] `LobbyPage.tsx` — retirer `startAutoRefresh` / `setInterval`, s'abonner au push. UI 2 slots **inchangée**.
 
 **Critères d'acceptation**
 - Un 2ᵉ joueur qui rejoint apparaît chez l'hôte **sans délai de polling**.
@@ -300,7 +300,7 @@ une fois PokéDesc validé de bout en bout.
 ---
 
 ## 7. Statut d'avancement
-- [ ] Phase 1 — Transport temps réel
+- [x] Phase 1 — Transport temps réel
 - [ ] Phase 2 — Joueurs dynamiques + rôles (back)
 - [ ] Phase 3 — Joueurs dynamiques + rôles (front)
 - [ ] Phase 4 — Jeu & résultats à N (PokéDesc)
