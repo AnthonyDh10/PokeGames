@@ -35,39 +35,44 @@ export default function PartieDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[50] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="max-w-3xl w-full max-h-[85vh] flex flex-col"
+        className="w-full max-w-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         <Card
-          showHeader
+          showHeader={false}
           headerColor={colors.brand.blueDeep}
           pokeballOpacity={0}
           borderColor={colors.brand.blueDeep}
-          className="border-4 overflow-hidden flex flex-col"
+          className="border-4 overflow-hidden" 
           header={
-            <div className="flex items-center justify-between w-full">
-              <h3 className="font-display text-lg tracking-widest text-white uppercase">
+            <div className="flex w-full items-center justify-between">
+              <h3 className="font-display text-lg uppercase tracking-widest text-white">
                 Détails de la partie
               </h3>
+            </div>
+          }
+        >
+          <div className="max-h-[65vh] sm:max-h-[75vh] overflow-y-auto overscroll-contain p-4 sm:p-6 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-2">
+            
+            <div className="sticky top-0 z-10 flex justify-end -mt-2 mb-2 pointer-events-none">
               <button
                 onClick={onClose}
-                className="text-white/70 hover:text-white text-2xl leading-none transition-colors"
+                className="pointer-events-auto flex text-2xl font-bold transition-colors hover:opacity-70"
+                style={{ color: colors.brand.blueDeep }}
                 aria-label="Fermer"
               >
                 ×
               </button>
             </div>
-          }
-        >
-          <div className="overflow-y-auto p-4 sm:p-6">
+
             {isSolo ? (
               <StatDetails data={currentPokemon} color={colors.brand.blue} />
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {sortedPlayers.map((player, rank) => {
                   const playerPokemon = player.completedPokemons[index]
                   const color = RANK_COLORS[rank] ?? colors.brand.blue
@@ -79,7 +84,7 @@ export default function PartieDetailsModal({
                       style={{ boxShadow: `3px 3px 0px ${color}`, borderColor: color }}
                     >
                       <div
-                        className="font-display text-xs mb-3 uppercase tracking-wider font-bold"
+                        className="font-display mb-3 text-xs font-bold uppercase tracking-wider"
                         style={{ color }}
                       >
                         {player.name}{isMe ? ' ★' : ''}
@@ -108,12 +113,12 @@ interface StatDetailsProps {
 }
 
 function StatDetails({ data, color, loading }: StatDetailsProps) {
-  if (loading) return <div className="font-heading animate-pulse text-orange-500 py-4">⏳ EN ATTENTE DU JOUEUR...</div>
-  if (!data) return <div className="font-heading text-gray-300 py-4">AUCUNE DONNÉE</div>
+  if (loading) return <div className="font-heading animate-pulse py-4 text-orange-500">⏳ EN ATTENTE DU JOUEUR...</div>
+  if (!data) return <div className="font-heading py-4 text-gray-300">AUCUNE DONNÉE</div>
 
   return (
-    <div className="space-y-4 font-heading uppercase tracking-widest">
-      <div className="flex justify-between items-end border-b-4 border-dashed pb-2" style={{ borderColor: color }}>
+    <div className="font-heading space-y-4 uppercase tracking-widest">
+      <div className="flex items-end justify-between border-b-4 border-dashed pb-2" style={{ borderColor: color }}>
         <span className={`font-bold text-sm ${data.wasGuessed ? 'text-green-600' : 'text-red-500'}`}>
           {data.wasGuessed ? '► RÉUSSI' : 'X ÉCHEC'}
         </span>
@@ -124,28 +129,28 @@ function StatDetails({ data, color, loading }: StatDetailsProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div
-          className="p-2 bg-white border-2 transition-transform hover:-translate-y-0.5"
+          className="bg-white p-2 border-2 transition-transform hover:-translate-y-0.5"
           style={{ borderColor: color, boxShadow: `3px 3px 0px ${color}` }}
         >
-          <div className="text-[10px] text-gray-500 mb-1">TENTATIVE(S)</div>
-          <div className="font-bold text-lg text-gray-800">{data.attemptsUsed} / 3</div>
+          <div className="mb-1 text-[10px] text-gray-500">TENTATIVE(S)</div>
+          <div className="text-lg font-bold text-gray-800">{data.attemptsUsed} / 3</div>
         </div>
 
         <div
-          className="p-2 bg-white border-2 transition-transform hover:-translate-y-0.5"
+          className="bg-white p-2 border-2 transition-transform hover:-translate-y-0.5"
           style={{ borderColor: color, boxShadow: `3px 3px 0px ${color}` }}
         >
-          <div className="text-[10px] text-gray-500 mb-1">INDICE(S) UTILISÉ(S)</div>
-          <div className="font-bold text-lg text-gray-800">{data.hintsUsed.length}</div>
+          <div className="mb-1 text-[10px] text-gray-500">INDICE(S) UTILISÉ(S)</div>
+          <div className="text-lg font-bold text-gray-800">{data.hintsUsed.length}</div>
         </div>
       </div>
 
       {data.hintsUsed.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-2">
+        <div className="mt-2 flex flex-wrap gap-2">
           {data.hintsUsed.map((h: string) => (
             <span
               key={h}
-              className="text-[10px] px-2 py-1 bg-gray-100 border-2 border-gray-800 text-gray-700 font-bold"
+              className="bg-gray-100 px-2 py-1 text-[10px] font-bold text-gray-700 border-2 border-gray-800"
             >
               [{HINT_LABELS[h] || h}]
             </span>
