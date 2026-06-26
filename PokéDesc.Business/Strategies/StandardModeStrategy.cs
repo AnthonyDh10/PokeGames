@@ -65,10 +65,11 @@ public class StandardModeStrategy : IGameModeStrategy
         partie.Statut = PartieStatut.EnCours;
 
         double initialTime = parameters.TimerDuration >= 0 ? parameters.TimerDuration : -1.0;
-        partie.StateJ1.TimerStart = DateTime.UtcNow;
-        partie.StateJ1.TimeRemaining = initialTime;
-        partie.StateJ2.TimerStart = DateTime.UtcNow;
-        partie.StateJ2.TimeRemaining = initialTime;
+        foreach (var player in partie.Players)
+        {
+            player.State.TimerStart = DateTime.UtcNow;
+            player.State.TimeRemaining = initialTime;
+        }
     }
 
     private static List<Pokemon> SelectPokemons(

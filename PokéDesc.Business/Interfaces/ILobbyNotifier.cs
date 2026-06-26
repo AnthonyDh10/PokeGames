@@ -12,4 +12,7 @@ public interface ILobbyNotifier
 
     /// <summary>Signale aux clients que la partie démarre afin de les rediriger vers l'écran de jeu.</summary>
     Task NotifyGameStarted(string partieId);
+
+    /// <summary>Signale au groupe qu'un joueur a été expulsé (le client concerné quitte la partie).</summary>
+    Task NotifyPlayerKicked(string partieId, string targetId);
 }

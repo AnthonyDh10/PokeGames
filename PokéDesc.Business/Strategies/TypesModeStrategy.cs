@@ -14,8 +14,8 @@ public class TypesModeStrategy : IGameModeStrategy
     public Task ExecuteAsync(Partie partie, StartGameParams parameters)
     {
         partie.Statut = PartieStatut.EnCours;
-        partie.StateJ1.TimerStart = DateTime.UtcNow;
-        partie.StateJ2.TimerStart = DateTime.UtcNow;
+        foreach (var player in partie.Players)
+            player.State.TimerStart = DateTime.UtcNow;
         return Task.CompletedTask;
     }
 }

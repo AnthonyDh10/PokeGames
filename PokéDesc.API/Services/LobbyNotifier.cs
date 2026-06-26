@@ -25,6 +25,9 @@ public class LobbyNotifier : ILobbyNotifier
 
     public Task NotifyGameStarted(string partieId) => Broadcast(partieId, "GameStarted");
 
+    public Task NotifyPlayerKicked(string partieId, string targetId)
+        => _hub.Clients.Group(partieId).SendAsync("PlayerKicked", targetId);
+
     private async Task Broadcast(string partieId, string eventName)
     {
         // La partie peut avoir été nettoyée entre-temps : on ignore silencieusement.

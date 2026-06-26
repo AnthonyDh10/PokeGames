@@ -1,4 +1,4 @@
-﻿using PokéDesc.Business.Constants;
+using PokéDesc.Business.Constants;
 using PokéDesc.Business.Helpers;
 using PokéDesc.Business.Interfaces;
 using PokéDesc.Business.Models;
@@ -25,25 +25,27 @@ public class PartieService : IPartieService
         _strategies = strategies.ToDictionary(s => s.Mode, StringComparer.OrdinalIgnoreCase);
     }
 
-    public Task<Partie> CreateGameAsync(string dresseurId)
+    public Task<Partie> CreateGameAsync(string dresseurId, string name = "")
     {
         _sessionStore.Cleanup(GameTtl);
         var partie = new Partie
         {
             Id = Guid.NewGuid().ToString(),
             CodeSession = GenerateSessionCode(),
-            Dresseur1Id = dresseurId,
             PokemonsToGuess = new List<Pokemon>(),
             Statut = PartieStatut.EnAttente
         };
+        partie.InitHost(dresseurId, name);
         _sessionStore.Add(partie);
         return Task.FromResult(partie);
     }
 
-    public async Task<Partie> StartGameAsync(string partieId, string mode, bool isSolo = false,
+    public async Task<Partie> StartGameAsync(string partieId, string dresseurId, string mode, bool isSolo = false,
         int nbPokemons = 3, List<int>? generations = null, int timerDuration = 60)
     {
         var partie = await GetGameAsync(partieId);
+        if (!partie.IsHost(dresseurId))
+            throw new UnauthorizedAccessException("Seul l'hôte peut démarrer la partie.");
         partie.ModeSolo = isSolo;
         if (!_strategies.TryGetValue(mode, out var strategy))
             throw new ArgumentException($"Mode de jeu '{mode}' inconnu.");
@@ -52,7 +54,7 @@ public class PartieService : IPartieService
         return partie;
     }
 
-    public async Task<Partie> JoinGameAsync(string codeSession, string dresseurId)
+    public async Task<Partie> JoinGameAsync(string codeSession, string dresseurId, string name = "")
     {
         var partie = _sessionStore.FindByCode(codeSession);
         if (partie == null)
@@ -61,7 +63,7 @@ public class PartieService : IPartieService
         await gameLock.WaitAsync();
         try
         {
-            partie.Join(dresseurId);
+            partie.Join(dresseurId, name);
         }
         finally
         {
@@ -74,6 +76,49 @@ public class PartieService : IPartieService
     public Task<Partie> GetGameAsync(string partieId)
         => Task.FromResult(_sessionStore.Get(partieId));
 
+    public async Task<Partie> KickPlayerAsync(string partieId, string hostId, string targetId)
+    {
+        var gameLock = _sessionStore.GetOrCreateLock(partieId);
+        await gameLock.WaitAsync();
+        Partie partie;
+        try
+        {
+            partie = await GetGameAsync(partieId);
+            if (!partie.IsHost(hostId))
+                throw new UnauthorizedAccessException("Seul l'hôte peut expulser un joueur.");
+            if (hostId == targetId)
+                throw new ArgumentException("L'hôte ne peut pas s'expulser lui-même.");
+            if (partie.GetPlayer(targetId) == null)
+                throw new KeyNotFoundException("Joueur introuvable dans cette partie.");
+            partie.Remove(targetId);
+        }
+        finally
+        {
+            gameLock.Release();
+        }
+        await _notifier.NotifyPlayerKicked(partieId, targetId);
+        await _notifier.NotifyLobbyUpdated(partieId);
+        return partie;
+    }
+
+    public async Task<Partie> LeaveGameAsync(string partieId, string dresseurId)
+    {
+        var gameLock = _sessionStore.GetOrCreateLock(partieId);
+        await gameLock.WaitAsync();
+        Partie partie;
+        try
+        {
+            partie = await GetGameAsync(partieId);
+            partie.Remove(dresseurId); // promeut automatiquement un nouvel hôte si nécessaire
+        }
+        finally
+        {
+            gameLock.Release();
+        }
+        await _notifier.NotifyLobbyUpdated(partieId);
+        return partie;
+    }
+
     public async Task<Partie> UseHintAsync(string partieId, string dresseurId, string hintType)
     {
         var gameLock = _sessionStore.GetOrCreateLock(partieId);
@@ -82,7 +127,7 @@ public class PartieService : IPartieService
         try
         {
             partie = await GetGameAsync(partieId);
-            var state = partie.GetState(dresseurId == partie.Dresseur1Id);
+            var state = GetPlayerState(partie, dresseurId);
             if (!HintConfig.Hints.ContainsKey(hintType))
                 throw new ArgumentException($"Type d'indice '{hintType}' inconnu.");
             if (!state.UsedHints.Contains(hintType))
@@ -118,11 +163,10 @@ public class PartieService : IPartieService
         try
         {
             var partie = await GetGameAsync(partieId);
-            bool isJ1 = dresseurId == partie.Dresseur1Id;
-            var state = partie.GetState(isJ1);
+            var state = GetPlayerState(partie, dresseurId);
 
             if (TimerCalculator.IsTimedOut(state.TimerStart, state.TimeRemaining))
-                return HandleTimeout(partie, isJ1);
+                return HandleTimeout(partie, state);
 
             if (state.CurrentIndex >= partie.PokemonsToGuess.Count)
                 return new GuessResult { IsGameFinished = true, Message = "Partie déjà terminée.", UpdatedGame = partie };
@@ -205,8 +249,8 @@ public class PartieService : IPartieService
         try
         {
             var partie = await GetGameAsync(partieId);
-            bool isJ1 = dresseurId == partie.Dresseur1Id;
-            result = HandleTimeout(partie, isJ1);
+            var state = GetPlayerState(partie, dresseurId);
+            result = HandleTimeout(partie, state);
         }
         finally
         {
@@ -216,9 +260,11 @@ public class PartieService : IPartieService
         return result;
     }
 
-    public async Task<Partie> UpdateGameSettingsAsync(string partieId, int nbPokemons, List<int>? generations, int? timerDuration)
+    public async Task<Partie> UpdateGameSettingsAsync(string partieId, string dresseurId, int nbPokemons, List<int>? generations, int? timerDuration)
     {
         var partie = await GetGameAsync(partieId);
+        if (!partie.IsHost(dresseurId))
+            throw new UnauthorizedAccessException("Seul l'hôte peut modifier les paramètres.");
         if (partie.Statut == PartieStatut.EnCours)
             return partie;
         if (nbPokemons < GameConstants.MinPokemons || nbPokemons > GameConstants.MaxPokemons)
@@ -236,22 +282,24 @@ public class PartieService : IPartieService
         if (string.IsNullOrWhiteSpace(dresseurId))
             throw new ArgumentException("dresseurId est requis.", nameof(dresseurId));
         var partie = await GetGameAsync(partieId);
-        partie.GetState(dresseurId == partie.Dresseur1Id).RematchReady = true;
-        bool bothReady = partie.StateJ1.RematchReady && (partie.ModeSolo || partie.StateJ2.RematchReady);
-        if (bothReady && string.IsNullOrEmpty(partie.RematchPartieId))
+        var player = partie.GetPlayer(dresseurId)
+            ?? throw new KeyNotFoundException("Joueur introuvable dans cette partie.");
+        player.State.RematchReady = true;
+
+        bool allReady = partie.Players.Count > 0 && partie.Players.All(p => p.State.RematchReady);
+        if (allReady && string.IsNullOrEmpty(partie.RematchPartieId))
         {
             await _rematchLock.WaitAsync();
             try
             {
                 if (string.IsNullOrEmpty(partie.RematchPartieId))
                 {
-                    var newPartie = await CreateGameAsync(partie.Dresseur1Id);
-                    if (!string.IsNullOrEmpty(partie.Dresseur2Id))
-                    {
-                        newPartie.Dresseur2Id = partie.Dresseur2Id;
-                        newPartie.Statut = PartieStatut.Pret;
-                    }
-                    await StartGameAsync(newPartie.Id, "Standard", partie.ModeSolo, partie.NbPokemons, partie.SelectedGenerations, partie.TimerDurationSeconds);
+                    var host = partie.GetPlayer(partie.HostId);
+                    var newPartie = await CreateGameAsync(partie.HostId, host?.Name ?? string.Empty);
+                    // On conserve la composition du lobby : tous les invités rejoignent la revanche.
+                    foreach (var p in partie.Players.Where(p => p.DresseurId != partie.HostId))
+                        newPartie.Join(p.DresseurId, p.Name);
+                    await StartGameAsync(newPartie.Id, partie.HostId, "Standard", partie.ModeSolo, partie.NbPokemons, partie.SelectedGenerations, partie.TimerDurationSeconds);
                     partie.RematchPartieId = newPartie.Id;
                 }
             }
@@ -261,15 +309,31 @@ public class PartieService : IPartieService
             }
         }
         await _notifier.NotifyLobbyUpdated(partie.Id);
-        return new RematchStatusDto
-        {
-            Player1Ready = partie.StateJ1.RematchReady,
-            Player2Ready = partie.StateJ2.RematchReady || partie.ModeSolo,
-            RematchPartieId = partie.RematchPartieId,
-        };
+        return BuildRematchStatus(partie);
     }
 
     // Méthodes privées
+
+    /// <summary>Retourne l'état du joueur ou lève si l'identité n'appartient pas à la partie.</summary>
+    private static PlayerGameState GetPlayerState(Partie partie, string dresseurId)
+        => partie.GetPlayer(dresseurId)?.State
+           ?? throw new KeyNotFoundException("Joueur introuvable dans cette partie.");
+
+    /// <summary>
+    /// Construit le statut de revanche. <see cref="RematchStatusDto"/> reste binaire (partagé avec les mini-jeux) :
+    /// Player1Ready = hôte prêt, Player2Ready = tous les invités prêts (vrai s'il n'y a pas d'invité).
+    /// </summary>
+    private static RematchStatusDto BuildRematchStatus(Partie partie)
+    {
+        var host = partie.GetPlayer(partie.HostId);
+        var guests = partie.Players.Where(p => p.DresseurId != partie.HostId).ToList();
+        return new RematchStatusDto
+        {
+            Player1Ready = host?.State.RematchReady ?? false,
+            Player2Ready = guests.Count == 0 || guests.All(p => p.State.RematchReady),
+            RematchPartieId = partie.RematchPartieId,
+        };
+    }
 
     private static void ApplyProximity(GuessResult result, ProximityResult proximity)
     {
@@ -302,9 +366,8 @@ public class PartieService : IPartieService
     private static bool CheckIfGameFinished(Partie partie, PlayerGameState state)
         => state.CurrentIndex >= partie.PokemonsToGuess.Count;
 
-    private static GuessResult HandleTimeout(Partie partie, bool isJ1)
+    private static GuessResult HandleTimeout(Partie partie, PlayerGameState state)
     {
-        var state = partie.GetState(isJ1);
         if (state.CurrentIndex >= partie.PokemonsToGuess.Count)
             return new GuessResult { IsGameFinished = true, Message = "Partie déjà terminée.", UpdatedGame = partie };
         var targetPokemon = partie.PokemonsToGuess[state.CurrentIndex];

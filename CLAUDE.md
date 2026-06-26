@@ -217,15 +217,17 @@ Events serveur → client : `LobbyUpdated`, `GameStarted`, `PlayerKicked`.
 ### Phase 2 — Joueurs dynamiques + rôles (back-end)
 **Objectif :** casser le modèle binaire `Dresseur1/2` + `StateJ1/J2`.
 
-- [ ] `PokéDesc.Domain` : ajouter `Player`, `PlayerRole` ; refondre `Partie` (`List<Player>`, `HostId`, `MaxPlayers`, helpers `GetPlayer`/`IsHost`/`CanJoin`/`Join`/`Remove`/`PromoteNewHost`).
-- [ ] `PokéDesc.Domain/Models/PartieStatut.cs` : simplifier (`EnAttente` → `EnCours` → `Termine`), retirer `Pret`.
-- [ ] `PartieService.cs` : remplacer tous les `GetState(isJ1)` par `GetPlayer(dresseurId).State` ; `JoinGameAsync` avec contrôle de capacité ; `MarkRematchReadyAsync` → `Players.All(...)`.
-- [ ] `TimerService.cs` : idem `GetPlayer(dresseurId)`.
-- [ ] **Autorisation hôte côté serveur** : `StartGame`, `UpdateGameSettings`, et nouveau `KickPlayer` rejettent si `!partie.IsHost(dresseurId)`.
-- [ ] Nouvelles commandes : `KickPlayerAsync(partieId, hostId, targetId)`, `LeaveGameAsync(partieId, dresseurId)` (+ promotion d'hôte).
-- [ ] `GameRequests.cs` : `PartieResponseDto` → `Players[]` + `HostId` + `MaxPlayers` ; nouvelles requêtes (`JoinGameRequest` ajoute `Name`, `KickPlayerRequest`…).
-- [ ] `PartieController.cs` : endpoints `kick`, `leave` ; passage des requêtes.
-- [ ] `PokéDesc.Tests` : mettre à jour la suite pour le modèle `Players[]`.
+- [x] `PokéDesc.Domain` : ajouter `Player`, `PlayerRole` ; refondre `Partie` (`List<Player>`, `HostId`, `MaxPlayers`, helpers `GetPlayer`/`IsHost`/`CanJoin`/`Join`/`Remove`/`PromoteNewHost` + `InitHost`).
+- [x] `PokéDesc.Domain/Models/PartieStatut.cs` : simplifier (`EnAttente` → `EnCours` → `Termine`), retirer `Pret`.
+- [x] `PartieService.cs` : remplacer tous les `GetState(isJ1)` par `GetPlayer(dresseurId).State` ; `JoinGameAsync` avec contrôle de capacité ; `MarkRematchReadyAsync` → `Players.All(...)`.
+- [x] `TimerService.cs` : idem `GetPlayer(dresseurId)`.
+- [x] **Autorisation hôte côté serveur** : `StartGame`, `UpdateGameSettings`, et nouveau `KickPlayer` rejettent (`UnauthorizedAccessException` → 403) si `!partie.IsHost(dresseurId)`.
+- [x] Nouvelles commandes : `KickPlayerAsync(partieId, hostId, targetId)`, `LeaveGameAsync(partieId, dresseurId)` (+ promotion d'hôte).
+- [x] `GameRequests.cs` : `PartieResponseDto` → `Players[]` + `HostId` + `MaxPlayers` + `Settings` (`PlayerDto`/`GameSettingsDto`) ; nouvelles requêtes (`Create`/`JoinGameRequest` ajoutent `Name`, `Start`/`UpdateSettings` ajoutent `DresseurId`, `KickPlayerRequest`/`LeaveGameRequest`).
+- [x] `PartieController.cs` : endpoints `kick`, `leave` ; passage des requêtes.
+- [x] `PokéDesc.Tests` : mettre à jour la suite pour le modèle `Players[]`.
+
+> **Notes d'implémentation** — `RematchStatusDto` (binaire `Player1Ready`/`Player2Ready`) est **conservé tel quel** car partagé avec les mini-jeux (`MiniGameServiceBase`, Phase 6) ; côté PokéDesc on dérive `Player1Ready` = hôte prêt, `Player2Ready` = tous les invités prêts. Le champ `ModeSolo` est conservé (orthogonal au clean cut J1/J2 ; un solo = lobby à 1 joueur). Nouvel event SignalR `PlayerKicked` ajouté à `ILobbyNotifier`. `ExceptionMiddleware` mappe désormais `UnauthorizedAccessException` → 403 et `InvalidOperationException` → 409 (lobby plein / déjà démarré).
 
 **Critères d'acceptation**
 - Création → 1 `Player` Host. Join → ajout d'un `Guest` jusqu'à 8, refus au-delà.
@@ -301,7 +303,7 @@ une fois PokéDesc validé de bout en bout.
 
 ## 7. Statut d'avancement
 - [x] Phase 1 — Transport temps réel
-- [ ] Phase 2 — Joueurs dynamiques + rôles (back)
+- [x] Phase 2 — Joueurs dynamiques + rôles (back)
 - [ ] Phase 3 — Joueurs dynamiques + rôles (front)
 - [ ] Phase 4 — Jeu & résultats à N (PokéDesc)
 - [ ] Phase 5 — Robustesse

@@ -50,12 +50,23 @@ public class PartieServiceTests
     // ─────────────────────────────────────────────
 
     [Fact]
-    public async Task CreateGameAsync_ReturnsPartieWithCorrectDresseur()
+    public async Task CreateGameAsync_SetsCreatorAsHost()
     {
         var partie = await _service.CreateGameAsync("dresseur-1");
 
         Assert.NotNull(partie);
-        Assert.Equal("dresseur-1", partie.Dresseur1Id);
+        Assert.Equal("dresseur-1", partie.HostId);
+    }
+
+    [Fact]
+    public async Task CreateGameAsync_AddsSingleHostPlayer()
+    {
+        var partie = await _service.CreateGameAsync("dresseur-1", "Sacha");
+
+        var player = Assert.Single(partie.Players);
+        Assert.Equal("dresseur-1", player.DresseurId);
+        Assert.Equal("Sacha", player.Name);
+        Assert.Equal(PlayerRole.Host, player.Role);
     }
 
     [Fact]
@@ -109,23 +120,27 @@ public class PartieServiceTests
     // ─────────────────────────────────────────────
 
     [Fact]
-    public async Task JoinGameAsync_WithValidCode_ReturnsPartieWithDresseur2()
+    public async Task JoinGameAsync_WithValidCode_AddsGuestPlayer()
     {
         var created = await _service.CreateGameAsync("dresseur-1");
 
-        var joined = await _service.JoinGameAsync(created.CodeSession, "dresseur-2");
+        var joined = await _service.JoinGameAsync(created.CodeSession, "dresseur-2", "Régis");
 
-        Assert.Equal("dresseur-2", joined.Dresseur2Id);
+        var guest = joined.GetPlayer("dresseur-2");
+        Assert.NotNull(guest);
+        Assert.Equal("Régis", guest!.Name);
+        Assert.Equal(PlayerRole.Guest, guest.Role);
+        Assert.Equal(2, joined.Players.Count);
     }
 
     [Fact]
-    public async Task JoinGameAsync_WithValidCode_UpdatesStatusToPret()
+    public async Task JoinGameAsync_WithValidCode_KeepsStatusEnAttente()
     {
         var created = await _service.CreateGameAsync("dresseur-1");
 
         var joined = await _service.JoinGameAsync(created.CodeSession, "dresseur-2");
 
-        Assert.Equal(PokéDesc.Domain.PartieStatut.Pret, joined.Statut);
+        Assert.Equal(PokéDesc.Domain.PartieStatut.EnAttente, joined.Statut);
     }
 
     [Fact]
@@ -136,13 +151,37 @@ public class PartieServiceTests
     }
 
     [Fact]
-    public async Task JoinGameAsync_WhenGameAlreadyFull_ThrowsArgumentException()
+    public async Task JoinGameAsync_UpToEightPlayers_Succeeds()
+    {
+        var created = await _service.CreateGameAsync("dresseur-1"); // hôte = 1 joueur
+
+        for (int i = 2; i <= 8; i++)
+            await _service.JoinGameAsync(created.CodeSession, $"dresseur-{i}");
+
+        var partie = await _service.GetGameAsync(created.Id);
+        Assert.Equal(8, partie.Players.Count);
+    }
+
+    [Fact]
+    public async Task JoinGameAsync_WhenLobbyFull_ThrowsInvalidOperationException()
+    {
+        var created = await _service.CreateGameAsync("dresseur-1");
+        for (int i = 2; i <= 8; i++)
+            await _service.JoinGameAsync(created.CodeSession, $"dresseur-{i}");
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _service.JoinGameAsync(created.CodeSession, "dresseur-9"));
+    }
+
+    [Fact]
+    public async Task JoinGameAsync_SamePlayerTwice_IsIdempotent()
     {
         var created = await _service.CreateGameAsync("dresseur-1");
         await _service.JoinGameAsync(created.CodeSession, "dresseur-2");
 
-        await Assert.ThrowsAsync<ArgumentException>(() =>
-            _service.JoinGameAsync(created.CodeSession, "dresseur-3"));
+        var joined = await _service.JoinGameAsync(created.CodeSession, "dresseur-2");
+
+        Assert.Equal(2, joined.Players.Count);
     }
 
     [Fact]
@@ -153,11 +192,11 @@ public class PartieServiceTests
 
         var joined = await _service.JoinGameAsync(lowerCode, "dresseur-2");
 
-        Assert.Equal("dresseur-2", joined.Dresseur2Id);
+        Assert.NotNull(joined.GetPlayer("dresseur-2"));
     }
 
     // ─────────────────────────────────────────────
-    // StartGameAsync — Mode Standard
+    // StartGameAsync — Mode Standard + autorisation hôte
     // ─────────────────────────────────────────────
 
     [Fact]
@@ -165,7 +204,7 @@ public class PartieServiceTests
     {
         var created = await _service.CreateGameAsync("dresseur-1");
 
-        var started = await _service.StartGameAsync(created.Id, "Standard", isSolo: true, nbPokemons: 1);
+        var started = await _service.StartGameAsync(created.Id, "dresseur-1", "Standard", isSolo: true, nbPokemons: 1);
 
         Assert.Equal(PokéDesc.Domain.PartieStatut.EnCours, started.Statut);
     }
@@ -175,7 +214,7 @@ public class PartieServiceTests
     {
         var created = await _service.CreateGameAsync("dresseur-1");
 
-        var started = await _service.StartGameAsync(created.Id, "Standard", isSolo: true, nbPokemons: 2);
+        var started = await _service.StartGameAsync(created.Id, "dresseur-1", "Standard", isSolo: true, nbPokemons: 2);
 
         Assert.Equal(2, started.PokemonsToGuess.Count);
     }
@@ -186,7 +225,17 @@ public class PartieServiceTests
         var created = await _service.CreateGameAsync("dresseur-1");
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            _service.StartGameAsync(created.Id, "ModeInconnu", isSolo: true));
+            _service.StartGameAsync(created.Id, "dresseur-1", "ModeInconnu", isSolo: true));
+    }
+
+    [Fact]
+    public async Task StartGameAsync_ByGuest_ThrowsUnauthorizedAccessException()
+    {
+        var created = await _service.CreateGameAsync("dresseur-1");
+        await _service.JoinGameAsync(created.CodeSession, "dresseur-2");
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            _service.StartGameAsync(created.Id, "dresseur-2", "Standard", nbPokemons: 1));
     }
 
     // ─────────────────────────────────────────────
@@ -197,19 +246,19 @@ public class PartieServiceTests
     public async Task UseHintAsync_AddsHintToUsedHints()
     {
         var created = await _service.CreateGameAsync("dresseur-1");
-        await _service.StartGameAsync(created.Id, "Standard", isSolo: true, nbPokemons: 1);
+        await _service.StartGameAsync(created.Id, "dresseur-1", "Standard", isSolo: true, nbPokemons: 1);
 
         await _service.UseHintAsync(created.Id, "dresseur-1", "Type1");
 
         var partie = await _service.GetGameAsync(created.Id);
-        Assert.Contains("Type1", partie.StateJ1.UsedHints);
+        Assert.Contains("Type1", partie.GetPlayer("dresseur-1")!.State.UsedHints);
     }
 
     [Fact]
     public async Task UseHintAsync_WithUnknownHintType_ThrowsArgumentException()
     {
         var created = await _service.CreateGameAsync("dresseur-1");
-        await _service.StartGameAsync(created.Id, "Standard", isSolo: true, nbPokemons: 1);
+        await _service.StartGameAsync(created.Id, "dresseur-1", "Standard", isSolo: true, nbPokemons: 1);
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
             _service.UseHintAsync(created.Id, "dresseur-1", "IndiceInexistant"));
@@ -219,13 +268,13 @@ public class PartieServiceTests
     public async Task UseHintAsync_SameHintTwice_AddedOnlyOnce()
     {
         var created = await _service.CreateGameAsync("dresseur-1");
-        await _service.StartGameAsync(created.Id, "Standard", isSolo: true, nbPokemons: 1);
+        await _service.StartGameAsync(created.Id, "dresseur-1", "Standard", isSolo: true, nbPokemons: 1);
 
         await _service.UseHintAsync(created.Id, "dresseur-1", "Category");
         await _service.UseHintAsync(created.Id, "dresseur-1", "Category");
 
         var partie = await _service.GetGameAsync(created.Id);
-        Assert.Single(partie.StateJ1.UsedHints.Where(h => h == "Category"));
+        Assert.Single(partie.GetPlayer("dresseur-1")!.State.UsedHints.Where(h => h == "Category"));
     }
 
     // ─────────────────────────────────────────────
@@ -240,7 +289,7 @@ public class PartieServiceTests
         _pokemonServiceMock.Setup(s => s.GetLegendaryOrMythicalPokemonsAsync()).ReturnsAsync(new List<Pokemon>());
 
         var created = await _service.CreateGameAsync("dresseur-1");
-        var started = await _service.StartGameAsync(created.Id, "Standard", isSolo: true, nbPokemons: 1);
+        var started = await _service.StartGameAsync(created.Id, "dresseur-1", "Standard", isSolo: true, nbPokemons: 1);
 
         // Force the specific pokemon to guess
         started.PokemonsToGuess = new List<Pokemon> { pokemon };
@@ -260,7 +309,7 @@ public class PartieServiceTests
         _pokemonServiceMock.Setup(s => s.GetPokemonByNameAsync(It.IsAny<string>())).ReturnsAsync((Pokemon?)null);
 
         var created = await _service.CreateGameAsync("dresseur-1");
-        var started = await _service.StartGameAsync(created.Id, "Standard", isSolo: true, nbPokemons: 1);
+        var started = await _service.StartGameAsync(created.Id, "dresseur-1", "Standard", isSolo: true, nbPokemons: 1);
         started.PokemonsToGuess = new List<Pokemon> { pokemon };
 
         var result = await _service.SubmitGuessAsync(created.Id, "dresseur-1", "Pikachu");
@@ -278,7 +327,7 @@ public class PartieServiceTests
         _pokemonServiceMock.Setup(s => s.GetPokemonByNameAsync(It.IsAny<string>())).ReturnsAsync((Pokemon?)null);
 
         var created = await _service.CreateGameAsync("dresseur-1");
-        var started = await _service.StartGameAsync(created.Id, "Standard", isSolo: true, nbPokemons: 1);
+        var started = await _service.StartGameAsync(created.Id, "dresseur-1", "Standard", isSolo: true, nbPokemons: 1);
         started.PokemonsToGuess = new List<Pokemon> { pokemon };
 
         await _service.SubmitGuessAsync(created.Id, "dresseur-1", "Pikachu");
@@ -297,7 +346,7 @@ public class PartieServiceTests
         _pokemonServiceMock.Setup(s => s.GetLegendaryOrMythicalPokemonsAsync()).ReturnsAsync(new List<Pokemon>());
 
         var created = await _service.CreateGameAsync("dresseur-1");
-        var started = await _service.StartGameAsync(created.Id, "Standard", isSolo: true, nbPokemons: 1);
+        var started = await _service.StartGameAsync(created.Id, "dresseur-1", "Standard", isSolo: true, nbPokemons: 1);
         started.PokemonsToGuess = new List<Pokemon> { pokemon };
 
         var result = await _service.SubmitGuessAsync(created.Id, "dresseur-1", "Bulbizarre");
@@ -310,12 +359,134 @@ public class PartieServiceTests
     // ─────────────────────────────────────────────
 
     [Fact]
-    public async Task UpdateGameSettingsAsync_UpdatesNbPokemons()
+    public async Task UpdateGameSettingsAsync_ByHost_UpdatesNbPokemons()
     {
         var created = await _service.CreateGameAsync("dresseur-1");
 
-        var updated = await _service.UpdateGameSettingsAsync(created.Id, nbPokemons: 5, generations: null, timerDuration: null);
+        var updated = await _service.UpdateGameSettingsAsync(created.Id, "dresseur-1", nbPokemons: 5, generations: null, timerDuration: null);
 
         Assert.Equal(5, updated.NbPokemons);
+    }
+
+    [Fact]
+    public async Task UpdateGameSettingsAsync_ByGuest_ThrowsUnauthorizedAccessException()
+    {
+        var created = await _service.CreateGameAsync("dresseur-1");
+        await _service.JoinGameAsync(created.CodeSession, "dresseur-2");
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            _service.UpdateGameSettingsAsync(created.Id, "dresseur-2", nbPokemons: 5, generations: null, timerDuration: null));
+    }
+
+    // ─────────────────────────────────────────────
+    // KickPlayerAsync
+    // ─────────────────────────────────────────────
+
+    [Fact]
+    public async Task KickPlayerAsync_ByHost_RemovesTarget()
+    {
+        var created = await _service.CreateGameAsync("dresseur-1");
+        await _service.JoinGameAsync(created.CodeSession, "dresseur-2");
+
+        var partie = await _service.KickPlayerAsync(created.Id, "dresseur-1", "dresseur-2");
+
+        Assert.Null(partie.GetPlayer("dresseur-2"));
+        Assert.Single(partie.Players);
+    }
+
+    [Fact]
+    public async Task KickPlayerAsync_ByGuest_ThrowsUnauthorizedAccessException()
+    {
+        var created = await _service.CreateGameAsync("dresseur-1");
+        await _service.JoinGameAsync(created.CodeSession, "dresseur-2");
+        await _service.JoinGameAsync(created.CodeSession, "dresseur-3");
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            _service.KickPlayerAsync(created.Id, "dresseur-2", "dresseur-3"));
+    }
+
+    [Fact]
+    public async Task KickPlayerAsync_HostKicksSelf_ThrowsArgumentException()
+    {
+        var created = await _service.CreateGameAsync("dresseur-1");
+        await _service.JoinGameAsync(created.CodeSession, "dresseur-2");
+
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _service.KickPlayerAsync(created.Id, "dresseur-1", "dresseur-1"));
+    }
+
+    [Fact]
+    public async Task KickPlayerAsync_UnknownTarget_ThrowsKeyNotFoundException()
+    {
+        var created = await _service.CreateGameAsync("dresseur-1");
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+            _service.KickPlayerAsync(created.Id, "dresseur-1", "fantome"));
+    }
+
+    // ─────────────────────────────────────────────
+    // LeaveGameAsync — promotion d'hôte
+    // ─────────────────────────────────────────────
+
+    [Fact]
+    public async Task LeaveGameAsync_HostLeaves_PromotesNextPlayer()
+    {
+        var created = await _service.CreateGameAsync("dresseur-1");
+        await _service.JoinGameAsync(created.CodeSession, "dresseur-2");
+        await _service.JoinGameAsync(created.CodeSession, "dresseur-3");
+
+        var partie = await _service.LeaveGameAsync(created.Id, "dresseur-1");
+
+        Assert.Null(partie.GetPlayer("dresseur-1"));
+        Assert.Equal("dresseur-2", partie.HostId);
+        Assert.Equal(PlayerRole.Host, partie.GetPlayer("dresseur-2")!.Role);
+    }
+
+    [Fact]
+    public async Task LeaveGameAsync_GuestLeaves_HostUnchanged()
+    {
+        var created = await _service.CreateGameAsync("dresseur-1");
+        await _service.JoinGameAsync(created.CodeSession, "dresseur-2");
+
+        var partie = await _service.LeaveGameAsync(created.Id, "dresseur-2");
+
+        Assert.Equal("dresseur-1", partie.HostId);
+        Assert.Single(partie.Players);
+    }
+
+    // ─────────────────────────────────────────────
+    // MarkRematchReadyAsync
+    // ─────────────────────────────────────────────
+
+    [Fact]
+    public async Task MarkRematchReadyAsync_AllPlayersReady_CreatesRematch()
+    {
+        var pokemon = TestDataFactory.CreateBulbizarre();
+        _pokemonServiceMock.Setup(s => s.GetAllPokemonsAsync()).ReturnsAsync(new List<Pokemon> { pokemon });
+        _pokemonServiceMock.Setup(s => s.GetLegendaryOrMythicalPokemonsAsync()).ReturnsAsync(new List<Pokemon>());
+
+        var created = await _service.CreateGameAsync("dresseur-1");
+        await _service.JoinGameAsync(created.CodeSession, "dresseur-2");
+        await _service.StartGameAsync(created.Id, "dresseur-1", "Standard", nbPokemons: 1);
+
+        await _service.MarkRematchReadyAsync(created.Id, "dresseur-1");
+        var status = await _service.MarkRematchReadyAsync(created.Id, "dresseur-2");
+
+        Assert.True(status.Player1Ready);
+        Assert.True(status.Player2Ready);
+        Assert.False(string.IsNullOrEmpty(status.RematchPartieId));
+    }
+
+    [Fact]
+    public async Task MarkRematchReadyAsync_OnlyOneReady_DoesNotCreateRematch()
+    {
+        var created = await _service.CreateGameAsync("dresseur-1");
+        await _service.JoinGameAsync(created.CodeSession, "dresseur-2");
+
+        var status = await _service.MarkRematchReadyAsync(created.Id, "dresseur-1");
+
+        Assert.True(status.Player1Ready);
+        Assert.False(status.Player2Ready);
+        Assert.True(string.IsNullOrEmpty(status.RematchPartieId));
     }
 }

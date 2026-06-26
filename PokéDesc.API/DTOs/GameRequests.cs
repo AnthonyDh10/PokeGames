@@ -6,77 +6,81 @@ namespace PokéDesc.API.DTOs;
 
 /// <summary>
 /// Version sûre de Partie retournée au client — exclut PokemonsToGuess pour ne pas exposer les réponses.
+/// Contrat dynamique à N joueurs : <see cref="Players"/> remplace les anciens champs *J1/*J2.
 /// </summary>
 public class PartieResponseDto
 {
     public string Id { get; set; } = string.Empty;
     public string CodeSession { get; set; } = string.Empty;
-    public string Dresseur1Id { get; set; } = string.Empty;
-    public string? Dresseur2Id { get; set; }
     public string Statut { get; set; } = string.Empty;
+    public string HostId { get; set; } = string.Empty;
+    public int MaxPlayers { get; set; }
     public bool ModeSolo { get; set; }
-    public int NbPokemons { get; set; }
-    public List<int> SelectedGenerations { get; set; } = new();
-    public int TimerDurationSeconds { get; set; }
-
-    public int CurrentIndexJ1 { get; set; }
-    public int ScoreJ1 { get; set; }
-    public int AttemptsUsedJ1 { get; set; }
-    public List<string> UsedHintsJ1 { get; set; } = new();
-    public DateTime? TimerStartJ1 { get; set; }
-    public double TimeRemainingJ1 { get; set; }
-
-    public int CurrentIndexJ2 { get; set; }
-    public int ScoreJ2 { get; set; }
-    public int AttemptsUsedJ2 { get; set; }
-    public List<string> UsedHintsJ2 { get; set; } = new();
-    public DateTime? TimerStartJ2 { get; set; }
-    public double TimeRemainingJ2 { get; set; }
-
-    public List<CompletedPokemon> CompletedPokemonsJ1 { get; set; } = new();
-    public List<CompletedPokemon> CompletedPokemonsJ2 { get; set; } = new();
-
-    public bool RematchReadyJ1 { get; set; }
-    public bool RematchReadyJ2 { get; set; }
+    public GameSettingsDto Settings { get; set; } = new();
+    public List<PlayerDto> Players { get; set; } = new();
     public string? RematchPartieId { get; set; }
-
-    /// <summary>ID du Pokémon actuel pour J1 (null si la partie n'a pas encore démarré).</summary>
-    public string? CurrentPokemonIdJ1 { get; set; }
-    /// <summary>ID du Pokémon actuel pour J2 (null si la partie n'a pas encore démarré).</summary>
-    public string? CurrentPokemonIdJ2 { get; set; }
 
     public static PartieResponseDto FromPartie(Partie p) => new()
     {
         Id = p.Id,
         CodeSession = p.CodeSession,
-        Dresseur1Id = p.Dresseur1Id,
-        Dresseur2Id = p.Dresseur2Id,
         Statut = p.Statut.ToDisplayString(),
+        HostId = p.HostId,
+        MaxPlayers = p.MaxPlayers,
         ModeSolo = p.ModeSolo,
-        NbPokemons = p.NbPokemons,
-        SelectedGenerations = p.SelectedGenerations,
-        TimerDurationSeconds = p.TimerDurationSeconds,
-        CurrentIndexJ1 = p.StateJ1.CurrentIndex,
-        ScoreJ1 = p.StateJ1.Score,
-        AttemptsUsedJ1 = p.StateJ1.AttemptsUsed,
-        UsedHintsJ1 = p.StateJ1.UsedHints,
-        TimerStartJ1 = p.StateJ1.TimerStart,
-        TimeRemainingJ1 = p.StateJ1.TimeRemaining,
-        CurrentIndexJ2 = p.StateJ2.CurrentIndex,
-        ScoreJ2 = p.StateJ2.Score,
-        AttemptsUsedJ2 = p.StateJ2.AttemptsUsed,
-        UsedHintsJ2 = p.StateJ2.UsedHints,
-        TimerStartJ2 = p.StateJ2.TimerStart,
-        TimeRemainingJ2 = p.StateJ2.TimeRemaining,
-        CompletedPokemonsJ1 = p.StateJ1.CompletedPokemons,
-        CompletedPokemonsJ2 = p.StateJ2.CompletedPokemons,
-        RematchReadyJ1 = p.StateJ1.RematchReady,
-        RematchReadyJ2 = p.StateJ2.RematchReady,
+        Settings = new GameSettingsDto
+        {
+            NbPokemons = p.NbPokemons,
+            Generations = p.SelectedGenerations,
+            TimerDuration = p.TimerDurationSeconds,
+        },
+        Players = p.Players.Select(pl => PlayerDto.FromPlayer(pl, p.PokemonsToGuess)).ToList(),
         RematchPartieId = p.RematchPartieId,
-        CurrentPokemonIdJ1 = p.PokemonsToGuess != null && p.StateJ1.CurrentIndex < p.PokemonsToGuess.Count
-            ? p.PokemonsToGuess[p.StateJ1.CurrentIndex].Id : null,
-        CurrentPokemonIdJ2 = p.PokemonsToGuess != null && p.StateJ2.CurrentIndex < p.PokemonsToGuess.Count
-            ? p.PokemonsToGuess[p.StateJ2.CurrentIndex].Id : null,
+    };
+}
+
+/// <summary>Paramètres de partie configurés par l'hôte.</summary>
+public class GameSettingsDto
+{
+    public int NbPokemons { get; set; }
+    public List<int> Generations { get; set; } = new();
+    public int TimerDuration { get; set; }
+}
+
+/// <summary>État public d'un joueur (issu de <see cref="Player"/> + <see cref="PlayerGameState"/>).</summary>
+public class PlayerDto
+{
+    public string DresseurId { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
+    public bool IsConnected { get; set; }
+    public int CurrentIndex { get; set; }
+    public int Score { get; set; }
+    public int AttemptsUsed { get; set; }
+    public List<string> UsedHints { get; set; } = new();
+    public DateTime? TimerStart { get; set; }
+    public double TimeRemaining { get; set; }
+    public bool RematchReady { get; set; }
+    /// <summary>ID du Pokémon en cours pour ce joueur (null si la partie n'a pas démarré ou est terminée).</summary>
+    public string? CurrentPokemonId { get; set; }
+    public List<CompletedPokemon> CompletedPokemons { get; set; } = new();
+
+    public static PlayerDto FromPlayer(Player pl, List<Pokemon>? pokemonsToGuess) => new()
+    {
+        DresseurId = pl.DresseurId,
+        Name = pl.Name,
+        Role = pl.Role.ToString(),
+        IsConnected = pl.IsConnected,
+        CurrentIndex = pl.State.CurrentIndex,
+        Score = pl.State.Score,
+        AttemptsUsed = pl.State.AttemptsUsed,
+        UsedHints = pl.State.UsedHints,
+        TimerStart = pl.State.TimerStart,
+        TimeRemaining = pl.State.TimeRemaining,
+        RematchReady = pl.State.RematchReady,
+        CurrentPokemonId = pokemonsToGuess != null && pl.State.CurrentIndex < pokemonsToGuess.Count
+            ? pokemonsToGuess[pl.State.CurrentIndex].Id : null,
+        CompletedPokemons = pl.State.CompletedPokemons,
     };
 }
 
@@ -108,6 +112,9 @@ public class CreateGameRequest
 {
     [Required]
     public string DresseurId { get; set; } = string.Empty;
+
+    /// <summary>Nom d'affichage de l'hôte (optionnel).</summary>
+    public string Name { get; set; } = string.Empty;
 }
 
 public class JoinGameRequest
@@ -117,6 +124,9 @@ public class JoinGameRequest
 
     [Required]
     public string DresseurId { get; set; } = string.Empty;
+
+    /// <summary>Nom d'affichage du joueur (optionnel).</summary>
+    public string Name { get; set; } = string.Empty;
 }
 
 public class SubmitGuessRequest
@@ -140,6 +150,9 @@ public class UseHintRequest
 public class StartGameRequest
 {
     [Required]
+    public string DresseurId { get; set; } = string.Empty; // doit être l'hôte
+
+    [Required]
     public string Mode { get; set; } = string.Empty; // "Standard"
 
     public bool IsSolo { get; set; } = false; // Mode solo ou multijoueur
@@ -155,6 +168,9 @@ public class StartGameRequest
 
 public class UpdateGameSettingsRequest
 {
+    [Required]
+    public string DresseurId { get; set; } = string.Empty; // doit être l'hôte
+
     [Range(1, 6)]
     public int NbPokemons { get; set; } = 1;
 
@@ -162,6 +178,21 @@ public class UpdateGameSettingsRequest
 
     [Range(-1, int.MaxValue)]
     public int? TimerDuration { get; set; }
+}
+
+public class KickPlayerRequest
+{
+    [Required]
+    public string DresseurId { get; set; } = string.Empty; // l'hôte qui expulse
+
+    [Required]
+    public string TargetId { get; set; } = string.Empty; // le joueur expulsé
+}
+
+public class LeaveGameRequest
+{
+    [Required]
+    public string DresseurId { get; set; } = string.Empty;
 }
 
 public class ResetTimerRequest

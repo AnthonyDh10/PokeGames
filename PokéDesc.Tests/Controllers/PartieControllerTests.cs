@@ -27,13 +27,17 @@ public class PartieControllerTests
         _controller = new PartieController(_serviceMock.Object, _timerServiceMock.Object);
     }
 
-    private static Partie CreateTestPartie(string id = "partie-1", string dresseur1 = "d1") => new()
+    private static Partie CreateTestPartie(string id = "partie-1", string host = "d1")
     {
-        Id = id,
-        CodeSession = "ABC123",
-        Dresseur1Id = dresseur1,
-        Statut = PokéDesc.Domain.PartieStatut.EnAttente,
-    };
+        var partie = new Partie
+        {
+            Id = id,
+            CodeSession = "ABC123",
+            Statut = PokéDesc.Domain.PartieStatut.EnAttente,
+        };
+        partie.InitHost(host, "Hôte");
+        return partie;
+    }
 
     // ─────────────────────────────────────────────
     // POST /api/partie/create
@@ -43,14 +47,15 @@ public class PartieControllerTests
     public async Task CreateGame_Returns200WithPartie()
     {
         var partie = CreateTestPartie();
-        _serviceMock.Setup(s => s.CreateGameAsync("d1")).ReturnsAsync(partie);
+        _serviceMock.Setup(s => s.CreateGameAsync("d1", It.IsAny<string>())).ReturnsAsync(partie);
 
         var result = await _controller.CreateGame(new CreateGameRequest { DresseurId = "d1" });
 
         var ok = Assert.IsType<OkObjectResult>(result);
         var dto = Assert.IsType<PartieResponseDto>(ok.Value);
         Assert.Equal(partie.Id, dto.Id);
-        Assert.Equal(partie.Dresseur1Id, dto.Dresseur1Id);
+        Assert.Equal(partie.HostId, dto.HostId);
+        Assert.Single(dto.Players);
     }
 
     // ─────────────────────────────────────────────
@@ -61,7 +66,7 @@ public class PartieControllerTests
     public async Task JoinGame_WithValidCode_Returns200()
     {
         var partie = CreateTestPartie();
-        _serviceMock.Setup(s => s.JoinGameAsync("ABC123", "d2")).ReturnsAsync(partie);
+        _serviceMock.Setup(s => s.JoinGameAsync("ABC123", "d2", It.IsAny<string>())).ReturnsAsync(partie);
 
         var result = await _controller.JoinGame(new JoinGameRequest { CodeSession = "ABC123", DresseurId = "d2" });
 
@@ -71,7 +76,7 @@ public class PartieControllerTests
     [Fact]
     public async Task JoinGame_WithInvalidCode_ThrowsKeyNotFoundException()
     {
-        _serviceMock.Setup(s => s.JoinGameAsync("BAD", "d2"))
+        _serviceMock.Setup(s => s.JoinGameAsync("BAD", "d2", It.IsAny<string>()))
             .ThrowsAsync(new KeyNotFoundException("Partie introuvable"));
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
@@ -185,11 +190,12 @@ public class PartieControllerTests
     {
         var partie = CreateTestPartie();
         partie.Statut = PokéDesc.Domain.PartieStatut.EnCours;
-        _serviceMock.Setup(s => s.StartGameAsync("partie-1", "Standard", true, 1, null, 60))
+        _serviceMock.Setup(s => s.StartGameAsync("partie-1", "d1", "Standard", true, 1, null, 60))
             .ReturnsAsync(partie);
 
         var result = await _controller.StartGame("partie-1", new StartGameRequest
         {
+            DresseurId = "d1",
             Mode = "Standard",
             IsSolo = true,
             NbPokemons = 1,
@@ -202,12 +208,51 @@ public class PartieControllerTests
     [Fact]
     public async Task StartGame_WithUnknownMode_ThrowsArgumentException()
     {
-        _serviceMock.Setup(s => s.StartGameAsync(It.IsAny<string>(), "ModeInconnu",
+        _serviceMock.Setup(s => s.StartGameAsync(It.IsAny<string>(), It.IsAny<string>(), "ModeInconnu",
                 It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<List<int>?>(), It.IsAny<int>()))
             .ThrowsAsync(new ArgumentException("Mode inconnu"));
 
         await Assert.ThrowsAsync<ArgumentException>(
-            () => _controller.StartGame("partie-1", new StartGameRequest { Mode = "ModeInconnu" }));
+            () => _controller.StartGame("partie-1", new StartGameRequest { DresseurId = "d1", Mode = "ModeInconnu" }));
+    }
+
+    // ─────────────────────────────────────────────
+    // POST /api/partie/{partieId}/kick et /leave
+    // ─────────────────────────────────────────────
+
+    [Fact]
+    public async Task KickPlayer_Returns200WithPartie()
+    {
+        var partie = CreateTestPartie();
+        _serviceMock.Setup(s => s.KickPlayerAsync("partie-1", "d1", "d2")).ReturnsAsync(partie);
+
+        var result = await _controller.KickPlayer("partie-1",
+            new KickPlayerRequest { DresseurId = "d1", TargetId = "d2" });
+
+        Assert.IsType<OkObjectResult>(result);
+        _serviceMock.Verify(s => s.KickPlayerAsync("partie-1", "d1", "d2"), Times.Once);
+    }
+
+    [Fact]
+    public async Task KickPlayer_ByGuest_PropagatesUnauthorizedAccessException()
+    {
+        _serviceMock.Setup(s => s.KickPlayerAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ThrowsAsync(new UnauthorizedAccessException("Seul l'hôte peut expulser un joueur."));
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _controller.KickPlayer("partie-1", new KickPlayerRequest { DresseurId = "d2", TargetId = "d3" }));
+    }
+
+    [Fact]
+    public async Task LeaveGame_Returns200WithPartie()
+    {
+        var partie = CreateTestPartie();
+        _serviceMock.Setup(s => s.LeaveGameAsync("partie-1", "d1")).ReturnsAsync(partie);
+
+        var result = await _controller.LeaveGame("partie-1", new LeaveGameRequest { DresseurId = "d1" });
+
+        Assert.IsType<OkObjectResult>(result);
+        _serviceMock.Verify(s => s.LeaveGameAsync("partie-1", "d1"), Times.Once);
     }
 
     // ─────────────────────────────────────────────

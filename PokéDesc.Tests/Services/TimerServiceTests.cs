@@ -33,14 +33,11 @@ public class TimerServiceTests
     }
 
     [Fact]
-    public void GetRemainingTime_ForJ1_ReturnsPositiveValue()
+    public void GetRemainingTime_ForHost_ReturnsPositiveValue()
     {
-        var partie = new Partie
-        {
-            Id = "partie-1",
-            Dresseur1Id = "dresseur-1",
-            StateJ1 = new PlayerGameState { TimerStart = DateTime.UtcNow, TimeRemaining = 60.0 }
-        };
+        var partie = new Partie { Id = "partie-1" };
+        partie.InitHost("dresseur-1", "Hôte");
+        partie.GetPlayer("dresseur-1")!.State = new PlayerGameState { TimerStart = DateTime.UtcNow, TimeRemaining = 60.0 };
         _sessionStoreMock.Setup(s => s.Get("partie-1")).Returns(partie);
 
         var remaining = _service.GetRemainingTime("partie-1", "dresseur-1");
@@ -50,39 +47,43 @@ public class TimerServiceTests
     }
 
     [Fact]
-    public void ResetTimer_ForJ1_ResetsTimeRemaining()
+    public void GetRemainingTime_ForUnknownPlayer_ThrowsKeyNotFoundException()
     {
-        var partie = new Partie
-        {
-            Id = "partie-1",
-            Dresseur1Id = "dresseur-1",
-            TimerDurationSeconds = 60,
-            StateJ1 = new PlayerGameState { TimeRemaining = 10 }
-        };
+        var partie = new Partie { Id = "partie-1" };
+        partie.InitHost("dresseur-1", "Hôte");
+        _sessionStoreMock.Setup(s => s.Get("partie-1")).Returns(partie);
+
+        Assert.Throws<KeyNotFoundException>(() => _service.GetRemainingTime("partie-1", "inconnu"));
+    }
+
+    [Fact]
+    public void ResetTimer_ForHost_ResetsTimeRemaining()
+    {
+        var partie = new Partie { Id = "partie-1", TimerDurationSeconds = 60 };
+        partie.InitHost("dresseur-1", "Hôte");
+        partie.GetPlayer("dresseur-1")!.State.TimeRemaining = 10;
         _sessionStoreMock.Setup(s => s.Get("partie-1")).Returns(partie);
 
         _service.ResetTimer("partie-1", "dresseur-1");
 
-        Assert.Equal(60, partie.StateJ1.TimeRemaining, precision: 1);
-        Assert.NotNull(partie.StateJ1.TimerStart);
+        var state = partie.GetPlayer("dresseur-1")!.State;
+        Assert.Equal(60, state.TimeRemaining, precision: 1);
+        Assert.NotNull(state.TimerStart);
     }
 
     [Fact]
-    public void ResetTimer_ForJ2_ResetsTimeRemaining()
+    public void ResetTimer_ForGuest_ResetsTimeRemaining()
     {
-        var partie = new Partie
-        {
-            Id = "partie-1",
-            Dresseur1Id = "dresseur-1",
-            Dresseur2Id = "dresseur-2",
-            TimerDurationSeconds = 45,
-            StateJ2 = new PlayerGameState { TimeRemaining = 5 }
-        };
+        var partie = new Partie { Id = "partie-1", TimerDurationSeconds = 45 };
+        partie.InitHost("dresseur-1", "Hôte");
+        partie.Join("dresseur-2", "Invité");
+        partie.GetPlayer("dresseur-2")!.State.TimeRemaining = 5;
         _sessionStoreMock.Setup(s => s.Get("partie-1")).Returns(partie);
 
         _service.ResetTimer("partie-1", "dresseur-2");
 
-        Assert.Equal(45, partie.StateJ2.TimeRemaining, precision: 1);
-        Assert.NotNull(partie.StateJ2.TimerStart);
+        var state = partie.GetPlayer("dresseur-2")!.State;
+        Assert.Equal(45, state.TimeRemaining, precision: 1);
+        Assert.NotNull(state.TimerStart);
     }
 }

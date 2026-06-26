@@ -22,14 +22,28 @@ public class PartieController : ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> CreateGame([FromBody] CreateGameRequest request)
     {
-        var partie = await _partieService.CreateGameAsync(request.DresseurId);
+        var partie = await _partieService.CreateGameAsync(request.DresseurId, request.Name);
         return OkWithPartie(partie);
     }
 
     [HttpPost("join")]
     public async Task<IActionResult> JoinGame([FromBody] JoinGameRequest request)
     {
-        var partie = await _partieService.JoinGameAsync(request.CodeSession, request.DresseurId);
+        var partie = await _partieService.JoinGameAsync(request.CodeSession, request.DresseurId, request.Name);
+        return OkWithPartie(partie);
+    }
+
+    [HttpPost("{partieId}/kick")]
+    public async Task<IActionResult> KickPlayer(string partieId, [FromBody] KickPlayerRequest request)
+    {
+        var partie = await _partieService.KickPlayerAsync(partieId, request.DresseurId, request.TargetId);
+        return OkWithPartie(partie);
+    }
+
+    [HttpPost("{partieId}/leave")]
+    public async Task<IActionResult> LeaveGame(string partieId, [FromBody] LeaveGameRequest request)
+    {
+        var partie = await _partieService.LeaveGameAsync(partieId, request.DresseurId);
         return OkWithPartie(partie);
     }
 
@@ -66,6 +80,7 @@ public class PartieController : ControllerBase
     {
         var partie = await _partieService.StartGameAsync(
             partieId,
+            request.DresseurId,
             request.Mode,
             request.IsSolo,
             request.NbPokemons,
@@ -78,7 +93,7 @@ public class PartieController : ControllerBase
     [HttpPut("{partieId}/settings")]
     public async Task<IActionResult> UpdateGameSettings(string partieId, [FromBody] UpdateGameSettingsRequest request)
     {
-        var partie = await _partieService.UpdateGameSettingsAsync(partieId, request.NbPokemons, request.Generations, request.TimerDuration);
+        var partie = await _partieService.UpdateGameSettingsAsync(partieId, request.DresseurId, request.NbPokemons, request.Generations, request.TimerDuration);
         return OkWithPartie(partie);
     }
 

@@ -105,21 +105,22 @@ public static class TestDataFactory
     };
 
     /// <summary>
-    /// Crée une Partie "EnCours" avec un Pokémon à deviner.
+    /// Crée une Partie "EnCours" avec un Pokémon à deviner et un hôte unique (mode solo).
     /// </summary>
-    public static Partie CreateActivePartie(string dresseur1Id, Pokemon pokemon)
+    public static Partie CreateActivePartie(string hostId, Pokemon pokemon)
     {
-        return new Partie
+        var partie = new Partie
         {
             Id = Guid.NewGuid().ToString(),
             CodeSession = "TEST01",
-            Dresseur1Id = dresseur1Id,
             Statut = PokéDesc.Domain.PartieStatut.EnCours,
             NbPokemons = 1,
             TimerDurationSeconds = 60,
             PokemonsToGuess = new List<Pokemon> { pokemon },
-            StateJ1 = new() { TimerStart = DateTime.UtcNow, TimeRemaining = 60.0 },
-            StateJ2 = new() { TimerStart = DateTime.UtcNow, TimeRemaining = 60.0 },
         };
+        partie.InitHost(hostId, "Hôte");
+        partie.GetPlayer(hostId)!.State.TimerStart = DateTime.UtcNow;
+        partie.GetPlayer(hostId)!.State.TimeRemaining = 60.0;
+        return partie;
     }
 }

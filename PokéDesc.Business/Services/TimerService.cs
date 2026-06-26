@@ -20,7 +20,7 @@ public class TimerService : ITimerService
     public double GetRemainingTime(string partieId, string dresseurId)
     {
         var partie = _sessionStore.Get(partieId);
-        var state = partie.GetState(dresseurId == partie.Dresseur1Id);
+        var state = GetPlayerState(partie, dresseurId);
         return TimerCalculator.GetRemaining(state.TimerStart, state.TimeRemaining);
     }
 
@@ -30,8 +30,12 @@ public class TimerService : ITimerService
     public void ResetTimer(string partieId, string dresseurId)
     {
         var partie = _sessionStore.Get(partieId);
-        var state = partie.GetState(dresseurId == partie.Dresseur1Id);
+        var state = GetPlayerState(partie, dresseurId);
         state.TimerStart = DateTime.UtcNow;
         state.TimeRemaining = partie.TimerDurationSeconds >= 0 ? partie.TimerDurationSeconds : -1;
     }
+
+    private static Domain.Models.PlayerGameState GetPlayerState(Partie partie, string dresseurId)
+        => partie.GetPlayer(dresseurId)?.State
+           ?? throw new KeyNotFoundException("Joueur introuvable dans cette partie.");
 }
