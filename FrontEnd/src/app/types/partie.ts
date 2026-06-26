@@ -42,26 +42,6 @@ export interface PartieDto {
   settings?: GameSettingsDto
   players: PlayerDto[]
   rematchPartieId?: string
-
-  // Champs legacy — supprimés côté back en Phase 2, conservés optionnels jusqu'en Phase 4
-  dresseur1Id?: string
-  dresseur2Id?: string
-  nbPokemons?: number
-  selectedGenerations?: number[]
-  timerDurationSeconds?: number
-  pokemonsToGuess?: PokemonSimpleDto[]
-  currentIndexJ1?: number
-  currentIndexJ2?: number
-  scoreJ1?: number
-  scoreJ2?: number
-  attemptsUsedJ1?: number
-  attemptsUsedJ2?: number
-  usedHintsJ1?: string[]
-  usedHintsJ2?: string[]
-  completedPokemonsJ1?: CompletedPokemonDto[]
-  completedPokemonsJ2?: CompletedPokemonDto[]
-  currentPokemonIdJ1?: string | null
-  currentPokemonIdJ2?: string | null
 }
 
 export interface GuessResultDto {

@@ -5,7 +5,7 @@ import { useChatStore } from '../store/chatStore'
 import { getPartie, markRematchReady, createPartie, startPartie } from '../services/partieService'
 import { useRematch } from '../hooks/useRematch'
 import { getHints } from '../services/pokemonService'
-import type { PartieDto } from '../types/partie'
+import type { PartieDto, PlayerDto } from '../types/partie'
 
 export interface UseResultatsReturn {
   // --- État ---
@@ -16,14 +16,16 @@ export interface UseResultatsReturn {
   gameFullyComplete: boolean
   isRelaunching: boolean
   isCreatingNew: boolean
-  // --- Dérivés ---
-  isPlayer1: boolean
-  player1Name: string
-  player2Name: string
+  // --- Dérivés N joueurs ---
+  /** Joueurs triés par score décroissant. */
+  sortedPlayers: PlayerDto[]
+  /** Le joueur local. */
+  me: PlayerDto | undefined
+  /** Vainqueur unique, `null` en cas d'égalité ou partie solo. */
+  winner: PlayerDto | null
+  /** `true` si plusieurs joueurs partagent le score le plus élevé. */
+  isTie: boolean
   isSolo: boolean
-  j1Wins: boolean
-  j2Wins: boolean
-  winnerName: string | null
   // --- Actions ---
   rematchRequested: boolean
   handleRematchClick: () => void
@@ -34,15 +36,15 @@ export interface UseResultatsReturn {
 /**
  * Hook orchestrateur de la page de résultats PokéDesc.
  *
- * Gère le chargement de la partie, le chargement des sprites, l'auto-refresh
- * en mode multijoueur (polling toutes les 2s jusqu'à ce que les 2 joueurs aient terminé),
- * et les actions de relance / nouvelle partie / revanche.
+ * Gère le chargement de la partie, les sprites, l'auto-refresh en multijoueur
+ * (polling 2 s jusqu'à ce que tous les joueurs aient terminé), et les actions
+ * de relance / nouvelle partie / revanche.
  *
  * @param partieId - Identifiant de la partie, extrait des paramètres d'URL.
  */
 export function useResultats(partieId: string | undefined): UseResultatsReturn {
   const navigate = useNavigate()
-  const { sessionId, playerName } = useSessionStore()
+  const { sessionId } = useSessionStore()
   const { setContext: setChatContext } = useChatStore()
 
   const [isLoading, setIsLoading] = useState(true)
@@ -65,17 +67,19 @@ export function useResultats(partieId: string | undefined): UseResultatsReturn {
   // --- Fonctions internes ---
 
   async function loadSprites(p: PartieDto) {
-    const all = [...(p.completedPokemonsJ1 ?? []), ...(p.completedPokemonsJ2 ?? [])]
+    const seen = new Set<string>()
+    const toFetch = p.players
+      .flatMap((pl) => pl.completedPokemons)
+      .filter((cp) => { if (seen.has(cp.pokemonId)) return false; seen.add(cp.pokemonId); return true })
+
     const newSprites: Record<string, string> = {}
     await Promise.all(
-      all.map(async (cp) => {
-        if (!newSprites[cp.pokemonId]) {
-          try {
-            const hints = await getHints(cp.pokemonId)
-            if (hints.sprites?.frontDefault) newSprites[cp.pokemonId] = hints.sprites.frontDefault
-          } catch {
-            // sprite indisponible — on ignore silencieusement
-          }
+      toFetch.map(async (cp) => {
+        try {
+          const hints = await getHints(cp.pokemonId)
+          if (hints.sprites?.frontDefault) newSprites[cp.pokemonId] = hints.sprites.frontDefault
+        } catch {
+          // sprite indisponible — on ignore silencieusement
         }
       }),
     )
@@ -83,11 +87,9 @@ export function useResultats(partieId: string | undefined): UseResultatsReturn {
   }
 
   function isComplete(p: PartieDto): boolean {
-    if (p.modeSolo) return (p.completedPokemonsJ1?.length ?? 0) >= p.nbPokemons
-    return (
-      (p.completedPokemonsJ1?.length ?? 0) >= p.nbPokemons &&
-      (p.completedPokemonsJ2?.length ?? 0) >= p.nbPokemons
-    )
+    const nbPkm = p.settings?.nbPokemons ?? 0
+    if (p.modeSolo) return (p.players[0]?.completedPokemons.length ?? 0) >= nbPkm
+    return p.players.length > 0 && p.players.every((pl) => pl.completedPokemons.length >= nbPkm)
   }
 
   async function load() {
@@ -99,7 +101,7 @@ export function useResultats(partieId: string | undefined): UseResultatsReturn {
       setChatContext({
         partieId,
         sessionCode: p.codeSession ?? '',
-        isSolo: p.modeSolo || !p.dresseur2Id,
+        isSolo: p.modeSolo || p.players.length <= 1,
       })
       setGameFullyComplete(isComplete(p))
       await loadSprites(p)
@@ -114,7 +116,7 @@ export function useResultats(partieId: string | undefined): UseResultatsReturn {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load() }, [partieId])
 
-  // Auto-refresh multijoueur : attend que les 2 joueurs aient terminé tous leurs Pokémon
+  // Auto-refresh multijoueur : attend que tous les joueurs aient terminé
   useEffect(() => {
     if (!partie || gameFullyComplete || partie.modeSolo) return
     autoRefreshRef.current = setInterval(async () => {
@@ -151,9 +153,9 @@ export function useResultats(partieId: string | undefined): UseResultatsReturn {
     try {
       const newPartie = await createPartie(sessionId)
       await startPartie(newPartie.id, true, {
-        nbPokemons: partie.nbPokemons,
-        generations: partie.selectedGenerations,
-        timerDuration: partie.timerDurationSeconds,
+        nbPokemons: partie.settings?.nbPokemons ?? 1,
+        generations: partie.settings?.generations ?? [],
+        timerDuration: partie.settings?.timerDuration ?? 60,
       })
       navigate(`/pokedesc/${newPartie.id}`)
     } catch {
@@ -170,9 +172,9 @@ export function useResultats(partieId: string | undefined): UseResultatsReturn {
         state: {
           existingPartieId: newPartie.id,
           previousSettings: {
-            nbPokemons: partie.nbPokemons,
-            generations: partie.selectedGenerations,
-            timerDuration: partie.timerDurationSeconds,
+            nbPokemons: partie.settings?.nbPokemons ?? 1,
+            generations: partie.settings?.generations ?? [],
+            timerDuration: partie.settings?.timerDuration ?? 60,
           },
         },
       })
@@ -182,13 +184,13 @@ export function useResultats(partieId: string | undefined): UseResultatsReturn {
   }
 
   // --- Valeurs dérivées ---
-  const isPlayer1 = partie?.dresseur1Id === sessionId
-  const player1Name = isPlayer1 ? (playerName || 'Joueur 1') : 'Adversaire'
-  const player2Name = isPlayer1 ? 'Adversaire' : (playerName || 'Joueur 2')
   const isSolo = partie?.modeSolo ?? true
-  const j1Wins = !isSolo && !!partie && partie.scoreJ1 > partie.scoreJ2
-  const j2Wins = !isSolo && !!partie && partie.scoreJ2 > partie.scoreJ1
-  const winnerName = j1Wins ? player1Name : j2Wins ? player2Name : null
+  const sortedPlayers = [...(partie?.players ?? [])].sort((a, b) => b.score - a.score)
+  const me = partie?.players.find((p) => p.dresseurId === sessionId)
+  const topScore = sortedPlayers[0]?.score ?? 0
+  const isTie = !isSolo && sortedPlayers.length > 1 &&
+    sortedPlayers.filter((p) => p.score === topScore).length > 1
+  const winner = !isSolo && !isTie && sortedPlayers.length > 0 ? sortedPlayers[0] : null
 
   return {
     isLoading,
@@ -198,13 +200,11 @@ export function useResultats(partieId: string | undefined): UseResultatsReturn {
     gameFullyComplete,
     isRelaunching,
     isCreatingNew,
-    isPlayer1,
-    player1Name,
-    player2Name,
+    sortedPlayers,
+    me,
+    winner,
+    isTie,
     isSolo,
-    j1Wins,
-    j2Wins,
-    winnerName,
     rematchRequested,
     handleRematchClick,
     handleRelaunchClick,

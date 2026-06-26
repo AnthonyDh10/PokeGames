@@ -49,11 +49,11 @@ export default function PokeDescPage() {
         <PokeDescHeader
           playerName={playerName}
           currentScore={currentScore}
-          nbPokemons={partie?.nbPokemons ?? 1}
+          nbPokemons={partie?.settings?.nbPokemons ?? 1}
           attemptsUsed={attemptsUsed}
-          selectedGenerations={partie?.selectedGenerations}
+          selectedGenerations={partie?.settings?.generations}
           timeRemaining={timeRemaining}
-          timerDurationSeconds={partie?.timerDurationSeconds}
+          timerDurationSeconds={partie?.settings?.timerDuration}
           timerShake={timerShake}
           timerFlash={timerFlash}
           showTimePenalty={showTimePenalty}
@@ -88,7 +88,7 @@ export default function PokeDescPage() {
           revealedHints={revealedHints}
           hintAnimations={hintAnimations}
           timeRemaining={timeRemaining}
-          timerDurationSeconds={partie?.timerDurationSeconds}
+          timerDurationSeconds={partie?.settings?.timerDuration}
           onRequestHint={handleRequestHint}
           isHintLocked={isHintLocked}
         />

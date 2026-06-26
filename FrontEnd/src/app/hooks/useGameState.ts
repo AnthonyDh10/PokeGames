@@ -47,8 +47,6 @@ export interface UseGameStateReturn {
   revealedHints: RevealedHints
   setRevealedHints: (hints: RevealedHints) => void
   sessionCode: string
-  /** `true` si le joueur local est le dresseur 1 de la partie. */
-  isPlayer1: boolean
   /** Ref stable vers l'ID du Pokémon en cours (accessible sans re-render dans les callbacks async). */
   currentPokemonIdRef: React.MutableRefObject<string>
   /**
@@ -68,7 +66,7 @@ export interface UseGameStateReturn {
  * appartiennent à `useTimer` et aux handlers de `usePokeDesc`.
  *
  * @param partieId - Identifiant de la partie. Si `undefined`, le chargement ne démarre pas.
- * @param sessionId - UUID de session du joueur, utilisé pour déterminer s'il est J1 ou J2.
+ * @param sessionId - UUID de session du joueur, utilisé pour retrouver le joueur dans players[].
  * @param onSkip - Callback déclenché quand un Pokémon sans description est détecté.
  */
 export function useGameState({
@@ -92,7 +90,6 @@ export function useGameState({
   const [usedHints, setUsedHints] = useState<string[]>([])
   const [revealedHints, setRevealedHints] = useState<RevealedHints>({})
   const [sessionCode, setSessionCode] = useState('')
-  const [isPlayer1, setIsPlayer1] = useState(true)
 
   const currentPokemonIdRef = useRef<string>('')
   // Ref stable vers onSkip pour éviter les closures périmées dans les callbacks async
@@ -108,15 +105,8 @@ export function useGameState({
       setPartie(p)
       setSessionCode(p.codeSession ?? 'N/A')
 
-      // Lecture via le nouveau schéma players[] (Phase 2+) avec fallback legacy J1/J2.
       const me = p.players?.find((pl) => pl.dresseurId === sessionId)
-      const player1 = me ? me.role === 'Host' : p.dresseur1Id === sessionId
-      setIsPlayer1(player1)
-
-      const pokemonId =
-        me?.currentPokemonId ??
-        (player1 ? p.currentPokemonIdJ1 : p.currentPokemonIdJ2) ??
-        ''
+      const pokemonId = me?.currentPokemonId ?? ''
 
       if (!pokemonId) {
         const debugInfo = [
@@ -134,20 +124,18 @@ export function useGameState({
 
       setCurrentPokemonId(pokemonId)
       currentPokemonIdRef.current = pokemonId
-      setCurrentScore(me?.score ?? (player1 ? (p.scoreJ1 ?? 0) : (p.scoreJ2 ?? 0)))
-      setAttemptsUsed(me?.attemptsUsed ?? (player1 ? (p.attemptsUsedJ1 ?? 0) : (p.attemptsUsedJ2 ?? 0)))
-      const hints = me?.usedHints ?? (player1 ? (p.usedHintsJ1 ?? []) : (p.usedHintsJ2 ?? []))
+      setCurrentScore(me?.score ?? 0)
+      setAttemptsUsed(me?.attemptsUsed ?? 0)
+      const hints = me?.usedHints ?? []
       setUsedHints(hints)
 
-      // Chargement parallèle : description censurée + données d'indices (évite deux aller-retours séquentiels).
+      // Chargement parallèle : description censurée + données d'indices
       const [desc, hintData] = await Promise.all([
         getCensoredDescription(pokemonId),
         getHints(pokemonId),
       ])
 
       if (!desc.descriptions?.length) {
-        // Le Pokémon n'a pas de description utilisable : on notifie l'utilisateur
-        // puis on déclenche le passage au suivant via onSkip (après 1,5 s pour la lisibilité).
         setIsLoading(false)
         setErrorMessage('Pokémon sans description — passage au suivant...')
         setTimeout(() => { onSkipRef.current() }, 1500)
@@ -164,7 +152,7 @@ export function useGameState({
       setIsLoading(false)
 
       return {
-        timerDurationSeconds: p.timerDurationSeconds ?? p.settings?.timerDuration ?? 60,
+        timerDurationSeconds: p.settings?.timerDuration ?? 60,
         sessionCode: p.codeSession ?? '',
         isSolo: p.modeSolo || (p.players?.length ?? 0) <= 1,
       }
@@ -194,7 +182,6 @@ export function useGameState({
     revealedHints,
     setRevealedHints,
     sessionCode,
-    isPlayer1,
     currentPokemonIdRef,
     loadGameData,
   }

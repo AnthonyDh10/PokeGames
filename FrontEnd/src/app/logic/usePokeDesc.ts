@@ -164,8 +164,8 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
   // --- Valeurs calculées ---
   // useMemo évite de re-filtrer 1000+ Pokémon à chaque tick du timer (toutes les secondes).
   const hintFilteredPokemons = useMemo(
-    () => filterHintPokemons(allPokemons, revealedHints, partie?.selectedGenerations ?? []),
-    [allPokemons, revealedHints, partie?.selectedGenerations],
+    () => filterHintPokemons(allPokemons, revealedHints, partie?.settings?.generations ?? []),
+    [allPokemons, revealedHints, partie?.settings?.generations],
   )
   const filteredPokemons = useMemo(
     () => filterSearchPokemons(hintFilteredPokemons, searchTerm),
@@ -173,7 +173,7 @@ export function usePokeDesc(partieId: string | undefined): UsePokeDescReturn {
   )
 
   function isHintLocked(hintKey: string): boolean {
-    return checkHintLocked(hintKey, usedHints, timeRemaining, partie?.timerDurationSeconds ?? -1)
+    return checkHintLocked(hintKey, usedHints, timeRemaining, partie?.settings?.timerDuration ?? -1)
   }
 
   // --- Fonctions d'orchestration ---

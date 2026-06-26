@@ -18,30 +18,30 @@ const mockedGetPartie = vi.mocked(getPartie);
 const mockedGetCensored = vi.mocked(getCensoredDescription);
 const mockedGetHints = vi.mocked(getHints);
 
+const fakePlayer1 = {
+  dresseurId: 'session-1',
+  name: 'Sacha',
+  role: 'Host' as const,
+  isConnected: true,
+  currentIndex: 0,
+  score: 100,
+  attemptsUsed: 1,
+  usedHints: ['Type1'],
+  timeRemaining: 60,
+  rematchReady: false,
+  currentPokemonId: '1',
+  completedPokemons: [],
+};
+
 const fakePartie = {
   id: 'p1',
   codeSession: 'ABC',
   statut: 'EnCours',
-  // Champs Phase 2 — requis par le nouveau PartieDto
   hostId: 'session-1',
   maxPlayers: 8,
   modeSolo: false,
-  players: [],
-  // Champs legacy — conservés pour useGameState en attendant Phase 4
-  dresseur1Id: 'session-1',
-  dresseur2Id: null,
-  scoreJ1: 100,
-  scoreJ2: 0,
-  currentIndexJ1: 0,
-  currentIndexJ2: 0,
-  attemptsUsedJ1: 1,
-  attemptsUsedJ2: 0,
-  usedHintsJ1: ['Type1'],
-  usedHintsJ2: [],
-  timerDurationSeconds: 60,
-  pokemonsToGuess: [{ id: '1' }],
-  currentPokemonIdJ1: '1',
-  currentPokemonIdJ2: null,
+  settings: { nbPokemons: 1, generations: [1], timerDuration: 60 },
+  players: [fakePlayer1],
 };
 
 const fakeDesc = { descriptions: ['C\'est un Pokémon de type ***'] };
@@ -96,34 +96,19 @@ describe('useGameState', () => {
     expect(result.current.descriptions).toEqual(fakeDesc.descriptions);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.currentPokemonId).toBe('1');
-    // Vérifier que loadGameData retourne les données de configuration
     expect(loadResult).toEqual({
       timerDurationSeconds: 60,
       sessionCode: 'ABC',
-      isSolo: true,
+      isSolo: true, // 1 joueur dans players[] → considéré solo
     });
   });
 
-  it('loadGameData détecte le joueur 1 correctement', async () => {
+  it('loadGameData charge les données du joueur courant (score, tentatives, indices)', async () => {
     mockedGetPartie.mockResolvedValue(fakePartie as any);
     mockedGetCensored.mockResolvedValue(fakeDesc as any);
     mockedGetHints.mockResolvedValue(fakeHints as any);
 
     const { result } = renderGameState({ sessionId: 'session-1' });
-
-    await act(async () => {
-      await result.current.loadGameData();
-    });
-
-    expect(result.current.isPlayer1).toBe(true);
-  });
-
-  it('loadGameData définit le score et les indices du joueur', async () => {
-    mockedGetPartie.mockResolvedValue(fakePartie as any);
-    mockedGetCensored.mockResolvedValue(fakeDesc as any);
-    mockedGetHints.mockResolvedValue(fakeHints as any);
-
-    const { result } = renderGameState();
 
     await act(async () => {
       await result.current.loadGameData();
@@ -160,19 +145,28 @@ describe('useGameState', () => {
       await result.current.loadGameData();
     });
 
-    // Type 1 est dans usedHintsJ1, donc devrait être révélé
+    // Type1 est dans usedHints du joueur, donc devrait être révélé
     expect(result.current.revealedHints['Type 1']).toBe('Plante');
   });
 
-  it('loadGameData détecte correctement le joueur 2', async () => {
+  it('loadGameData charge les données d\'un second joueur correctement', async () => {
+    const fakePlayer2 = {
+      dresseurId: 'session-2',
+      name: 'Pierre',
+      role: 'Guest' as const,
+      isConnected: true,
+      currentIndex: 0,
+      score: 50,
+      attemptsUsed: 2,
+      usedHints: ['Type1', 'Generation'],
+      timeRemaining: 60,
+      rematchReady: false,
+      currentPokemonId: '1',
+      completedPokemons: [],
+    };
     const partieJ2 = {
       ...fakePartie,
-      dresseur1Id: 'autre-joueur',
-      dresseur2Id: 'session-2',
-      scoreJ2: 50,
-      attemptsUsedJ2: 2,
-      usedHintsJ2: ['Type1', 'Generation'],
-      currentPokemonIdJ2: '1',
+      players: [fakePlayer1, fakePlayer2],
     };
     mockedGetPartie.mockResolvedValue(partieJ2 as any);
     mockedGetCensored.mockResolvedValue(fakeDesc as any);
@@ -184,15 +178,17 @@ describe('useGameState', () => {
       await result.current.loadGameData();
     });
 
-    expect(result.current.isPlayer1).toBe(false);
     expect(result.current.currentScore).toBe(50);
     expect(result.current.attemptsUsed).toBe(2);
     expect(result.current.usedHints).toEqual(['Type1', 'Generation']);
   });
 
   it('loadGameData met errorMessage si aucun pokémon à deviner', async () => {
-    const partieVidePokemon = { ...fakePartie, pokemonsToGuess: [], currentPokemonIdJ1: null };
-    mockedGetPartie.mockResolvedValue(partieVidePokemon as any);
+    const partieNoPokemon = {
+      ...fakePartie,
+      players: [{ ...fakePlayer1, currentPokemonId: null }],
+    };
+    mockedGetPartie.mockResolvedValue(partieNoPokemon as any);
     mockedGetCensored.mockResolvedValue(fakeDesc as any);
     mockedGetHints.mockResolvedValue(fakeHints as any);
 
@@ -219,12 +215,14 @@ describe('useGameState', () => {
     });
 
     expect(result.current.errorMessage).toContain('sans description');
-    // onSkip est appelé après un setTimeout de 1500ms — vérifier qu'il est prévu
     expect(result.current.isLoading).toBe(false);
   });
 
   it('processRevealedHints mappe Silhouette (hint Sprite)', async () => {
-    const partieWithSprite = { ...fakePartie, usedHintsJ1: ['Sprite'] };
+    const partieWithSprite = {
+      ...fakePartie,
+      players: [{ ...fakePlayer1, usedHints: ['Sprite'] }],
+    };
     mockedGetPartie.mockResolvedValue(partieWithSprite as any);
     mockedGetCensored.mockResolvedValue(fakeDesc as any);
     mockedGetHints.mockResolvedValue(fakeHints as any);
@@ -236,7 +234,10 @@ describe('useGameState', () => {
   });
 
   it('processRevealedHints mappe Type 2 avec une valeur', async () => {
-    const partieWithType2 = { ...fakePartie, usedHintsJ1: ['Type2'] };
+    const partieWithType2 = {
+      ...fakePartie,
+      players: [{ ...fakePlayer1, usedHints: ['Type2'] }],
+    };
     mockedGetPartie.mockResolvedValue(partieWithType2 as any);
     mockedGetCensored.mockResolvedValue(fakeDesc as any);
     mockedGetHints.mockResolvedValue(fakeHints as any);
@@ -248,10 +249,13 @@ describe('useGameState', () => {
   });
 
   it('processRevealedHints mappe "Pas de second type" si pas de Type 2', async () => {
-    const partieWithType2 = { ...fakePartie, usedHintsJ1: ['Type2'] };
+    const partieWithType2 = {
+      ...fakePartie,
+      players: [{ ...fakePlayer1, usedHints: ['Type2'] }],
+    };
     const hintsWithoutType2 = {
       ...fakeHints,
-      types: [{ slot: 1, name: 'Feu' }], // Pas de slot 2
+      types: [{ slot: 1, name: 'Feu' }],
     };
     mockedGetPartie.mockResolvedValue(partieWithType2 as any);
     mockedGetCensored.mockResolvedValue(fakeDesc as any);
@@ -264,7 +268,10 @@ describe('useGameState', () => {
   });
 
   it('processRevealedHints mappe Génération', async () => {
-    const partieWithGen = { ...fakePartie, usedHintsJ1: ['Generation'] };
+    const partieWithGen = {
+      ...fakePartie,
+      players: [{ ...fakePlayer1, usedHints: ['Generation'] }],
+    };
     mockedGetPartie.mockResolvedValue(partieWithGen as any);
     mockedGetCensored.mockResolvedValue(fakeDesc as any);
     mockedGetHints.mockResolvedValue(fakeHints as any);
@@ -276,7 +283,10 @@ describe('useGameState', () => {
   });
 
   it('processRevealedHints mappe Catégorie', async () => {
-    const partieWithCat = { ...fakePartie, usedHintsJ1: ['Category'] };
+    const partieWithCat = {
+      ...fakePartie,
+      players: [{ ...fakePlayer1, usedHints: ['Category'] }],
+    };
     mockedGetPartie.mockResolvedValue(partieWithCat as any);
     mockedGetCensored.mockResolvedValue(fakeDesc as any);
     mockedGetHints.mockResolvedValue(fakeHints as any);
@@ -288,7 +298,10 @@ describe('useGameState', () => {
   });
 
   it('processRevealedHints mappe Taille et Poids', async () => {
-    const partieWithPhysical = { ...fakePartie, usedHintsJ1: ['Height', 'Weight'] };
+    const partieWithPhysical = {
+      ...fakePartie,
+      players: [{ ...fakePlayer1, usedHints: ['Height', 'Weight'] }],
+    };
     mockedGetPartie.mockResolvedValue(partieWithPhysical as any);
     mockedGetCensored.mockResolvedValue(fakeDesc as any);
     mockedGetHints.mockResolvedValue(fakeHints as any);
@@ -301,7 +314,10 @@ describe('useGameState', () => {
   });
 
   it('processRevealedHints mappe les Talents', async () => {
-    const partieWithAbil = { ...fakePartie, usedHintsJ1: ['Abilities'] };
+    const partieWithAbil = {
+      ...fakePartie,
+      players: [{ ...fakePlayer1, usedHints: ['Abilities'] }],
+    };
     mockedGetPartie.mockResolvedValue(partieWithAbil as any);
     mockedGetCensored.mockResolvedValue(fakeDesc as any);
     mockedGetHints.mockResolvedValue(fakeHints as any);
@@ -313,7 +329,10 @@ describe('useGameState', () => {
   });
 
   it('processRevealedHints mappe les Statistiques', async () => {
-    const partieWithStats = { ...fakePartie, usedHintsJ1: ['Stats'] };
+    const partieWithStats = {
+      ...fakePartie,
+      players: [{ ...fakePlayer1, usedHints: ['Stats'] }],
+    };
     const hintsWithStats = {
       ...fakeHints,
       stats: {
