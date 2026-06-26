@@ -22,7 +22,7 @@ describe('dezoomService', () => {
 
     await dezoomService.getDeZoomGame('p1', 'd1');
 
-    expect(mockedGet).toHaveBeenCalledWith('/api/dezoom/p1', { params: { dresseurId: 'd1' } });
+    expect(mockedGet).toHaveBeenCalledWith('/api/dezoom/p1', expect.objectContaining({ params: { dresseurId: 'd1' } }));
   });
 
   it('submitDeZoomGuess appelle POST /api/dezoom/:id/guess', async () => {

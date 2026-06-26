@@ -304,7 +304,7 @@ une fois PokéDesc validé de bout en bout.
 ## 7. Statut d'avancement
 - [x] Phase 1 — Transport temps réel
 - [x] Phase 2 — Joueurs dynamiques + rôles (back)
-- [ ] Phase 3 — Joueurs dynamiques + rôles (front)
+- [x] Phase 3 — Joueurs dynamiques + rôles (front)
 - [ ] Phase 4 — Jeu & résultats à N (PokéDesc)
 - [ ] Phase 5 — Robustesse
 - [ ] Phase 6 — DeZoom / Typuzzle

@@ -41,7 +41,7 @@ export function useGameSession(): UseGameSessionReturn {
       setChatContext({
         partieId,
         sessionCode: p.codeSession ?? '',
-        isSolo: !p.dresseur2Id,
+        isSolo: p.modeSolo || (p.players?.length ?? 0) <= 1,
       })
       return {
         sessionCode: p.codeSession ?? 'N/A',

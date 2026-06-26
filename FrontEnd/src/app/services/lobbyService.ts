@@ -10,13 +10,15 @@ export interface LobbyHandlers {
   onLobbyUpdated?: (partie: PartieDto) => void
   /** Appelé quand la partie démarre — sert à rediriger vers l'écran de jeu. */
   onGameStarted?: (partie: PartieDto) => void
+  /** Appelé quand un joueur est expulsé. `kickedId` est le dresseurId du joueur expulsé. */
+  onPlayerKicked?: (kickedId: string) => void
 }
 
 /**
  * Service temps réel du lobby basé sur SignalR (GameHub).
  *
  * Remplace le polling HTTP du lobby : le serveur pousse l'état de la partie
- * via les événements `LobbyUpdated` et `GameStarted`. Calqué sur `chatService`.
+ * via les événements `LobbyUpdated`, `GameStarted` et `PlayerKicked`. Calqué sur `chatService`.
  *
  * Exposé comme singleton (`lobbyService`) — ne pas instancier directement.
  */
@@ -59,6 +61,9 @@ class LobbyService {
     })
     this.connection.on('GameStarted', (partie: PartieDto) => {
       this.handlers.onGameStarted?.(partie)
+    })
+    this.connection.on('PlayerKicked', (kickedId: string) => {
+      this.handlers.onPlayerKicked?.(kickedId)
     })
 
     try {

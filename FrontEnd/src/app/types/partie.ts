@@ -11,30 +11,56 @@ export interface CompletedPokemonDto {
   pointsEarned: number
 }
 
+export interface GameSettingsDto {
+  nbPokemons: number
+  generations: number[]
+  timerDuration: number
+}
+
+export interface PlayerDto {
+  dresseurId: string
+  name: string
+  role: 'Host' | 'Guest'
+  isConnected: boolean
+  currentIndex: number
+  score: number
+  attemptsUsed: number
+  usedHints: string[]
+  timeRemaining: number
+  rematchReady: boolean
+  currentPokemonId?: string | null
+  completedPokemons: CompletedPokemonDto[]
+}
+
 export interface PartieDto {
   id: string
   codeSession?: string
   statut?: string
+  hostId: string
+  maxPlayers: number
+  modeSolo: boolean
+  settings?: GameSettingsDto
+  players: PlayerDto[]
+  rematchPartieId?: string
+
+  // Champs legacy — supprimés côté back en Phase 2, conservés optionnels jusqu'en Phase 4
   dresseur1Id?: string
   dresseur2Id?: string
-  modeSolo: boolean
-  nbPokemons: number
-  selectedGenerations: number[]
-  timerDurationSeconds: number
+  nbPokemons?: number
+  selectedGenerations?: number[]
+  timerDurationSeconds?: number
   pokemonsToGuess?: PokemonSimpleDto[]
-  currentIndexJ1: number
-  currentIndexJ2: number
-  scoreJ1: number
-  scoreJ2: number
-  attemptsUsedJ1: number
-  attemptsUsedJ2: number
-  usedHintsJ1: string[]
-  usedHintsJ2: string[]
-  completedPokemonsJ1: CompletedPokemonDto[]
-  completedPokemonsJ2: CompletedPokemonDto[]
-  /** ID du Pokémon actuel pour J1 — null avant le démarrage de la partie. */
+  currentIndexJ1?: number
+  currentIndexJ2?: number
+  scoreJ1?: number
+  scoreJ2?: number
+  attemptsUsedJ1?: number
+  attemptsUsedJ2?: number
+  usedHintsJ1?: string[]
+  usedHintsJ2?: string[]
+  completedPokemonsJ1?: CompletedPokemonDto[]
+  completedPokemonsJ2?: CompletedPokemonDto[]
   currentPokemonIdJ1?: string | null
-  /** ID du Pokémon actuel pour J2 — null avant le démarrage de la partie. */
   currentPokemonIdJ2?: string | null
 }
 
@@ -45,10 +71,10 @@ export interface GuessResultDto {
   isTimeout: boolean
   message: string
   pointsEarned: number
-  hasOneTypeInCommon?: boolean;
-  hasPerfectTypeMatch?: boolean;
-  hasSameGeneration?: boolean;
-  isInSameEvolutionChain?: boolean;
+  hasOneTypeInCommon?: boolean
+  hasPerfectTypeMatch?: boolean
+  hasSameGeneration?: boolean
+  isInSameEvolutionChain?: boolean
 }
 
 export interface TimerResponse {

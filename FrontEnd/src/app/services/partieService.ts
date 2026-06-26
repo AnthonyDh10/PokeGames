@@ -2,13 +2,14 @@ import api from './api'
 import type { PartieDto, GuessResultDto, TimerResponse, RematchStatusDto } from '../types/partie'
 
 /**
- * Crée une nouvelle partie et désigne le dresseur appelant comme joueur 1.
+ * Crée une nouvelle partie et désigne le dresseur appelant comme hôte.
  *
  * @param dresseurId - UUID de session du joueur qui crée la partie.
+ * @param name - Nom d'affichage de l'hôte (cosmétique).
  * @returns La partie nouvellement créée avec son code de session.
  */
-export async function createPartie(dresseurId: string): Promise<PartieDto> {
-  const { data } = await api.post<PartieDto>('/api/partie/create', { dresseurId })
+export async function createPartie(dresseurId: string, name: string = ''): Promise<PartieDto> {
+  const { data } = await api.post<PartieDto>('/api/partie/create', { dresseurId, name })
   return data
 }
 
@@ -17,10 +18,11 @@ export async function createPartie(dresseurId: string): Promise<PartieDto> {
  *
  * @param codeSession - Code à 6 caractères affiché dans le lobby.
  * @param dresseurId - UUID de session du joueur qui rejoint.
- * @returns L'état de la partie après l'entrée du second joueur.
+ * @param name - Nom d'affichage du joueur (cosmétique).
+ * @returns L'état de la partie après l'entrée du joueur.
  */
-export async function joinPartie(codeSession: string, dresseurId: string): Promise<PartieDto> {
-  const { data } = await api.post<PartieDto>('/api/partie/join', { codeSession, dresseurId })
+export async function joinPartie(codeSession: string, dresseurId: string, name: string = ''): Promise<PartieDto> {
+  const { data } = await api.post<PartieDto>('/api/partie/join', { codeSession, dresseurId, name })
   return data
 }
 
@@ -36,45 +38,34 @@ export async function getPartie(partieId: string): Promise<PartieDto> {
 }
 
 /**
- * Démarre une partie en envoyant les paramètres de jeu au serveur.
- *
- * Le payload envoyé varie selon le mode :
- * - `Standard` : nbPokemons, générations et durée du timer.
- * - `DeZoom` : générations uniquement (pas de nbPokemons).
- * - Autres modes (ex : `Types`) : n'envoie que les paramètres explicitement fournis.
+ * Démarre une partie. Réservé à l'hôte.
  *
  * @param partieId - Identifiant unique de la partie.
- * @param isSolo - `true` pour une partie solo, `false` pour multijoueur.
+ * @param isSolo - `true` pour une partie solo.
  * @param settings - Paramètres optionnels (Pokémon, générations, timer).
  * @param mode - Mode de jeu (`'Standard'`, `'DeZoom'`, `'Types'`, etc.).
+ * @param dresseurId - UUID de l'hôte (requis côté serveur pour l'autorisation).
  * @returns L'état de la partie après démarrage.
  */
 export async function startPartie(
   partieId: string,
   isSolo: boolean,
   settings?: { nbPokemons: number; generations: number[]; timerDuration: number },
-  mode: string = 'Standard'
+  mode: string = 'Standard',
+  dresseurId?: string
 ): Promise<PartieDto> {
-  // Construction conditionnelle du payload : certains modes (ex. "Types") n'acceptent
-  // pas les paramètres nbPokemons/générations, on ne les inclut que si pertinent.
-  const payload: {
-    mode: string
-    isSolo: boolean
-    nbPokemons?: number
-    generations?: number[]
-    timerDuration?: number
-  } = { mode, isSolo }
+  const payload: Record<string, unknown> = { mode, isSolo }
+
+  if (dresseurId) payload.dresseurId = dresseurId
 
   if (mode === 'Standard') {
     payload.nbPokemons = settings?.nbPokemons ?? 1
     payload.generations = settings?.generations ?? [1, 2, 3, 4, 5, 6, 7, 8]
     payload.timerDuration = settings?.timerDuration ?? 60
   } else if (mode === 'DeZoom') {
-    // DeZoom utilise les générations et peut avoir une durée de timer personnalisée.
     payload.generations = settings?.generations ?? [1, 2, 3, 4, 5, 6, 7, 8, 9]
     if (settings?.timerDuration !== undefined) payload.timerDuration = settings.timerDuration
   } else {
-    // Autres modes (ex. "Types") : n'envoie nbPokemons/générations que si explicitement fournis.
     if (settings?.nbPokemons !== undefined) payload.nbPokemons = settings.nbPokemons
     if (settings?.generations !== undefined) payload.generations = settings.generations
     if (settings?.timerDuration !== undefined) payload.timerDuration = settings.timerDuration
@@ -86,11 +77,6 @@ export async function startPartie(
 
 /**
  * Soumet une proposition de réponse pour le Pokémon en cours.
- *
- * @param partieId - Identifiant unique de la partie.
- * @param dresseurId - UUID de session du joueur qui propose.
- * @param pokemonName - Nom français du Pokémon proposé.
- * @returns Le résultat de la tentative (correct, score, indicateurs de proximité, etc.).
  */
 export async function submitGuess(partieId: string, dresseurId: string, pokemonName: string): Promise<GuessResultDto> {
   const { data } = await api.post<GuessResultDto>(`/api/partie/${partieId}/guess`, { dresseurId, pokemonName })
@@ -99,11 +85,6 @@ export async function submitGuess(partieId: string, dresseurId: string, pokemonN
 
 /**
  * Signale un timeout au serveur pour le Pokémon en cours.
- * Le serveur enregistre le Pokémon comme raté et avance au suivant.
- *
- * @param partieId - Identifiant unique de la partie.
- * @param dresseurId - UUID de session du joueur dont le temps est écoulé.
- * @returns Le résultat du timeout (IsTurnFinished = true, IsTimeout = true).
  */
 export async function notifyTimeout(partieId: string, dresseurId: string): Promise<GuessResultDto> {
   const { data } = await api.post<GuessResultDto>(`/api/partie/${partieId}/timeout`, { dresseurId })
@@ -112,11 +93,6 @@ export async function notifyTimeout(partieId: string, dresseurId: string): Promi
 
 /**
  * Demande un indice supplémentaire pour le Pokémon en cours.
- * Le serveur enregistre l'indice comme utilisé et applique la pénalité de temps correspondante.
- *
- * @param partieId - Identifiant unique de la partie.
- * @param dresseurId - UUID de session du joueur qui demande l'indice.
- * @param hintType - Clé de l'indice demandé (ex : `'type'`, `'generation'`, `'ability'`).
  */
 export async function useHint(partieId: string, dresseurId: string, hintType: string): Promise<void> {
   await api.post(`/api/partie/${partieId}/hint`, { dresseurId, hintType })
@@ -124,11 +100,6 @@ export async function useHint(partieId: string, dresseurId: string, hintType: st
 
 /**
  * Interroge le serveur pour connaître le temps restant dans la partie.
- * Appelé périodiquement par `useTimer` (toutes les secondes) pour maintenir la synchronisation.
- *
- * @param partieId - Identifiant unique de la partie.
- * @param dresseurId - UUID de session du joueur.
- * @returns Le temps restant en secondes et la durée totale du timer.
  */
 export async function getTimer(partieId: string, dresseurId: string): Promise<TimerResponse> {
   const { data } = await api.get<TimerResponse>(`/api/partie/${partieId}/timer/${dresseurId}`)
@@ -137,34 +108,28 @@ export async function getTimer(partieId: string, dresseurId: string): Promise<Ti
 
 /**
  * Remet le timer à zéro côté serveur.
- * Utilisé lors du passage au Pokémon suivant (ex : Pokémon sans description).
- *
- * @param partieId - Identifiant unique de la partie.
- * @param dresseurId - UUID de session du joueur.
  */
 export async function resetTimer(partieId: string, dresseurId: string): Promise<void> {
   await api.post(`/api/partie/${partieId}/timer/reset`, { dresseurId })
 }
 
 /**
- * Met à jour les paramètres de jeu d'une partie en attente dans le lobby.
+ * Met à jour les paramètres de jeu d'une partie en attente. Réservé à l'hôte.
  *
  * @param partieId - Identifiant unique de la partie.
- * @param nbPokemons - Nombre de Pokémon à deviner dans la partie.
- * @param generations - Générations sélectionnées pour le tirage aléatoire.
+ * @param dresseurId - UUID de l'hôte (requis côté serveur pour l'autorisation).
+ * @param nbPokemons - Nombre de Pokémon à deviner.
+ * @param generations - Générations sélectionnées.
  * @param timerDuration - Durée du timer en secondes (optionnel).
- * @returns L'état de la partie après mise à jour des paramètres.
  */
 export async function updateGameSettings(
   partieId: string,
+  dresseurId: string,
   nbPokemons: number,
   generations: number[],
   timerDuration?: number
 ): Promise<PartieDto> {
-  const payload: { nbPokemons: number; generations: number[]; timerDuration?: number } = {
-    nbPokemons,
-    generations,
-  }
+  const payload: Record<string, unknown> = { dresseurId, nbPokemons, generations }
   if (timerDuration !== undefined) payload.timerDuration = timerDuration
 
   const { data } = await api.put<PartieDto>(`/api/partie/${partieId}/settings`, payload)
@@ -172,8 +137,29 @@ export async function updateGameSettings(
 }
 
 /**
+ * Expulse un joueur de la partie. Réservé à l'hôte.
+ *
+ * @param partieId - Identifiant unique de la partie.
+ * @param dresseurId - UUID de l'hôte qui expulse.
+ * @param targetId - UUID du joueur à expulser.
+ */
+export async function kickPlayer(partieId: string, dresseurId: string, targetId: string): Promise<void> {
+  await api.post(`/api/partie/${partieId}/kick`, { dresseurId, targetId })
+}
+
+/**
+ * Quitte une partie en cours ou en attente.
+ * Si le joueur est hôte, le prochain joueur est promu automatiquement.
+ *
+ * @param partieId - Identifiant unique de la partie.
+ * @param dresseurId - UUID du joueur qui quitte.
+ */
+export async function leaveGame(partieId: string, dresseurId: string): Promise<void> {
+  await api.post(`/api/partie/${partieId}/leave`, { dresseurId })
+}
+
+/**
  * Signale au serveur que le joueur est prêt pour une revanche.
- * Si les deux joueurs sont prêts, le serveur crée une nouvelle partie et retourne son identifiant.
  *
  * @param partieId - Identifiant de la partie terminée.
  * @param dresseurId - UUID de session du joueur qui demande la revanche.

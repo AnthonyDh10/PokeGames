@@ -24,16 +24,36 @@ const fakePartie = { id: 'partie-1', codeSession: 'ABC123', statut: 'EnAttente' 
 const fakeGuessResult = { isCorrect: true, pointsEarned: 100, message: 'Bravo !' };
 
 describe('partieService', () => {
-  it('createPartie appelle POST /api/partie/create avec dresseurId', async () => {
+  it('createPartie appelle POST /api/partie/create avec dresseurId et name', async () => {
     mockedPost.mockResolvedValue({ data: fakePartie });
 
-    const result = await partieService.createPartie('d1');
+    const result = await partieService.createPartie('d1', 'Sacha');
 
-    expect(mockedPost).toHaveBeenCalledWith('/api/partie/create', { dresseurId: 'd1' });
+    expect(mockedPost).toHaveBeenCalledWith('/api/partie/create', { dresseurId: 'd1', name: 'Sacha' });
     expect(result).toEqual(fakePartie);
   });
 
-  it('joinPartie appelle POST /api/partie/join', async () => {
+  it('createPartie fonctionne sans name (défaut vide)', async () => {
+    mockedPost.mockResolvedValue({ data: fakePartie });
+
+    await partieService.createPartie('d1');
+
+    expect(mockedPost).toHaveBeenCalledWith('/api/partie/create', { dresseurId: 'd1', name: '' });
+  });
+
+  it('joinPartie appelle POST /api/partie/join avec codeSession, dresseurId et name', async () => {
+    mockedPost.mockResolvedValue({ data: fakePartie });
+
+    await partieService.joinPartie('ABC123', 'd2', 'Pierre');
+
+    expect(mockedPost).toHaveBeenCalledWith('/api/partie/join', {
+      codeSession: 'ABC123',
+      dresseurId: 'd2',
+      name: 'Pierre',
+    });
+  });
+
+  it('joinPartie fonctionne sans name (défaut vide)', async () => {
     mockedPost.mockResolvedValue({ data: fakePartie });
 
     await partieService.joinPartie('ABC123', 'd2');
@@ -41,6 +61,7 @@ describe('partieService', () => {
     expect(mockedPost).toHaveBeenCalledWith('/api/partie/join', {
       codeSession: 'ABC123',
       dresseurId: 'd2',
+      name: '',
     });
   });
 
@@ -64,6 +85,16 @@ describe('partieService', () => {
       nbPokemons: 3,
       generations: [1, 2],
       timerDuration: 60,
+    }));
+  });
+
+  it('startPartie inclut dresseurId quand fourni', async () => {
+    mockedPost.mockResolvedValue({ data: fakePartie });
+
+    await partieService.startPartie('partie-1', false, { nbPokemons: 3, generations: [1], timerDuration: 60 }, 'Standard', 'host-id');
+
+    expect(mockedPost).toHaveBeenCalledWith('/api/partie/partie-1/start', expect.objectContaining({
+      dresseurId: 'host-id',
     }));
   });
 
@@ -153,12 +184,13 @@ describe('partieService', () => {
     expect(mockedPost).toHaveBeenCalledWith('/api/partie/partie-1/timer/reset', { dresseurId: 'd1' });
   });
 
-  it('updateGameSettings appelle PUT /api/partie/:id/settings', async () => {
+  it('updateGameSettings appelle PUT /api/partie/:id/settings avec dresseurId', async () => {
     mockedPut.mockResolvedValue({ data: fakePartie });
 
-    const result = await partieService.updateGameSettings('partie-1', 5, [1, 2, 3]);
+    const result = await partieService.updateGameSettings('partie-1', 'host-id', 5, [1, 2, 3]);
 
     expect(mockedPut).toHaveBeenCalledWith('/api/partie/partie-1/settings', {
+      dresseurId: 'host-id',
       nbPokemons: 5,
       generations: [1, 2, 3],
     });
@@ -168,9 +200,10 @@ describe('partieService', () => {
   it('updateGameSettings avec timerDuration inclut le champ', async () => {
     mockedPut.mockResolvedValue({ data: fakePartie });
 
-    await partieService.updateGameSettings('partie-1', 3, [1], 120);
+    await partieService.updateGameSettings('partie-1', 'host-id', 3, [1], 120);
 
     expect(mockedPut).toHaveBeenCalledWith('/api/partie/partie-1/settings', {
+      dresseurId: 'host-id',
       nbPokemons: 3,
       generations: [1],
       timerDuration: 120,
@@ -187,7 +220,7 @@ describe('partieService', () => {
     expect(callArg.timerDuration).toBeUndefined();
   });
 
-  it('markRematchReady appelle POST /api/partie/:id/rematch-ready avec dresseurId en query param', async () => {
+  it('markRematchReady appelle POST /api/partie/:id/rematch-ready avec dresseurId en body', async () => {
     const fakeStatus = { player1Ready: true, player2Ready: false };
     mockedPost.mockResolvedValue({ data: fakeStatus });
 
@@ -195,9 +228,27 @@ describe('partieService', () => {
 
     expect(mockedPost).toHaveBeenCalledWith(
       '/api/partie/partie-1/rematch-ready',
-      {},
-      { params: { dresseurId: 'd1' } }
+      { dresseurId: 'd1' }
     );
     expect(result).toEqual(fakeStatus);
+  });
+
+  it('kickPlayer appelle POST /api/partie/:id/kick avec dresseurId et targetId', async () => {
+    mockedPost.mockResolvedValue({ data: undefined });
+
+    await partieService.kickPlayer('partie-1', 'host-id', 'target-id');
+
+    expect(mockedPost).toHaveBeenCalledWith('/api/partie/partie-1/kick', {
+      dresseurId: 'host-id',
+      targetId: 'target-id',
+    });
+  });
+
+  it('leaveGame appelle POST /api/partie/:id/leave avec dresseurId', async () => {
+    mockedPost.mockResolvedValue({ data: undefined });
+
+    await partieService.leaveGame('partie-1', 'd1');
+
+    expect(mockedPost).toHaveBeenCalledWith('/api/partie/partie-1/leave', { dresseurId: 'd1' });
   });
 });

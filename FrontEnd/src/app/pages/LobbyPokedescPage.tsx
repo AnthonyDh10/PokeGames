@@ -54,10 +54,10 @@ export default function LobbyPokedescPage() {
           <br /> Tu as le droit à 3 essais et des indices pour t'aider !
         </div>
       }
-      settingsPanel={(isPlayer1, partie: PartieDto | null) => {
-        const displayNb = isPlayer1 ? settings.nbPokemons : (partie?.nbPokemons ?? settings.nbPokemons)
-        const displayGens = isPlayer1 ? settings.generations : (partie?.selectedGenerations ?? settings.generations)
-        const displayTimer = isPlayer1 ? settings.timerDuration : (partie?.timerDurationSeconds ?? settings.timerDuration)
+      settingsPanel={(isHost, partie: PartieDto | null) => {
+        const displayNb = isHost ? settings.nbPokemons : (partie?.settings?.nbPokemons ?? settings.nbPokemons)
+        const displayGens = isHost ? settings.generations : (partie?.settings?.generations ?? settings.generations)
+        const displayTimer = isHost ? settings.timerDuration : (partie?.settings?.timerDuration ?? settings.timerDuration)
         
         return (
         <Card pokeballColor={colors.brand.blue}>
@@ -67,7 +67,7 @@ export default function LobbyPokedescPage() {
               <h3 className="font-heading text-xl tracking-wide" style={{ color: colors.ui.textPrimary, fontSize: '1.25rem' }}>
                 Paramètres de la partie
               </h3>
-              {!isPlayer1 && (
+              {!isHost && (
                 <div className="ml-auto">
                   <SubCard
                     bodyColor="#f3f4f6"
@@ -94,9 +94,9 @@ export default function LobbyPokedescPage() {
                   return (
                     <button
                       key={n}
-                      onClick={() => isPlayer1 && setSettings((prev) => ({ ...prev, nbPokemons: n }))}
-                      disabled={!isPlayer1}
-                      className={`flex-1 transition ${!isPlayer1 ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:-translate-y-0.5'}`}
+                      onClick={() => isHost && setSettings((prev) => ({ ...prev, nbPokemons: n }))}
+                      disabled={!isHost}
+                      className={`flex-1 transition ${!isHost ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:-translate-y-0.5'}`}
                     >
                       <SubCard
                         bodyColor={active ? colors.brand.blue : '#ffffff'}
@@ -128,9 +128,9 @@ export default function LobbyPokedescPage() {
                   return (
                     <button
                       key={duration}
-                      onClick={() => isPlayer1 && setSettings((prev) => ({ ...prev, timerDuration: duration }))}
-                      disabled={!isPlayer1}
-                      className={`flex-1 transition ${!isPlayer1 ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:-translate-y-0.5'}`}
+                      onClick={() => isHost && setSettings((prev) => ({ ...prev, timerDuration: duration }))}
+                      disabled={!isHost}
+                      className={`flex-1 transition ${!isHost ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:-translate-y-0.5'}`}
                     >
                       <SubCard
                         bodyColor={active ? colors.brand.blue : '#ffffff'}
@@ -152,7 +152,7 @@ export default function LobbyPokedescPage() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <label className="font-heading text-sm font-medium" style={{ color: colors.ui.textMuted }}>Générations</label>
-                {isPlayer1 && (
+                {isHost && (
                   <div className="flex flex-wrap gap-1 justify-end">
                     <button
                       onClick={() => setSettings((prev) => ({ ...prev, generations: [...ALL_GENERATIONS] }))}
@@ -178,9 +178,9 @@ export default function LobbyPokedescPage() {
                   return (
                     <button
                       key={gen}
-                      onClick={() => isPlayer1 && toggleGeneration(gen)}
-                      disabled={!isPlayer1}
-                      className={`transition ${!isPlayer1 ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:-translate-y-0.5'}`}
+                      onClick={() => isHost && toggleGeneration(gen)}
+                      disabled={!isHost}
+                      className={`transition ${!isHost ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:-translate-y-0.5'}`}
                     >
                       <SubCard
                         bodyColor={active ? colors.brand.blue : '#ffffff'}

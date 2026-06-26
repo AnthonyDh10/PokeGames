@@ -22,6 +22,12 @@ const fakePartie = {
   id: 'p1',
   codeSession: 'ABC',
   statut: 'EnCours',
+  // Champs Phase 2 — requis par le nouveau PartieDto
+  hostId: 'session-1',
+  maxPlayers: 8,
+  modeSolo: false,
+  players: [],
+  // Champs legacy — conservés pour useGameState en attendant Phase 4
   dresseur1Id: 'session-1',
   dresseur2Id: null,
   scoreJ1: 100,
@@ -34,6 +40,8 @@ const fakePartie = {
   usedHintsJ2: [],
   timerDurationSeconds: 60,
   pokemonsToGuess: [{ id: '1' }],
+  currentPokemonIdJ1: '1',
+  currentPokemonIdJ2: null,
 };
 
 const fakeDesc = { descriptions: ['C\'est un Pokémon de type ***'] };
@@ -164,6 +172,7 @@ describe('useGameState', () => {
       scoreJ2: 50,
       attemptsUsedJ2: 2,
       usedHintsJ2: ['Type1', 'Generation'],
+      currentPokemonIdJ2: '1',
     };
     mockedGetPartie.mockResolvedValue(partieJ2 as any);
     mockedGetCensored.mockResolvedValue(fakeDesc as any);
@@ -182,7 +191,7 @@ describe('useGameState', () => {
   });
 
   it('loadGameData met errorMessage si aucun pokémon à deviner', async () => {
-    const partieVidePokemon = { ...fakePartie, pokemonsToGuess: [] };
+    const partieVidePokemon = { ...fakePartie, pokemonsToGuess: [], currentPokemonIdJ1: null };
     mockedGetPartie.mockResolvedValue(partieVidePokemon as any);
     mockedGetCensored.mockResolvedValue(fakeDesc as any);
     mockedGetHints.mockResolvedValue(fakeHints as any);
@@ -193,7 +202,7 @@ describe('useGameState', () => {
       await result.current.loadGameData();
     });
 
-    expect(result.current.errorMessage).toBe('Aucun Pokémon à deviner');
+    expect(result.current.errorMessage).toContain('Aucun Pokémon à deviner');
     expect(result.current.isLoading).toBe(false);
   });
 

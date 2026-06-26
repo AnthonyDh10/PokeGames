@@ -108,23 +108,35 @@ export function useGameState({
       setPartie(p)
       setSessionCode(p.codeSession ?? 'N/A')
 
-      // Détermine si le joueur local est J1 ou J2 pour lire les bons champs (index, score, tentatives).
-      const player1 = p.dresseur1Id === sessionId
+      // Lecture via le nouveau schéma players[] (Phase 2+) avec fallback legacy J1/J2.
+      const me = p.players?.find((pl) => pl.dresseurId === sessionId)
+      const player1 = me ? me.role === 'Host' : p.dresseur1Id === sessionId
       setIsPlayer1(player1)
 
-      const pokemonId = (player1 ? p.currentPokemonIdJ1 : p.currentPokemonIdJ2) ?? ''
+      const pokemonId =
+        me?.currentPokemonId ??
+        (player1 ? p.currentPokemonIdJ1 : p.currentPokemonIdJ2) ??
+        ''
 
       if (!pokemonId) {
-        setErrorMessage('Aucun Pokémon à deviner')
+        const debugInfo = [
+          `sessionId=${sessionId}`,
+          `players=[${p.players?.map((pl) => pl.dresseurId).join(', ') ?? 'aucun'}]`,
+          me
+            ? `me.currentPokemonId=${me.currentPokemonId ?? 'null'}`
+            : 'joueur introuvable dans players[]',
+          `statut=${p.statut}`,
+        ].join(', ')
+        setErrorMessage(`Aucun Pokémon à deviner (${debugInfo})`)
         setIsLoading(false)
         return null
       }
 
       setCurrentPokemonId(pokemonId)
       currentPokemonIdRef.current = pokemonId
-      setCurrentScore(player1 ? p.scoreJ1 : p.scoreJ2)
-      setAttemptsUsed(player1 ? p.attemptsUsedJ1 : p.attemptsUsedJ2)
-      const hints = player1 ? p.usedHintsJ1 : p.usedHintsJ2
+      setCurrentScore(me?.score ?? (player1 ? (p.scoreJ1 ?? 0) : (p.scoreJ2 ?? 0)))
+      setAttemptsUsed(me?.attemptsUsed ?? (player1 ? (p.attemptsUsedJ1 ?? 0) : (p.attemptsUsedJ2 ?? 0)))
+      const hints = me?.usedHints ?? (player1 ? (p.usedHintsJ1 ?? []) : (p.usedHintsJ2 ?? []))
       setUsedHints(hints)
 
       // Chargement parallèle : description censurée + données d'indices (évite deux aller-retours séquentiels).
@@ -152,9 +164,9 @@ export function useGameState({
       setIsLoading(false)
 
       return {
-        timerDurationSeconds: p.timerDurationSeconds,
+        timerDurationSeconds: p.timerDurationSeconds ?? p.settings?.timerDuration ?? 60,
         sessionCode: p.codeSession ?? '',
-        isSolo: !p.dresseur2Id,
+        isSolo: p.modeSolo || (p.players?.length ?? 0) <= 1,
       }
     } catch (err: any) {
       setErrorMessage(`Erreur : ${err?.message ?? 'Inconnue'}`)

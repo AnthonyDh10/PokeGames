@@ -55,8 +55,8 @@ export default function LobbyDeZoomPage() {
           <br /> Chaque mauvaise réponse agrandit la zone visible.
         </span>
       }
-      settingsPanel={(isPlayer1, partie: PartieDto | null) => {
-        const displayGens = isPlayer1 ? settings.generations : (partie?.selectedGenerations ?? settings.generations)
+      settingsPanel={(isHost, partie: PartieDto | null) => {
+        const displayGens = isHost ? settings.generations : (partie?.settings?.generations ?? settings.generations)
         return (
           <Card pokeballColor={colors.brand.red}>
             <div className="p-3 sm:p-6">
@@ -65,7 +65,7 @@ export default function LobbyDeZoomPage() {
                 <h3 className="font-heading text-xl tracking-wide" style={{ color: colors.ui.textPrimary, fontSize: '1.25rem' }}>
                   Paramètres de la partie
                 </h3>
-                {!isPlayer1 && (
+                {!isHost && (
                   <span className="ml-auto font-body text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
                     Lecture seule
                   </span>
@@ -74,7 +74,7 @@ export default function LobbyDeZoomPage() {
 
               <div className="flex items-center justify-between mb-3">
                 <span className="font-heading text-sm font-medium" style={{ color: colors.ui.textMuted }}>Générations</span>
-                {isPlayer1 && (
+                {isHost && (
                   <div className="flex flex-wrap gap-1 justify-end">
                     <button
                       onClick={() => setSettings((prev) => ({ ...prev, generations: [...ALL_GENERATIONS] }))}
@@ -101,10 +101,10 @@ export default function LobbyDeZoomPage() {
                   return (
                     <SubCard
                       key={gen}
-                      onClick={() => isPlayer1 && toggleGeneration(gen)}
+                      onClick={() => isHost && toggleGeneration(gen)}
                       bodyColor={active ? colors.brand.red : '#ffffff'}
                       borderColor={active ? colors.brand.redDark : '#e5e7eb'}
-                      className={`p-2 text-center ${isPlayer1 ? 'hover:-translate-y-0.5 transition cursor-pointer' : 'cursor-not-allowed opacity-70'}`}
+                      className={`p-2 text-center ${isHost ? 'hover:-translate-y-0.5 transition cursor-pointer' : 'cursor-not-allowed opacity-70'}`}
                     >
                       <span
                         className="font-heading text-sm font-semibold"
